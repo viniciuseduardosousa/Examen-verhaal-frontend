@@ -88,12 +88,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
             Verhalen
           </Link>
           <Link 
-            to="/over-ons" 
+            to="/over-mij" 
             className="text-2xl py-4 border-b-2 border-gray-800 hover:pl-4 
                      transition-all duration-300 hover:text-gray-600"
             onClick={onClose}
           >
-            Over-ons
+            Over-mij
           </Link>
           
           {/* Genre's Dropdown */}
