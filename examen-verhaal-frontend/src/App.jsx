@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
+import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Verhalen from './pages/Verhalen';
 import VerhaalDetail from './pages/VerhaalDetail';
@@ -8,12 +10,15 @@ import Login from './pages/admin/Login';
 import VerhalenDashboard from './pages/admin/VerhalenDashboard';
 import CreateVerhaal from './pages/admin/CreateVerhaal';
 import EditVerhaal from './pages/admin/EditVerhaal';
-import Footer from './components/Footer';
+import CookieBeleid from './pages/legal/CookieBeleid';
+import PrivacyBeleid from './pages/legal/PrivacyBeleid';
+import AlgemeneVoorwaarden from './pages/legal/AlgemeneVoorwaarden';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#FFFFF5] flex flex-col">
+      <ScrollToTop />
+      <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
           <Routes>
@@ -25,6 +30,9 @@ function App() {
             <Route path="/admin/dashboard" element={<VerhalenDashboard />} />
             <Route path="/admin/verhalen/create" element={<CreateVerhaal />} />
             <Route path="/admin/verhalen/edit/:id" element={<EditVerhaal />} />
+            <Route path="/cookie-beleid" element={<CookieBeleid />} />
+            <Route path="/privacy-beleid" element={<PrivacyBeleid />} />
+            <Route path="/algemene-voorwaarden" element={<AlgemeneVoorwaarden />} />
           </Routes>
         </main>
         <Footer />

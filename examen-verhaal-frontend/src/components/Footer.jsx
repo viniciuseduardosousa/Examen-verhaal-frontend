@@ -31,10 +31,7 @@ const Footer = () => {
                 <Link to="/verhalen" className="text-gray-700 hover:text-gray-900">Verhalen</Link>
               </li>
               <li>
-                <Link to="/over-ons" className="text-gray-700 hover:text-gray-900">Over ons</Link>
-              </li>
-              <li>
-                <Link to="/categorieen" className="text-gray-700 hover:text-gray-900">Categorieën</Link>
+                <Link to="/over-ons" className="text-gray-700 hover:text-gray-900">Over mij</Link>
               </li>
             </ul>
             {/* Verticale divider rechts */}
@@ -62,24 +59,26 @@ const Footer = () => {
 
           {/* Legal section */}
           <div>
-            <h3 className="text-xl font-medium mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/privacy" className="text-gray-700 hover:text-gray-900">
-                  Privacy beleid
-                </Link>
-              </li>
-              <li>
-                <Link to="/voorwaarden" className="text-gray-700 hover:text-gray-900">
-                  Algemene voorwaarden
-                </Link>
-              </li>
-              <li>
-                <Link to="/cookies" className="text-gray-700 hover:text-gray-900">
-                  Cookie beleid
-                </Link>
-              </li>
-            </ul>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/cookie-beleid" className="text-gray-600 hover:text-[#303655] transition-colors">
+                    Cookie Beleid
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy-beleid" className="text-gray-600 hover:text-[#303655] transition-colors">
+                    Privacy Beleid
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/algemene-voorwaarden" className="text-gray-600 hover:text-[#303655] transition-colors">
+                    Algemene Voorwaarden
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
