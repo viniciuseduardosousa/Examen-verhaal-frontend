@@ -2,7 +2,7 @@
   "name": "examen-verhaal-frontend",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://test.github.io/examen-verhaal-frontend",
+  "homepage": "https://viniciuseduardosousa.github.io/Examen-verhaal-frontend",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
