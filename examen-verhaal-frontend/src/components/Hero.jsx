@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Hero = () => {
   return (
     <div className="flex items-center justify-center min-h-screen w-full bg-[#FFFFF5] pt-24">
@@ -15,8 +17,8 @@ const Hero = () => {
                      transition-transform duration-200"
           >
           </div>
-          <a
-            href="/verhalen"
+          <Link
+            to="/verhalen"
             className="relative inline-block px-6 md:px-24 py-3 md:py-5 text-lg md:text-[1.5rem] font-medium text-gray-800 
                      bg-[#DFE9EB] border-2 border-gray-800
                      transform transition-all duration-200
@@ -25,7 +27,7 @@ const Hero = () => {
                      w-[280px] md:w-auto md:min-w-[400px]"
           >
             Bekijk alle verhalen
-          </a>
+          </Link>
         </div>
       </div>
     </div>

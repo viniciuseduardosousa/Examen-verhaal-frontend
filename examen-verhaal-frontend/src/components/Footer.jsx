@@ -31,7 +31,7 @@ const Footer = () => {
                 <Link to="/verhalen" className="text-gray-700 hover:text-gray-900">Verhalen</Link>
               </li>
               <li>
-                <Link to="/over-ons" className="text-gray-700 hover:text-gray-900">Over mij</Link>
+                <Link to="/over-mij" className="text-gray-700 hover:text-gray-900">Over mij</Link>
               </li>
             </ul>
             {/* Verticale divider rechts */}
