@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import CategoryDropdown from './navigation/CategoryDropdown';
 import MobileMenu from './navigation/MobileMenu';
@@ -6,6 +6,12 @@ import MobileMenu from './navigation/MobileMenu';
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Hide header on admin pages
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const handleSearch = (e) => {
     e.preventDefault();
