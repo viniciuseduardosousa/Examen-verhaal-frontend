@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { mockStories } from '../data/mockStories';
@@ -6,8 +7,16 @@ import { mockStories } from '../data/mockStories';
 const CATEGORIES = ['Columns', '50 words', 'Colors', 'Sound Stories'];
 
 const Verhalen = () => {
+  const [searchParams] = useSearchParams();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState('');
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && CATEGORIES.includes(categoryParam)) {
+      setSelectedCategories([categoryParam]);
+    }
+  }, [searchParams]);
 
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
@@ -78,8 +87,8 @@ const Verhalen = () => {
               </svg>
             </button>
           )}
-          <select 
-            value={sortBy} 
+          <select
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-auto"
           >
