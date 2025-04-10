@@ -5,19 +5,25 @@ const HighlightedStories = () => {
   // Dit zou later uit een API of CMS kunnen komen
   const stories = [
     {
+      id: 1,
       title: "De Verloren Brief",
       description: "Een verhaal over een brief die 50 jaar te laat werd bezorgd. Een verhaal over tijd, herinneringen en onverwachte verbindingen.",
-      imageUrl: ""
+      imageUrl: "",
+      category: "Columns"
     },
     {
+      id: 2,
       title: "Laatste Trein",
       description: "Een mysterieuze ontmoeting in de laatste trein van de avond leidt tot een onverwachte wending in het leven van een forens.",
-      imageUrl: ""
+      imageUrl: "",
+      category: "50 words"
     },
     {
+      id: 3,
       title: "De Componist",
       description: "Het leven van een componist die alleen in stilte kan werken wordt op zijn kop gezet door een onverwachte nieuwe buur.",
-      imageUrl: ""
+      imageUrl: "",
+      category: "Sound Stories"
     }
   ];
 
