@@ -101,6 +101,7 @@ const Verhalen = () => {
             style={{ animationDelay: `${(index % 3) * 0.1}s` }}
           >
             <StoryCard
+              id={story.id}
               title={story.title}
               description={story.description}
               imageUrl={story.imageUrl}
@@ -129,6 +130,7 @@ const Verhalen = () => {
                 style={{ animationDelay: `${(index % 3) * 0.1}s` }}
               >
                 <StoryCard
+                  id={story.id}
                   title={story.title}
                   description={story.description}
                   imageUrl={story.imageUrl}

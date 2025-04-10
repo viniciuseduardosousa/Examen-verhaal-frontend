@@ -1,7 +1,14 @@
+import { useNavigate } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 import trainImage from '../../assets/images/train.webp';
 
-const StoryCard = ({ title, description, imageUrl, category }) => {
+const StoryCard = ({ id, title, description, imageUrl, category }) => {
+  const navigate = useNavigate();
+
+  const handleReadMore = () => {
+    navigate(`/verhaal-detail/${id}`);
+  };
+
   return (
     <div className="flex flex-col border-2 border-gray-800 bg-white w-full">
       {/* Image container met vaste hoogte */}
@@ -31,7 +38,10 @@ const StoryCard = ({ title, description, imageUrl, category }) => {
         
         {/* Lees meer button */}
         <div className="mt-auto">
-          <button className="w-full border-2 border-gray-800 py-1.5 sm:py-2 px-3 sm:px-4 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
+          <button 
+            onClick={handleReadMore}
+            className="w-full border-2 border-gray-800 py-1.5 sm:py-2 px-3 sm:px-4 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base hover:bg-gray-50 transition-colors"
+          >
             <span>Lees meer</span>
             <ArrowIcon className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
