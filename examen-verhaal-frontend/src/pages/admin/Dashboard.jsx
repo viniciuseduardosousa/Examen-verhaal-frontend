@@ -180,7 +180,7 @@ const Dashboard = () => {
                         placeholder="Zoeken..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-50 rounded-lg"
+                        className="w-full px-4 py-2 bg-white border-2 border-gray-800 rounded-full pr-10 focus:outline-none"
                         autoFocus
                       />
                     </motion.div>
@@ -190,7 +190,6 @@ const Dashboard = () => {
             </div>
             <button onClick={() => setShowSearch(!showSearch)} className="p-2">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-gray-600"
                 viewBox="0 0 20 20"
                 fill="currentColor"
