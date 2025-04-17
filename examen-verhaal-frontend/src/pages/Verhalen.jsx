@@ -14,8 +14,9 @@ const Verhalen = () => {
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    if (categoryParam && CATEGORIES.includes(categoryParam)) {
-      setSelectedCategories([categoryParam]);
+    if (categoryParam) {
+      const categories = categoryParam.split(',').filter(cat => CATEGORIES.includes(cat));
+      setSelectedCategories(categories);
     } else {
       setSelectedCategories([]);
     }
@@ -23,11 +24,13 @@ const Verhalen = () => {
 
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== category));
-      navigate('/verhalen');
+      const newCategories = selectedCategories.filter(c => c !== category);
+      setSelectedCategories(newCategories);
+      navigate(newCategories.length > 0 ? `/verhalen?category=${encodeURIComponent(newCategories.join(','))}` : '/verhalen');
     } else {
-      setSelectedCategories([category]);
-      navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+      const newCategories = [...selectedCategories, category];
+      setSelectedCategories(newCategories);
+      navigate(`/verhalen?category=${encodeURIComponent(newCategories.join(','))}`);
     }
   };
 
