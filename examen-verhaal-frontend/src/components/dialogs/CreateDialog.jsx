@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const CreateDialog = ({ isOpen, onClose, isCategory = false, categories }) => {
   const [formData, setFormData] = useState({
@@ -8,6 +8,29 @@ const CreateDialog = ({ isOpen, onClose, isCategory = false, categories }) => {
     isHighlighted: false,
     isPdfDownloadable: false
   });
+
+  // Handle scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Handle outside click (only on desktop)
+  const handleOutsideClick = useCallback((e) => {
+    // Check if we're on mobile
+    if (window.innerWidth <= 768) return;
+    
+    // Check if click is outside dialog
+    if (e.target.classList.contains('dialog-overlay')) {
+      onClose();
+    }
+  }, [onClose]);
 
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -20,8 +43,11 @@ const CreateDialog = ({ isOpen, onClose, isCategory = false, categories }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-[600px] mx-4">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 dialog-overlay"
+      onClick={handleOutsideClick}
+    >
+      <div className="bg-white rounded-lg w-[600px] mx-4" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h2 className="text-xl font-mono">
@@ -29,7 +55,7 @@ const CreateDialog = ({ isOpen, onClose, isCategory = false, categories }) => {
           </h2>
           <button
             onClick={onClose}
-            className="bg-[#f84e3b] text-white px-3 py-1 rounded-lg flex items-center gap-2 hover:bg-[#e54e30] text-sm"
+            className="bg-[#F85B3B] text-white px-3 py-1 rounded-lg flex items-center gap-2 hover:bg-[#e54e30] text-sm"
           >
             aanmaking verlaten
             <span className="text-xl leading-none">×</span>

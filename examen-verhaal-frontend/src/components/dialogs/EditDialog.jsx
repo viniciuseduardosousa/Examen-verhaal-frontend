@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) => {
   const [formData, setFormData] = useState({
@@ -20,6 +20,25 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
     }
   }, [data]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  const handleOutsideClick = useCallback((e) => {
+    if (window.innerWidth <= 768) return;
+    
+    if (e.target.classList.contains('dialog-overlay')) {
+      onClose();
+    }
+  }, [onClose]);
+
   const handleChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData(prev => ({
@@ -31,8 +50,11 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-[600px] mx-4">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 dialog-overlay"
+      onClick={handleOutsideClick}
+    >
+      <div className="bg-white rounded-lg w-[600px] mx-4" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h2 className="text-xl font-mono">
