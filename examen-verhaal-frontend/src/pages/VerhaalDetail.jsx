@@ -93,14 +93,13 @@ const VerhaalDetail = () => {
 
       {/* Story Content Section */}
       <section className="py-8 animate-slideDown">
-        <div className="prose prose-lg max-w-none font-serif leading-relaxed text-gray-700">
+        <div className="prose prose-lg max-w-4xl mx-auto font-serif leading-relaxed text-gray-700">
           {story.content}
         </div>
       </section>
 
       <Divider />
       <HighlightedStories />
-      <Divider />
     </div>
   );
 };
