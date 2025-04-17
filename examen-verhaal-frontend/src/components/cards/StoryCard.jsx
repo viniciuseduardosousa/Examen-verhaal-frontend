@@ -1,12 +1,24 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 import trainImage from '../../assets/images/train.webp';
 
 const StoryCard = ({ id, title, description, imageUrl, category }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isOnVerhalenPage = location.pathname === '/verhalen';
+  const selectedCategory = searchParams.get('category');
+  const isCategorySelected = selectedCategory === category;
 
   const handleReadMore = () => {
     navigate(`/verhaal-detail/${id}`);
+  };
+
+  const handleCategoryClick = (e) => {
+    if (!isCategorySelected) {
+      e.stopPropagation();
+      navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+    }
   };
 
   return (
@@ -28,7 +40,11 @@ const StoryCard = ({ id, title, description, imageUrl, category }) => {
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-mono text-base sm:text-lg">{title}</h3>
             {category && (
-              <span className="px-2 sm:px-3 py-1 bg-gray-200 rounded-full text-xs sm:text-sm whitespace-nowrap ml-2">
+              <span 
+                onClick={handleCategoryClick}
+                className={`px-2 sm:px-3 py-1 bg-gray-200 rounded-full text-xs sm:text-sm whitespace-nowrap ml-2
+                  ${!isCategorySelected ? 'cursor-pointer hover:bg-gray-300' : ''}`}
+              >
                 {category}
               </span>
             )}

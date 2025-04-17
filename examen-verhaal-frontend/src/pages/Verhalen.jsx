@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { mockStories } from '../data/mockStories';
@@ -6,19 +7,33 @@ import { mockStories } from '../data/mockStories';
 const CATEGORIES = ['Columns', '50 words', 'Colors', 'Sound Stories'];
 
 const Verhalen = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState('');
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && CATEGORIES.includes(categoryParam)) {
+      setSelectedCategories([categoryParam]);
+    } else {
+      setSelectedCategories([]);
+    }
+  }, [searchParams]);
 
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(selectedCategories.filter(c => c !== category));
+      navigate('/verhalen');
     } else {
-      setSelectedCategories([...selectedCategories, category]);
+      setSelectedCategories([category]);
+      navigate(`/verhalen?category=${encodeURIComponent(category)}`);
     }
   };
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
+    navigate('/verhalen');
   };
 
   // Filter stories for the grid
@@ -78,17 +93,24 @@ const Verhalen = () => {
               </svg>
             </button>
           )}
-          <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-auto"
-          >
-            <option value="">Sorteren op</option>
-            <option value="date-new">Datum (nieuwste eerst)</option>
-            <option value="date-old">Datum (oudste eerst)</option>
-            <option value="az">A-Z</option>
-            <option value="za">Z-A</option>
-          </select>
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-auto appearance-none bg-white pr-8 cursor-pointer"
+            >
+              <option value="">Sorteren op</option>
+              <option value="date-new">Datum (nieuwste eerst)</option>
+              <option value="date-old">Datum (oudste eerst)</option>
+              <option value="az">A-Z</option>
+              <option value="za">Z-A</option>
+            </select>
+            <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-500">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
