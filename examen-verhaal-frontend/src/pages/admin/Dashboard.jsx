@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { storiesAPI } from "../../services/api";
 import { mockStories } from "../../data/mockStories";
 import { motion, AnimatePresence } from "framer-motion";
+import CreateDialog from "../../components/dialogs/CreateDialog";
+import EditDialog from "../../components/dialogs/EditDialog";
 
 const Dashboard = () => {
   const [stories, setStories] = useState([]);
@@ -14,6 +16,9 @@ const Dashboard = () => {
   const [storyToDelete, setStoryToDelete] = useState(null);
   const [error, setError] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
 
   const storiesPerPage = 7;
   const categories = ["Columns", "50 words", "Colors", "Sound Stories"];
@@ -24,12 +29,10 @@ const Dashboard = () => {
 
   const fetchStories = async () => {
     try {
-      // In development mode, use mock data
       if (process.env.NODE_ENV === "development") {
         setStories(mockStories);
         setError(null);
       } else {
-        // In production, use the API
         const data = await storiesAPI.getAll();
         setStories(data);
         setError(null);
@@ -52,19 +55,15 @@ const Dashboard = () => {
 
     try {
       if (process.env.NODE_ENV === "development") {
-        // In development, just update the local state
         setStories(stories.filter((story) => story.id !== storyToDelete.id));
       } else {
-        // In production, call the API
         await storiesAPI.delete(storyToDelete.id);
         setStories(stories.filter((story) => story.id !== storyToDelete.id));
       }
       setDeleteModalOpen(false);
       setStoryToDelete(null);
     } catch (err) {
-      setError(
-        "Er is een fout opgetreden bij het verwijderen van het verhaal."
-      );
+      setError("Er is een fout opgetreden bij het verwijderen van het verhaal.");
       console.error("Error deleting story:", err);
     }
   };
@@ -74,10 +73,8 @@ const Dashboard = () => {
       const updatedStory = { ...story, published: !story.published };
 
       if (process.env.NODE_ENV === "development") {
-        // In development, just update the local state
         setStories(stories.map((s) => (s.id === story.id ? updatedStory : s)));
       } else {
-        // In production, call the API
         await storiesAPI.update(story.id, updatedStory);
         setStories(stories.map((s) => (s.id === story.id ? updatedStory : s)));
       }
@@ -85,6 +82,11 @@ const Dashboard = () => {
       setError("Er is een fout opgetreden bij het bijwerken van het verhaal.");
       console.error("Error updating story:", err);
     }
+  };
+
+  const handleEditClick = (item) => {
+    setItemToEdit(item);
+    setEditDialogOpen(true);
   };
 
   const filteredStories = stories.filter((story) => {
@@ -130,12 +132,13 @@ const Dashboard = () => {
         {/* Welcome and Create Button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-mono">welkom, Ingrid</h2>
-          <Link
-            to="/admin/verhaal/create"
+          <button
+            onClick={() => setCreateDialogOpen(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
           >
-            Nieuw verhaal <span className="text-xl leading-none">+</span>
-          </Link>
+            {showCategories ? "Nieuwe categorie" : "Nieuw verhaal"}{" "}
+            <span className="text-xl leading-none">+</span>
+          </button>
         </div>
 
         {/* Main Content Card */}
@@ -210,16 +213,15 @@ const Dashboard = () => {
             <div className="h-[450px] overflow-y-auto">
               <div className="space-y-4">
                 {showCategories
-                  ? // Categories List
-                    categories.map((category) => (
+                  ? categories.map((category) => (
                       <div
                         key={category}
                         className="flex items-center justify-between py-3 border-b border-gray-200"
                       >
                         <span className="font-mono">{category}</span>
                         <div className="flex gap-6">
-                          <Link
-                            to={`/admin/categorie/edit/${category}`}
+                          <button
+                            onClick={() => handleEditClick({ title: category })}
                             className="text-gray-600 hover:text-gray-900"
                           >
                             <svg
@@ -230,7 +232,7 @@ const Dashboard = () => {
                             >
                               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
-                          </Link>
+                          </button>
                           <button
                             onClick={() => handleDeleteClick(category)}
                             className="text-gray-600 hover:text-gray-900"
@@ -251,8 +253,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                     ))
-                  : // Stories List
-                    currentStories.map((story) => (
+                  : currentStories.map((story) => (
                       <div
                         key={story.id}
                         className="flex items-center justify-between py-3 border-b border-gray-200"
@@ -298,8 +299,8 @@ const Dashboard = () => {
                               </svg>
                             )}
                           </button>
-                          <Link
-                            to={`/admin/verhaal/edit/${story.id}`}
+                          <button
+                            onClick={() => handleEditClick(story)}
                             className="text-gray-600 hover:text-gray-900"
                           >
                             <svg
@@ -310,7 +311,7 @@ const Dashboard = () => {
                             >
                               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
-                          </Link>
+                          </button>
                           <button
                             onClick={() => handleDeleteClick(story)}
                             className="text-gray-600 hover:text-gray-900"
@@ -382,6 +383,26 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Create Dialog */}
+      <CreateDialog
+        isOpen={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        isCategory={showCategories}
+        categories={categories}
+      />
+
+      {/* Edit Dialog */}
+      <EditDialog
+        isOpen={editDialogOpen}
+        onClose={() => {
+          setEditDialogOpen(false);
+          setItemToEdit(null);
+        }}
+        isCategory={showCategories}
+        categories={categories}
+        data={itemToEdit}
+      />
     </div>
   );
 };
