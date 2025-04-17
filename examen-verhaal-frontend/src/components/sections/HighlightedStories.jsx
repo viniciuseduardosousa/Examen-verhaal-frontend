@@ -16,14 +16,14 @@ const HighlightedStories = () => {
       title: "Laatste Trein",
       description: "Een mysterieuze ontmoeting in de laatste trein van de avond leidt tot een onverwachte wending in het leven van een forens.",
       imageUrl: "",
-      category: "50 words"
+      category: "50WordsStories"
     },
     {
       id: 3,
       title: "De Componist",
       description: "Het leven van een componist die alleen in stilte kan werken wordt op zijn kop gezet door een onverwachte nieuwe buur.",
       imageUrl: "",
-      category: "Sound Stories"
+      category: "SoundStories"
     }
   ];
 
