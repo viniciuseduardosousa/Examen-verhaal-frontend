@@ -4,7 +4,7 @@ import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { mockStories } from '../data/mockStories';
 
-const CATEGORIES = ['UKV\'tjes', 'Columns', 'Korte Verhalen', '50WordsStories', 'SoundStories'];
+const CATEGORIES = ['UKV\'tjes', 'Columns', 'Korte Verhalen', '50Words', 'SoundStories'];
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();

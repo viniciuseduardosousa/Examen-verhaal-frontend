@@ -16,7 +16,7 @@ const HighlightedStories = () => {
       title: "Laatste Trein",
       description: "Een mysterieuze ontmoeting in de laatste trein van de avond leidt tot een onverwachte wending in het leven van een forens.",
       imageUrl: "",
-      category: "50WordsStories"
+      category: "50Words"
     },
     {
       id: 3,

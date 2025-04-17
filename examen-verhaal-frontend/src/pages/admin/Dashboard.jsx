@@ -22,7 +22,7 @@ const Dashboard = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
 
   const storiesPerPage = 7;
-  const categories = ["Columns", "50 words", "Colors", "Sound Stories"];
+  const categories = ["Columns", "50Words", "Colors", "Sound Stories"];
 
   useEffect(() => {
     fetchStories();

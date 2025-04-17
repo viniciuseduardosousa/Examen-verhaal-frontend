@@ -5,7 +5,7 @@ export const mockStories = [
     description: "Een boekhouder die zijn pensioen nadert en zijn klanten bedankt voor hun vertrouwen.",
     content: "De boekhouder wilde z'n werk afbouwen, zijn pensioen kwam eraan. Hij had het vroeg aangekondigd, zijn vele klanten zorgden op tijd voor vervanging. Eén voor één kwamen ze hun papieren ophalen. Ze bedankten hem. Hij vertelde dat hij op vakantie was geweest in Tjechië. Hij klaagde over z'n ouwe knieën.",
     imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80",
-    category: "50WordsStories",
+    category: "50Words",
     date: "2024-03-15",
     wordCount: 50,
     published: true
@@ -16,7 +16,7 @@ export const mockStories = [
     description: "Een vrouw die zich voorbereidt op een kraamvisite en worstelt met sociale verwachtingen.",
     content: "Kraamvisite. Het woord alleen al. Maar het hoort er nu eenmaal bij, dus daar ging ze. In de auto oefende ze haar woorden. 'Wat een mooie baby' en 'Hij lijkt sprekend op z'n vader'. Moest ze naar de bevalling vragen? En wat als haar gevraagd werd hem vast te houden?",
     imageUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80",
-    category: "50WordsStories",
+    category: "50Words",
     date: "2024-03-14",
     wordCount: 50,
     published: true
@@ -27,7 +27,7 @@ export const mockStories = [
     description: "Een observatie van een televisieprogramma over kunst en antiek.",
     content: "Tussen Kunst en Kitsch. Via historische verhandelingen van expert en de persoonlijke verhalen van eigenaar over het veelal geërfde stuk, komt het meegenomen object tot leven. De expert oordeelt, de presentatrice veinst interesse, de eigenaar knikt geregeld ter bevestiging. Maar telkens weer zie je de hamvraag in de ogen: hoeveel?",
     imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80",
-    category: "50WordsStories",
+    category: "50Words",
     date: "2024-03-13",
     wordCount: 50,
     published: true
@@ -38,7 +38,7 @@ export const mockStories = [
     description: "Een persoonlijke tip over eten en sollicitatiegesprekken.",
     content: "Hier volgt een tip. Meer voor mezelf dan voor jullie. Want op een of andere manier weten anderen dit soort dingen altijd. Hoe mag Joost weten, zo iets leer je niet op school. Maar goed, Ingrid, voor de volgende keer: 'Eet geen spinazie tijdens de lunch als je daarna sollicitatiegesprekken hebt!'",
     imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80",
-    category: "50WordsStories",
+    category: "50Words",
     date: "2024-03-12",
     wordCount: 50,
     published: true
