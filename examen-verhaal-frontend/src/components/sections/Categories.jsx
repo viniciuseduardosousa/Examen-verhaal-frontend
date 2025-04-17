@@ -6,17 +6,20 @@ const Categories = () => {
     {
       title: "Korte Verhalen",
       description: "Ontdek onze collectie korte verhalen, perfect voor een moment van ontspanning.",
-      imageUrl: "/category1.jpg"
+      imageUrl: "/category1.jpg",
+      category: "Korte Verhalen"
     },
     {
-      title: "50 Words Stories",
+      title: "50Words",
       description: "Krachtige verhalen verteld in precies vijftig woorden.",
-      imageUrl: "/category2.jpg"
+      imageUrl: "/category2.jpg",
+      category: "50Words"
     },
     {
-      title: "Sound Stories",
+      title: "SoundStories",
       description: "Verhalen die tot leven komen door geluid en muziek.",
-      imageUrl: ""
+      imageUrl: "",
+      category: "SoundStories"
     }
   ];
 
