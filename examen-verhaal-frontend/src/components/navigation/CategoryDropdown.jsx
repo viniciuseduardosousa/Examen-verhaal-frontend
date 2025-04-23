@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 
 // Mock data voor development
 const mockCategories = [
-  { id: 1, name: 'UKV Columns', path: '/categorie/ukv-columns', count: 12 },
-  { id: 2, name: 'Korte Verhalen', path: '/categorie/korte-verhalen', count: 8 },
-  { id: 3, name: '50 Words Stories', path: '/categorie/50-words-stories', count: 15 },
-  { id: 4, name: 'Sound Stories', path: '/categorie/sound-stories', count: 5 },
+  { id: 1, name: 'UKV\'tjes', path: '/verhalen?category=UKV\'tjes', count: 12 },
+  { id: 2, name: 'Columns', path: '/verhalen?category=Columns', count: 8 },
+  { id: 3, name: 'Korte Verhalen', path: '/verhalen?category=Korte Verhalen', count: 15 },
+  { id: 4, name: '50Words', path: '/verhalen?category=50Words', count: 5 },
+  { id: 5, name: 'SoundStories', path: '/verhalen?category=SoundStories', count: 5 },
 ];
 
 const CategoryDropdown = () => {

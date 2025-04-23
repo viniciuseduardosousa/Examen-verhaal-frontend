@@ -157,52 +157,69 @@ const Verhalen = () => {
 
       {/* Stories Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
-        {filteredStories.map((story, index) => (
-          <div 
-            key={story.id}
-            className="animate-slideDown"
-            style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-          >
-            <StoryCard
-              id={story.id}
-              title={story.titel}
-              description={story.beschrijving}
-              imageUrl={story.cover_image}
-              category={story.categorie.naam}
-            />
+        {filteredStories.length > 0 ? (
+          filteredStories.map((story, index) => (
+            <div 
+              key={story.id}
+              className="animate-slideDown"
+              style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+            >
+              <StoryCard
+                id={story.id}
+                title={story.titel}
+                description={story.beschrijving}
+                imageUrl={story.cover_image}
+                category={story.categorie.naam}
+              />
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-600 text-lg">Geen verhalen beschikbaar voor deze categorie</p>
+            <button 
+              onClick={clearAllFilters}
+              className="mt-4 text-gray-800 hover:text-gray-600 underline"
+            >
+              Verwijder filters
+            </button>
           </div>
-        ))}
+        )}
       </div>
       
-      <Divider />
-      <div className="mt-16">
-        <h2 className="text-xl font-medium mb-8 flex items-center">
-          Andere categorieën
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-          </svg>
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stories
-            .filter(story => !selectedCategories.includes(story.categorie.naam))
-            .slice(0, 3)
-            .map((story, index) => (
-              <div 
-                key={story.id}
-                className="animate-slideDown"
-                style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-              >
-                <StoryCard
-                  id={story.id}
-                  title={story.titel}
-                  description={story.beschrijving}
-                  imageUrl={story.cover_image}
-                  category={story.categorie.naam}
-                />
-              </div>
-            ))}
-        </div>
-      </div>
+      {/* Andere categorieën sectie - alleen tonen als er verhalen zijn */}
+      {filteredStories.length > 0 && stories.length > 0 && (
+        <>
+          <Divider />
+          <div className="mt-16">
+            <h2 className="text-xl font-medium mb-8 flex items-center">
+              Andere categorieën
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+              </svg>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {stories
+                .filter(story => !selectedCategories.includes(story.categorie.naam))
+                .slice(0, 3)
+                .map((story, index) => (
+                  <div 
+                    key={story.id}
+                    className="animate-slideDown"
+                    style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+                  >
+                    <StoryCard
+                      id={story.id}
+                      title={story.titel}
+                      description={story.beschrijving}
+                      imageUrl={story.cover_image}
+                      category={story.categorie.naam}
+                    />
+                  </div>
+                ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
