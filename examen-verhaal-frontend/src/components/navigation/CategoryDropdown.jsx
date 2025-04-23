@@ -1,32 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-// Mock data voor development
-const mockCategories = [
-  { id: 1, name: 'UKV\'tjes', path: '/verhalen?category=UKV\'tjes', count: 12 },
-  { id: 2, name: 'Columns', path: '/verhalen?category=Columns', count: 8 },
-  { id: 3, name: 'Korte Verhalen', path: '/verhalen?category=Korte Verhalen', count: 15 },
-  { id: 4, name: '50Words', path: '/verhalen?category=50Words', count: 5 },
-  { id: 5, name: 'SoundStories', path: '/verhalen?category=SoundStories', count: 5 },
-];
+import { storiesAPI } from '../../services/api';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [categories, setCategories] = useState(mockCategories); // Direct mock data gebruiken
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Alleen error handling voor productie
   useEffect(() => {
     const fetchCategories = async () => {
-      if (process.env.NODE_ENV !== 'development') {
-        try {
-          const response = await fetch('https://api.example.com/categories');
-          if (!response.ok) throw new Error('Failed to fetch categories');
-          const data = await response.json();
-          setCategories(data);
-        } catch (err) {
-          console.error('Error fetching categories:', err);
-        }
+      try {
+        const stories = await storiesAPI.getAll();
+        // Extract unique categories from stories
+        const uniqueCategories = [...new Set(stories.map(story => story.categorie.naam))];
+        // Create category objects with count
+        const categoriesWithCount = uniqueCategories.map(category => ({
+          id: category,
+          name: category,
+          path: `/verhalen?category=${encodeURIComponent(category)}`,
+          count: stories.filter(story => story.categorie.naam === category).length
+        }));
+        setCategories(categoriesWithCount);
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de categorieën.');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -43,6 +45,48 @@ const CategoryDropdown = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="text-xl text-gray-800 relative group flex items-center gap-2">
+        <span>Categorieën</span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-xl text-gray-800 relative group flex items-center gap-2">
+        <span>Categorieën</span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>

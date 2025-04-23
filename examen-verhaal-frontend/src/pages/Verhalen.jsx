@@ -4,14 +4,13 @@ import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { storiesAPI } from '../services/api';
 
-const CATEGORIES = ['UKV\'tjes', 'Columns', 'Korte Verhalen', '50Words', 'SoundStories'];
-
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [stories, setStories] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,6 +19,9 @@ const Verhalen = () => {
       try {
         const data = await storiesAPI.getAll();
         setStories(data);
+        // Extract unique categories from stories
+        const uniqueCategories = [...new Set(data.map(story => story.categorie.naam))];
+        setCategories(uniqueCategories);
         setError(null);
       } catch (err) {
         setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
@@ -35,8 +37,8 @@ const Verhalen = () => {
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam) {
-      const categories = categoryParam.split(',').filter(cat => CATEGORIES.includes(cat));
-      setSelectedCategories(categories);
+      const categoriesFromUrl = categoryParam.split(',');
+      setSelectedCategories(categoriesFromUrl);
     } else {
       setSelectedCategories([]);
     }
@@ -102,7 +104,7 @@ const Verhalen = () => {
 
           {/* Category Buttons */}
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <button 
                 key={category}
                 onClick={() => toggleCategory(category)}
