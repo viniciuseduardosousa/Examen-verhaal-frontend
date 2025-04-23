@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { mockStories } from '../data/mockStories';
+import { storiesAPI } from '../services/api';
 import HighlightedStories from '../components/sections/HighlightedStories';
 import Divider from '../components/decorative/Divider'; 
 
@@ -8,31 +8,35 @@ const VerhaalDetail = () => {
   const { id } = useParams();
   const [story, setStory] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStory = () => {
+    const fetchStory = async () => {
       try {
-        const foundStory = mockStories.find(story => story.id === parseInt(id));
-        if (!foundStory) {
-          throw new Error('Verhaal niet gevonden');
-        }
-        setStory(foundStory);
+        const data = await storiesAPI.getById(id);
+        setStory(data);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError('Verhaal niet gevonden');
         console.error('Error fetching story:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchStory();
   }, [id]);
 
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">Laden...</div>;
+  }
+
   if (error) {
-    return <div>{error}</div>;
+    return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
   }
 
   if (!story) {
-    return <div>Verhaal niet gevonden</div>;
+    return <div className="container mx-auto px-4 py-8">Verhaal niet gevonden</div>;
   }
 
   return (
@@ -46,16 +50,16 @@ const VerhaalDetail = () => {
                          group-hover:translate-x-1 group-hover:translate-y-1 
                          transition-transform duration-200"></div>
             <img 
-              src={story.image || "https://placehold.co/600x400"} 
-              alt={story.title}
+              src={story.cover_image} 
+              alt={story.titel}
               className="relative w-full h-full object-cover border-2 border-gray-800"
             />
             <div className="flex gap-2 mt-4">
               <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                {story.category}
+                {story.categorie.naam}
               </span>
               <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                {story.date || 'Geen datum beschikbaar'}
+                {story.datum || 'Geen datum beschikbaar'}
               </span>
             </div>
           </div>
@@ -64,8 +68,8 @@ const VerhaalDetail = () => {
           <div className="grid grid-rows-[auto_1fr_auto] h-full">
             {/* Titel en beschrijving */}
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-gray-800 leading-tight">{story.title}</h1>
-              <p className="text-xl text-gray-600 max-w-2xl mb-6 leading-relaxed font-serif">{story.description}</p>
+              <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-gray-800 leading-tight">{story.titel}</h1>
+              <p className="text-xl text-gray-600 max-w-2xl mb-6 leading-relaxed font-serif">{story.beschrijving}</p>
             </div>
 
             {/* Actie knoppen */}
@@ -94,7 +98,7 @@ const VerhaalDetail = () => {
       {/* Story Content Section */}
       <section className="py-8 animate-slideDown">
         <div className="prose prose-lg max-w-4xl mx-auto font-serif leading-relaxed text-gray-700">
-          {story.content}
+          {story.tekst}
         </div>
       </section>
 

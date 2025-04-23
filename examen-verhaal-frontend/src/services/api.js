@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Auth API calls
 export const authAPI = {
@@ -31,14 +31,14 @@ export const authAPI = {
 export const storiesAPI = {
   // Haal alle verhalen op
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/stories/`);
+    const response = await fetch(`${API_BASE_URL}/verhalen/`);
     if (!response.ok) throw new Error('Failed to fetch stories');
     return response.json();
   },
 
   // Haal één verhaal op
   getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/stories/${id}/`);
+    const response = await fetch(`${API_BASE_URL}/verhalen/${id}/`);
     if (!response.ok) throw new Error('Failed to fetch story');
     return response.json();
   },

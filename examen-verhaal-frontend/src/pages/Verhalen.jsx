@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
-import { mockStories } from '../data/mockStories';
+import { storiesAPI } from '../services/api';
 
 const CATEGORIES = ['UKV\'tjes', 'Columns', 'Korte Verhalen', '50Words', 'SoundStories'];
 
@@ -11,6 +11,26 @@ const Verhalen = () => {
   const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState('');
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const data = await storiesAPI.getAll();
+        setStories(data);
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
+        console.error('Error fetching stories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
@@ -40,15 +60,33 @@ const Verhalen = () => {
   };
 
   // Filter stories for the grid
-  const filteredStories = mockStories
-    .filter(story => selectedCategories.length === 0 || selectedCategories.includes(story.category))
+  const filteredStories = stories
+    .filter(story => {
+      if (selectedCategories.length === 0) return true;
+      return selectedCategories.includes(story.categorie.naam);
+    })
     .sort((a, b) => {
-      if (sortBy === 'date-new') return new Date(b.date) - new Date(a.date);
-      if (sortBy === 'date-old') return new Date(a.date) - new Date(b.date);
-      if (sortBy === 'az') return a.title.localeCompare(b.title);
-      if (sortBy === 'za') return b.title.localeCompare(a.title);
-      return 0;
+      switch (sortBy) {
+        case 'date-new':
+          return new Date(b.datum) - new Date(a.datum);
+        case 'date-old':
+          return new Date(a.datum) - new Date(b.datum);
+        case 'az':
+          return a.titel.localeCompare(b.titel);
+        case 'za':
+          return b.titel.localeCompare(a.titel);
+        default:
+          return 0;
+      }
     });
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">Laden...</div>;
+  }
+
+  if (error) {
+    return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 pt-32 pb-8 animate-fadeIn">
@@ -127,10 +165,10 @@ const Verhalen = () => {
           >
             <StoryCard
               id={story.id}
-              title={story.title}
-              description={story.description}
-              imageUrl={story.imageUrl}
-              category={story.category}
+              title={story.titel}
+              description={story.beschrijving}
+              imageUrl={story.cover_image}
+              category={story.categorie.naam}
             />
           </div>
         ))}
@@ -145,8 +183,8 @@ const Verhalen = () => {
           </svg>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockStories
-            .filter(story => !selectedCategories.includes(story.category))
+          {stories
+            .filter(story => !selectedCategories.includes(story.categorie.naam))
             .slice(0, 3)
             .map((story, index) => (
               <div 
@@ -156,10 +194,10 @@ const Verhalen = () => {
               >
                 <StoryCard
                   id={story.id}
-                  title={story.title}
-                  description={story.description}
-                  imageUrl={story.imageUrl}
-                  category={story.category}
+                  title={story.titel}
+                  description={story.beschrijving}
+                  imageUrl={story.cover_image}
+                  category={story.categorie.naam}
                 />
               </div>
             ))}

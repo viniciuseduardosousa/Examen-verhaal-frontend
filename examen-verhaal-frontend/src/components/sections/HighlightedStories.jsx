@@ -1,31 +1,38 @@
+import { useState, useEffect } from 'react';
 import StoryCard from '../cards/StoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
+import { storiesAPI } from '../../services/api';
 
 const HighlightedStories = () => {
-  // Dit zou later uit een API of CMS kunnen komen
-  const stories = [
-    {
-      id: 1,
-      title: "De Verloren Brief",
-      description: "Een verhaal over een brief die 50 jaar te laat werd bezorgd. Een verhaal over tijd, herinneringen en onverwachte verbindingen.",
-      imageUrl: "",
-      category: "Columns"
-    },
-    {
-      id: 2,
-      title: "Laatste Trein",
-      description: "Een mysterieuze ontmoeting in de laatste trein van de avond leidt tot een onverwachte wending in het leven van een forens.",
-      imageUrl: "",
-      category: "50Words"
-    },
-    {
-      id: 3,
-      title: "De Componist",
-      description: "Het leven van een componist die alleen in stilte kan werken wordt op zijn kop gezet door een onverwachte nieuwe buur.",
-      imageUrl: "",
-      category: "SoundStories"
-    }
-  ];
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const data = await storiesAPI.getAll();
+        // Take the first 3 stories as highlighted
+        setStories(data.slice(0, 3));
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
+        console.error('Error fetching stories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  if (loading) {
+    return <div className="py-16">Laden...</div>;
+  }
+
+  if (error) {
+    return <div className="py-16 text-red-500">{error}</div>;
+  }
 
   return (
     <section className="py-16">
@@ -38,8 +45,15 @@ const HighlightedStories = () => {
 
         {/* Grid met kaarten */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stories.map((story, index) => (
-            <StoryCard key={index} {...story} />
+          {stories.map((story) => (
+            <StoryCard
+              key={story.id}
+              id={story.id}
+              title={story.titel}
+              description={story.beschrijving}
+              imageUrl={story.cover_image}
+              category={story.categorie.naam}
+            />
           ))}
         </div>
       </div>
