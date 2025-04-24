@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import StoryCard from '../cards/StoryCard';
-import ArrowIcon from '../icons/ArrowIcon';
 import { verhalenAPI } from '../../services/api';
 
-const HighlightedStories = () => {
+const StoriesSection = () => {
   const [verhalen, setVerhalen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,8 +11,7 @@ const HighlightedStories = () => {
     const fetchVerhalen = async () => {
       try {
         const data = await verhalenAPI.getAll();
-        // Take the first 3 verhalen as highlighted
-        setVerhalen(data.slice(0, 3));
+        setVerhalen(data);
         setError(null);
       } catch (err) {
         setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
@@ -37,13 +35,7 @@ const HighlightedStories = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-8">
-        {/* Header met pijl */}
-        <div className="flex items-center gap-4 mb-12">
-          <h2 className="text-2xl font-medium">Uitgelichte verhalen</h2>
-          <ArrowIcon className="w-6 h-6" />
-        </div>
-
-        {/* Grid met kaarten */}
+        <h2 className="text-2xl font-medium mb-12">Alle verhalen</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {verhalen.map((verhaal) => (
             <StoryCard
@@ -61,4 +53,4 @@ const HighlightedStories = () => {
   );
 };
 
-export default HighlightedStories; 
+export default StoriesSection; 

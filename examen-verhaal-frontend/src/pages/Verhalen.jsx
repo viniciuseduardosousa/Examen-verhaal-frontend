@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
-import { storiesAPI } from '../services/api';
+import { verhalenAPI } from '../services/api';
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
@@ -17,10 +17,10 @@ const Verhalen = () => {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const data = await storiesAPI.getAll();
+        const data = await verhalenAPI.getAll();
         setStories(data);
         // Extract unique categories from stories
-        const uniqueCategories = [...new Set(data.map(story => story.categorie.naam))];
+        const uniqueCategories = [...new Set(data.map(verhaal => verhaal.categorie.naam))];
         setCategories(uniqueCategories);
         setError(null);
       } catch (err) {

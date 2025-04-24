@@ -1,87 +1,106 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { storiesAPI } from "../../services/api";
-import { mockStories } from "../../data/mockStories";
+import { Link, useNavigate } from "react-router-dom";
+import { adminVerhalenAPI, authAPI, adminCategoriesAPI } from "../../services/adminApi";
 import { motion, AnimatePresence } from "framer-motion";
 import CreateDialog from "../../components/dialogs/CreateDialog";
 import EditDialog from "../../components/dialogs/EditDialog";
 import DeleteDialog from "../../components/dialogs/DeleteDialog";
 
 const Dashboard = () => {
-  const [stories, setStories] = useState([]);
+  const navigate = useNavigate();
+  const [verhalen, setVerhalen] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCategories, setShowCategories] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [storyToDelete, setStoryToDelete] = useState(null);
+  const [verhaalToDelete, setVerhaalToDelete] = useState(null);
   const [error, setError] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
 
-  const storiesPerPage = 7;
-  const categories = ["Columns", "50Words", "Colors", "Sound Stories"];
+  const verhalenPerPage = 7;
 
   useEffect(() => {
-    fetchStories();
-  }, []);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/admin/login');
+      return;
+    }
+    fetchVerhalen();
+    fetchCategories();
+  }, [navigate]);
 
-  const fetchStories = async () => {
+  const fetchVerhalen = async () => {
     try {
-      if (process.env.NODE_ENV === "development") {
-        setStories(mockStories);
-        setError(null);
-      } else {
-        const data = await storiesAPI.getAll();
-        setStories(data);
-        setError(null);
-      }
+      const data = await adminVerhalenAPI.getAll();
+      setVerhalen(data);
+      setError(null);
     } catch (err) {
       setError("Er is een fout opgetreden bij het ophalen van de verhalen.");
-      console.error("Error fetching stories:", err);
+      console.error("Error fetching verhalen:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteClick = (story) => {
-    setStoryToDelete(story);
+  const fetchCategories = async () => {
+    try {
+      const data = await adminCategoriesAPI.getAll();
+      setCategories(data);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+      localStorage.removeItem('token');
+      navigate('/admin/login');
+    } catch (err) {
+      console.error("Error logging out:", err);
+    }
+  };
+
+  const handleDeleteClick = (verhaal) => {
+    setVerhaalToDelete(verhaal);
     setDeleteModalOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!storyToDelete) return;
+    if (!verhaalToDelete) return;
 
     try {
-      if (process.env.NODE_ENV === "development") {
-        setStories(stories.filter((story) => story.id !== storyToDelete.id));
+      if (showCategories) {
+        await adminCategoriesAPI.delete(verhaalToDelete.id);
       } else {
-        await storiesAPI.delete(storyToDelete.id);
-        setStories(stories.filter((story) => story.id !== storyToDelete.id));
+        await adminVerhalenAPI.delete(verhaalToDelete.id);
+      }
+      if (showCategories) {
+        setCategories(categories.filter(cat => cat.id !== verhaalToDelete.id));
+      } else {
+        setVerhalen(verhalen.filter((v) => v.id !== verhaalToDelete.id));
       }
       setDeleteModalOpen(false);
-      setStoryToDelete(null);
+      setVerhaalToDelete(null);
     } catch (err) {
-      setError("Er is een fout opgetreden bij het verwijderen van het verhaal.");
-      console.error("Error deleting story:", err);
+      setError("Er is een fout opgetreden bij het verwijderen.");
+      console.error("Error deleting:", err);
     }
   };
 
-  const handlePublishToggle = async (story) => {
+  const handlePublishToggle = async (verhaal) => {
     try {
-      const updatedStory = { ...story, published: !story.published };
-
-      if (process.env.NODE_ENV === "development") {
-        setStories(stories.map((s) => (s.id === story.id ? updatedStory : s)));
-      } else {
-        await storiesAPI.update(story.id, updatedStory);
-        setStories(stories.map((s) => (s.id === story.id ? updatedStory : s)));
-      }
+      const updatedVerhaal = { ...verhaal, published: !verhaal.published };
+      await adminVerhalenAPI.update(verhaal.id, updatedVerhaal);
+      setVerhalen(verhalen.map((v) => (v.id === verhaal.id ? updatedVerhaal : v)));
     } catch (err) {
       setError("Er is een fout opgetreden bij het bijwerken van het verhaal.");
-      console.error("Error updating story:", err);
+      console.error("Error updating verhaal:", err);
     }
   };
 
@@ -90,22 +109,38 @@ const Dashboard = () => {
     setEditDialogOpen(true);
   };
 
-  const filteredStories = stories.filter((story) => {
-    const matchesSearch = story.title
+  const handleCreateSuccess = () => {
+    if (showCategories) {
+      fetchCategories();
+    } else {
+      fetchVerhalen();
+    }
+  };
+
+  const handleEditSuccess = () => {
+    if (showCategories) {
+      fetchCategories();
+    } else {
+      fetchVerhalen();
+    }
+  };
+
+  const filteredVerhalen = verhalen.filter((verhaal) => {
+    const matchesSearch = verhaal.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesCategory =
-      !showCategories || story.category === categories[showCategories ? 1 : 0];
+      !showCategories || verhaal.category === categories[showCategories ? 1 : 0];
     return matchesSearch && matchesCategory;
   });
 
-  const indexOfLastStory = currentPage * storiesPerPage;
-  const indexOfFirstStory = indexOfLastStory - storiesPerPage;
-  const currentStories = filteredStories.slice(
-    indexOfFirstStory,
-    indexOfLastStory
+  const indexOfLastVerhaal = currentPage * verhalenPerPage;
+  const indexOfFirstVerhaal = indexOfLastVerhaal - verhalenPerPage;
+  const currentVerhalen = filteredVerhalen.slice(
+    indexOfFirstVerhaal,
+    indexOfLastVerhaal
   );
-  const totalPages = Math.ceil(filteredStories.length / storiesPerPage);
+  const totalPages = Math.ceil(filteredVerhalen.length / verhalenPerPage);
 
   return (
     <div className="min-h-screen bg-[#FFFFF5] p-8">
@@ -113,7 +148,10 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-mono">Ingscribblings</h1>
-          <button className="text-gray-600 hover:text-gray-900 flex items-center gap-2">
+          <button 
+            onClick={handleLogout}
+            className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
+          >
             Log-out
             <svg
               width="24"
@@ -216,13 +254,13 @@ const Dashboard = () => {
                 {showCategories
                   ? categories.map((category) => (
                       <div
-                        key={category}
+                        key={category.id}
                         className="flex items-center justify-between py-3 border-b border-gray-200"
                       >
-                        <span className="font-mono">{category}</span>
+                        <span className="font-mono">{category.naam}</span>
                         <div className="flex gap-6">
                           <button
-                            onClick={() => handleEditClick({ title: category })}
+                            onClick={() => handleEditClick(category)}
                             className="text-gray-600 hover:text-gray-900"
                           >
                             <svg
@@ -254,23 +292,23 @@ const Dashboard = () => {
                         </div>
                       </div>
                     ))
-                  : currentStories.map((story) => (
+                  : currentVerhalen.map((verhaal) => (
                       <div
-                        key={story.id}
+                        key={verhaal.id}
                         className="flex items-center justify-between py-3 border-b border-gray-200"
                       >
-                        <span className="font-mono">{story.title}</span>
+                        <span className="font-mono">{verhaal.title}</span>
                         <div className="flex gap-6">
                           <button
-                            onClick={() => handlePublishToggle(story)}
+                            onClick={() => handlePublishToggle(verhaal)}
                             className="text-gray-600 hover:text-gray-900"
                             title={
-                              story.published
+                              verhaal.published
                                 ? "Verhaal verbergen"
                                 : "Verhaal publiceren"
                             }
                           >
-                            {story.published ? (
+                            {verhaal.published ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="h-5 w-5"
@@ -301,7 +339,7 @@ const Dashboard = () => {
                             )}
                           </button>
                           <button
-                            onClick={() => handleEditClick(story)}
+                            onClick={() => handleEditClick(verhaal)}
                             className="text-gray-600 hover:text-gray-900"
                           >
                             <svg
@@ -314,7 +352,7 @@ const Dashboard = () => {
                             </svg>
                           </button>
                           <button
-                            onClick={() => handleDeleteClick(story)}
+                            onClick={() => handleDeleteClick(verhaal)}
                             className="text-gray-600 hover:text-gray-900"
                           >
                             <svg
@@ -364,6 +402,7 @@ const Dashboard = () => {
         onClose={() => setCreateDialogOpen(false)}
         isCategory={showCategories}
         categories={categories}
+        onSuccess={handleCreateSuccess}
       />
 
       {/* Edit Dialog */}
@@ -376,6 +415,7 @@ const Dashboard = () => {
         isCategory={showCategories}
         categories={categories}
         data={itemToEdit}
+        onSuccess={handleEditSuccess}
       />
 
       {/* Delete Dialog */}
@@ -383,10 +423,10 @@ const Dashboard = () => {
         isOpen={deleteModalOpen}
         onClose={() => {
           setDeleteModalOpen(false);
-          setStoryToDelete(null);
+          setVerhaalToDelete(null);
         }}
         onConfirm={handleDeleteConfirm}
-        itemName={storyToDelete?.title || storyToDelete}
+        itemName={verhaalToDelete?.title || verhaalToDelete?.naam}
       />
     </div>
   );

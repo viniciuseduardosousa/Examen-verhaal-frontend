@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 
-const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) => {
+const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
     category: '',
     description: '',
     isHighlighted: false,
     isPdfDownloadable: false,
+    published: false,
     content: '',
     ...data
   });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -47,6 +51,27 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
     }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (isCategory) {
+        await categoriesAPI.update(data.id, formData);
+      } else {
+        await verhalenAPI.update(data.id, formData);
+      }
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setError("Er is een fout opgetreden bij het bijwerken.");
+      console.error("Error updating:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -70,7 +95,7 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
         </div>
 
         {/* Form Content */}
-        <div className="p-6">
+        <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -84,6 +109,7 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
                   value={formData.title}
                   onChange={handleChange}
                   className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5"
+                  required
                 />
               </div>
 
@@ -99,8 +125,9 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
                       value={formData.category}
                       onChange={handleChange}
                       className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5 appearance-none bg-white"
+                      required
                     >
-                      <option value="">Actie</option>
+                      <option value="">Selecteer een categorie</option>
                       {categories.map(category => (
                         <option key={category} value={category}>{category}</option>
                       ))}
@@ -108,15 +135,31 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
                   </div>
 
                   <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                      Datum
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                      Beschrijving
                     </label>
-                    <select
-                      id="date"
-                      className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5 appearance-none bg-white"
-                    >
-                      <option value="">{new Date().toLocaleDateString()}</option>
-                    </select>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5"
+                      rows="3"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+                      Verhaal
+                    </label>
+                    <textarea
+                      id="content"
+                      name="content"
+                      value={formData.content}
+                      onChange={handleChange}
+                      className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5"
+                      rows="6"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -140,74 +183,49 @@ const EditDialog = ({ isOpen, onClose, isCategory = false, categories, data }) =
                         onChange={handleChange}
                         className="w-4 h-4"
                       />
-                      <label htmlFor="isPdfDownloadable" className="text-sm">Download als pdf</label>
+                      <label htmlFor="isPdfDownloadable" className="text-sm">PDF downloadbaar</label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="published"
+                        name="published"
+                        checked={formData.published}
+                        onChange={handleChange}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor="published" className="text-sm">Gepubliceerd</label>
                     </div>
                   </div>
                 </>
               )}
             </div>
-
-            {!isCategory && (
-              <div className="border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 h-[180px]">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-500 text-sm">Vervang omslag foto</p>
-                </div>
-              </div>
-            )}
           </div>
 
-          {!isCategory && (
-            <>
-              <div className="mt-4">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Korte beschrijving
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full border-2 border-gray-300 rounded-lg px-3 py-1.5 bg-gray-50"
-                />
-              </div>
-
-              <div className="mt-4">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                  Verhaal
-                </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  value={formData.content}
-                  onChange={handleChange}
-                  rows={6}
-                  className="w-full border-2 border-gray-300 rounded-lg px-3 py-1.5 bg-gray-50"
-                />
-              </div>
-            </>
+          {error && (
+            <div className="mt-4 text-red-600 text-sm">
+              {error}
+            </div>
           )}
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-end gap-4">
             <button
-              onClick={() => {
-                // Handle form submission
-                onClose();
-              }}
-              className="bg-[#4CAF50] text-white px-4 py-1.5 rounded-lg flex items-center gap-2 hover:bg-[#45a049] text-sm"
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+              disabled={loading}
             >
-              {isCategory ? "Categorie Opslaan" : "Verhaal Opslaan"}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              annuleren
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+              disabled={loading}
+            >
+              {loading ? 'Bijwerken...' : 'Bijwerken'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

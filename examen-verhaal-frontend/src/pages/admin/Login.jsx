@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/adminApi';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -15,20 +16,21 @@ const Login = () => {
     setError('');
     setIsLoading(true);
 
-    // Simuleer een API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authAPI.login(formData);
+      console.log('Login response:', response);
       
-      // Mock credentials check
-      if (formData.email === 'admin@Ingscribblings.nl' && formData.password === 'admin123') {
-        // In een echte app zou je hier een JWT token opslaan
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/admin/dashboard');
+      if (response.access) {
+        localStorage.setItem('token', response.access);
+        console.log('Token stored, navigating to dashboard...');
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        setError('Ongeldige inloggegevens');
+        console.error('No access token in response');
+        setError('Login mislukt - geen token ontvangen');
       }
     } catch (err) {
-      setError('Er is iets misgegaan. Probeer het opnieuw.');
+      console.error('Login error:', err);
+      setError(err.message || 'Er is iets misgegaan. Probeer het opnieuw.');
     } finally {
       setIsLoading(false);
     }
@@ -57,18 +59,18 @@ const Login = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
+            {/* Username Input */}
             <div>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 required
                 className="w-full px-6 py-3 border-2 border-gray-800 rounded-lg focus:outline-none
                          focus:ring-2 focus:ring-gray-500 transition-all text-lg"
-                placeholder="E-mail"
+                placeholder="Gebruikersnaam"
               />
             </div>
 
@@ -83,7 +85,7 @@ const Login = () => {
                 required
                 className="w-full px-6 py-3 border-2 border-gray-800 rounded-lg focus:outline-none
                          focus:ring-2 focus:ring-gray-500 transition-all text-lg"
-                placeholder="wachtwoord"
+                placeholder="Wachtwoord"
               />
             </div>
 

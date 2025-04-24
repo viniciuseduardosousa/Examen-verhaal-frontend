@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { storiesAPI } from '../../services/api';
+import { verhalenAPI } from '../../services/api';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,15 +12,15 @@ const CategoryDropdown = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const stories = await storiesAPI.getAll();
+        const verhalen = await verhalenAPI.getAll();
         // Extract unique categories from stories
-        const uniqueCategories = [...new Set(stories.map(story => story.categorie.naam))];
+        const uniqueCategories = [...new Set(verhalen.map(verhaal => verhaal.categorie.naam))];
         // Create category objects with count
         const categoriesWithCount = uniqueCategories.map(category => ({
           id: category,
           name: category,
           path: `/verhalen?category=${encodeURIComponent(category)}`,
-          count: stories.filter(story => story.categorie.naam === category).length
+          count: verhalen.filter(verhaal => verhaal.categorie.naam === category).length
         }));
         setCategories(categoriesWithCount);
         setError(null);

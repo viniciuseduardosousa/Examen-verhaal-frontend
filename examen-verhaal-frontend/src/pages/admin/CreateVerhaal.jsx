@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { storiesAPI } from '../../services/api';
+import { verhalenAPI } from '../../services/api';
 
 const CreateVerhaal = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const CreateVerhaal = () => {
     setError(null);
 
     try {
-      await storiesAPI.create(formData);
+      await verhalenAPI.create(formData);
       navigate('/admin/dashboard');
     } catch (err) {
       setError('Er is een fout opgetreden bij het aanmaken van het verhaal.');

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { storiesAPI } from '../../services/api';
+import { verhalenAPI } from '../../services/api';
 
 const EditVerhaal = () => {
   const { id } = useParams();
@@ -24,7 +24,7 @@ const EditVerhaal = () => {
 
   const fetchStory = async () => {
     try {
-      const data = await storiesAPI.getById(id);
+      const data = await verhalenAPI.getById(id);
       setFormData(data);
       setError(null);
     } catch (err) {
@@ -49,7 +49,7 @@ const EditVerhaal = () => {
     setError(null);
 
     try {
-      await storiesAPI.update(id, formData);
+      await verhalenAPI.update(id, formData);
       navigate('/admin/dashboard');
     } catch (err) {
       setError('Er is een fout opgetreden bij het bijwerken van het verhaal.');
