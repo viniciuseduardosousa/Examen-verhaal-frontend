@@ -109,11 +109,20 @@ const Dashboard = () => {
     setEditDialogOpen(true);
   };
 
-  const handleCreateSuccess = () => {
-    if (showCategories) {
-      fetchCategories();
-    } else {
-      fetchVerhalen();
+  const handleCreateSuccess = async (formData) => {
+    try {
+      console.log('Creating story with data:', formData);
+      if (showCategories) {
+        await adminCategoriesAPI.create(formData);
+        fetchCategories();
+      } else {
+        await adminVerhalenAPI.create(formData);
+        fetchVerhalen();
+      }
+      setCreateDialogOpen(false);
+    } catch (err) {
+      console.error('Error creating item:', err);
+      setError("Er is een fout opgetreden bij het aanmaken.");
     }
   };
 
@@ -400,9 +409,8 @@ const Dashboard = () => {
       <CreateDialog
         isOpen={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        isCategory={showCategories}
-        categories={categories}
-        onSuccess={handleCreateSuccess}
+        onSave={handleCreateSuccess}
+        type={showCategories ? 'category' : 'story'}
       />
 
       {/* Edit Dialog */}

@@ -1,206 +1,230 @@
-import { useState, useEffect, useCallback } from 'react';
-import { verhalenAPI, categoriesAPI } from '../../services/api';
+import { useState, useEffect } from 'react';
+import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 
-const CreateDialog = ({ isOpen, onClose, isCategory = false, categories, onSuccess }) => {
+const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [formData, setFormData] = useState({
     title: '',
-    category: '',
+    text: '',
     description: '',
-    isHighlighted: false,
-    isPdfDownloadable: false,
-    published: false
+    published: true,
+    category: '',
+    coverImage: null,
+    date: new Date().toISOString().split('T')[0]
   });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Handle scroll lock
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
+    const fetchCategories = async () => {
+      try {
+        const data = await adminCategoriesAPI.getAll();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+        setError('Kon categorieën niet ophalen');
+      }
     };
-  }, [isOpen]);
 
-  // Handle outside click (only on desktop)
-  const handleOutsideClick = useCallback((e) => {
-    if (window.innerWidth <= 768) return;
-    
-    if (e.target.classList.contains('dialog-overlay')) {
-      onClose();
+    if (isOpen) {
+      fetchCategories();
     }
-  }, [onClose]);
-
-  const handleChange = (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: value
-    }));
-  };
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    setError('');
+    setIsLoading(true);
 
     try {
-      if (isCategory) {
-        await categoriesAPI.create(formData);
-      } else {
-        await verhalenAPI.create(formData);
+      // Format data for API
+      const formattedData = {
+        titel: formData.title,
+        tekst: formData.text,
+        beschrijving: formData.description,
+        is_onzichtbaar: !formData.published,
+        categorie_id: formData.category,
+        datum: formData.date,
+        cover_image: formData.coverImage
+      };
+
+      console.log('Sending data to API:', formattedData);
+      console.log('Category value:', formData.category);
+
+      // Validate category ID
+      if (!formData.category) {
+        throw new Error('Selecteer een categorie');
       }
-      onSuccess();
+
+      console.log('Calling onSave with data:', formattedData);
+      await onSave(formattedData);
+      console.log('onSave completed successfully');
+      
       onClose();
     } catch (err) {
-      setError("Er is een fout opgetreden bij het aanmaken.");
-      console.error("Error creating:", err);
+      console.error('Error in handleSubmit:', err);
+      setError(err.message || 'Er is iets misgegaan bij het opslaan');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
+    }));
   };
 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 dialog-overlay"
-      onClick={handleOutsideClick}
-    >
-      <div className="bg-white rounded-lg w-[600px] mx-4" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-          <h2 className="text-xl font-mono">
-            {isCategory ? "Categorie aanmaken" : "Verhaal aanmaken"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="bg-[#F85B3B] text-white px-3 py-1 rounded-lg flex items-center gap-2 hover:bg-[#e54e30] text-sm"
-          >
-            aanmaking verlaten
-            <span className="text-xl leading-none">×</span>
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">
+          Nieuw {type === 'story' ? 'Verhaal' : 'Categorie'}
+        </h2>
 
-        {/* Form Content */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {type === 'story' && (
+            <>
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Titel
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Titel</label>
                 <input
                   type="text"
-                  id="title"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5"
-                  placeholder="Verhaal 1"
                   required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
 
-              {!isCategory && (
-                <>
-                  <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                      Categorie
-                    </label>
-                    <select
-                      id="category"
-                      name="category"
-                      value={formData.category}
-                      onChange={handleChange}
-                      className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5 appearance-none bg-white"
-                      required
-                    >
-                      <option value="">Selecteer een categorie</option>
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Tekst</label>
+                <textarea
+                  name="text"
+                  value={formData.text}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
 
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                      Beschrijving
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      className="w-full border-2 border-gray-800 rounded-lg px-3 py-1.5"
-                      rows="3"
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Beschrijving</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows={2}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Cover Afbeelding</label>
+                <input
+                  type="file"
+                  name="coverImage"
+                  onChange={handleChange}
+                  accept="image/*"
+                  className="mt-1 block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-50 file:text-indigo-700
+                    hover:file:bg-indigo-100"
+                />
+                {formData.coverImage && !(formData.coverImage instanceof File) && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.coverImage} 
+                      alt="Current cover" 
+                      className="h-32 w-32 object-cover rounded-md"
                     />
                   </div>
+                )}
+              </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isHighlighted"
-                        name="isHighlighted"
-                        checked={formData.isHighlighted}
-                        onChange={handleChange}
-                        className="w-4 h-4"
-                      />
-                      <label htmlFor="isHighlighted" className="text-sm">Uitgelicht</label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isPdfDownloadable"
-                        name="isPdfDownloadable"
-                        checked={formData.isPdfDownloadable}
-                        onChange={handleChange}
-                        className="w-4 h-4"
-                      />
-                      <label htmlFor="isPdfDownloadable" className="text-sm">PDF downloadbaar</label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="published"
-                        name="published"
-                        checked={formData.published}
-                        onChange={handleChange}
-                        className="w-4 h-4"
-                      />
-                      <label htmlFor="published" className="text-sm">Gepubliceerd</label>
-                    </div>
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Categorie</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">Selecteer een categorie</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.naam}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Datum</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="published"
+                  checked={formData.published}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 block text-sm text-gray-900">Gepubliceerd</label>
+              </div>
+            </>
+          )}
+
+          {type === 'category' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Naam</label>
+              <input
+                type="text"
+                name="naam"
+                value={formData.naam}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
             </div>
-          </div>
+          )}
 
           {error && (
-            <div className="mt-4 text-red-600 text-sm">
+            <div className="text-red-500 text-sm p-2 bg-red-50 rounded-md">
               {error}
             </div>
           )}
 
-          <div className="mt-6 flex justify-end gap-4">
+          <div className="mt-4 flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-              disabled={loading}
+              className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              annuleren
+              Annuleren
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
-              disabled={loading}
+              disabled={isLoading}
+              className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? 'Aanmaken...' : 'Aanmaken'}
+              {isLoading ? 'Opslaan...' : 'Opslaan'}
             </button>
           </div>
         </form>
