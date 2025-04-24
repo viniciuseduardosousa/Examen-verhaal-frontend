@@ -29,7 +29,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
       <div className="flex flex-col h-full p-8">
         {/* Header with Logo and Close */}
         <div className="flex justify-between items-center mb-12">
-          <span className="text-3xl font-medium tracking-tight">ReadKeep</span>
+          <span className="text-3xl font-medium tracking-tight">Ingscribblings</span>
           <button
             onClick={onClose}
             className="text-gray-800 hover:rotate-90 transition-all duration-300"

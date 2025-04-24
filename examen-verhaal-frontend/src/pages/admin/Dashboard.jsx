@@ -112,7 +112,7 @@ const Dashboard = () => {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-mono">ReadKeep</h1>
+          <h1 className="text-xl font-mono">Ingscribblings</h1>
           <button className="text-gray-600 hover:text-gray-900 flex items-center gap-2">
             Log-out
             <svg

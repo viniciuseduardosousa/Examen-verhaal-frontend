@@ -51,7 +51,7 @@ const OverMij = () => {
               heeft het vermogen om ons te raken en te inspireren.
             </p>
             <p className="text-gray-600">
-              Met ReadKeep wil ik een platform bieden waar verhalen tot leven komen en lezers 
+              Met Ingscribblings wil ik een platform bieden waar verhalen tot leven komen en lezers 
               kunnen verdwalen in woorden. Een plek waar creativiteit en verbeeldingskracht 
               centraal staan.
             </p>

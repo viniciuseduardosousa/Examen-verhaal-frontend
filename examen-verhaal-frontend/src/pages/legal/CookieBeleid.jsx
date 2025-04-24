@@ -7,7 +7,7 @@ const CookieBeleid = () => {
       
       <div className="prose prose-lg">
         <p className="mb-6">
-          ReadKeep gebruikt cookies om uw ervaring op onze website te verbeteren. 
+        Ingscribblings gebruikt cookies om uw ervaring op onze website te verbeteren. 
           Door op "Accepteren" te klikken gaat u akkoord met het gebruik van alle cookies.
         </p>
 
@@ -44,8 +44,8 @@ const CookieBeleid = () => {
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact</h2>
         <p className="mb-6">
           Heeft u vragen over ons cookiebeleid? Neem dan contact met ons op via 
-          <a href="mailto:info@readkeep.nl" className="text-[#303655] hover:underline ml-1">
-            info@readkeep.nl
+          <a href="mailto:info@Ingscribblings.nl" className="text-[#303655] hover:underline ml-1">
+            info@Ingscribblings.nl
           </a>
         </p>
 

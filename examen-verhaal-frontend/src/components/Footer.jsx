@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 relative">
           {/* Logo/Brand section */}
           <div className="relative">
-            <h3 className="text-xl font-medium mb-4">ReadKeep</h3>
+            <h3 className="text-xl font-medium mb-4">Ingscribblings</h3>
             <p className="text-gray-700">
               Ontdek verhalen die je raken, 
               inspireren en vermaken. Een plek 
@@ -43,8 +43,8 @@ const Footer = () => {
             <h3 className="text-xl font-medium mb-4">Contact</h3>
             <ul className="space-y-2">
               <li>
-                <a href="mailto:info@readkeep.nl" className="text-gray-700 hover:text-gray-900">
-                  info@readkeep.nl
+                <a href="mailto:info@Ingscribblings.nl" className="text-gray-700 hover:text-gray-900">
+                  info@Ingscribblings.nl
                 </a>
               </li>
               <li>
@@ -87,7 +87,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="text-center text-gray-700">
-          <p>&copy; {currentYear} ReadKeep. Alle rechten voorbehouden.</p>
+          <p>&copy; {currentYear} Ingscribblings. Alle rechten voorbehouden.</p>
         </div>
       </div>
     </footer>

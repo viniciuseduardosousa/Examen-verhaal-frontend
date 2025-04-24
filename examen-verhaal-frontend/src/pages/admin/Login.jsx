@@ -20,7 +20,7 @@ const Login = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock credentials check
-      if (formData.email === 'admin@readkeep.nl' && formData.password === 'admin123') {
+      if (formData.email === 'admin@Ingscribblings.nl' && formData.password === 'admin123') {
         // In een echte app zou je hier een JWT token opslaan
         localStorage.setItem('isAuthenticated', 'true');
         navigate('/admin/dashboard');
@@ -51,7 +51,7 @@ const Login = () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <a href="/" className="inline-block">
-              <h1 className="text-3xl font-bold text-[#000000]">ReadKeep</h1>
+              <h1 className="text-3xl font-bold text-[#000000]">Ingscribblings</h1>
             </a>
           </div>
 
