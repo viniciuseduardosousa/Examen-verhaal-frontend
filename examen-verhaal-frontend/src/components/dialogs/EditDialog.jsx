@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 
-const EditDialog = ({ isOpen, onClose, onSave, data, isCategory }) => {
+const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [formData, setFormData] = useState({
     title: '',
     text: '',
@@ -60,9 +60,18 @@ const EditDialog = ({ isOpen, onClose, onSave, data, isCategory }) => {
       if (isCategory) {
         await adminCategoriesAPI.update(data.id, formData);
       } else {
-        await adminVerhalenAPI.update(data.id, formData);
+        const transformedData = {
+          titel: formData.title,
+          tekst: formData.text,
+          beschrijving: formData.description,
+          is_onzichtbaar: !formData.published,
+          categorie_id: formData.category,
+          datum: formData.date,
+          cover_image: formData.coverImage
+        };
+        await adminVerhalenAPI.update(data.id, transformedData);
       }
-      onSave();
+      onSuccess();
       onClose();
     } catch (err) {
       console.error('Error saving:', err);

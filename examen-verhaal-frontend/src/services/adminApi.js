@@ -241,25 +241,17 @@ export const adminVerhalenAPI = {
     }
   },
 
-  update: async (id, verhaalData) => {
-    try {
-      const formData = processVerhaalData(verhaalData);
-
-      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}/`), {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-        credentials: 'include'
-      });
-
-      const data = await handleApiResponse(response);
-      return transformVerhaalData(data);
-    } catch (error) {
-      console.error('Error updating verhaal:', error);
-      throw error;
-    }
+  update: async (id, data) => {
+    const processedData = processVerhaalData(data);
+    const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: processedData,
+      credentials: 'include'
+    });
+    return handleApiResponse(response);
   },
 
   delete: async (id) => {
