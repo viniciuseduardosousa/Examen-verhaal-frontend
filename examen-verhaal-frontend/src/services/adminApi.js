@@ -27,8 +27,8 @@ const getFetchOptions = (method = 'GET', body = null, isFormData = false) => {
 // Helper function to construct API URLs
 const getApiUrl = (endpoint) => {
   const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  return `${baseUrl}${path}`;
+  const path = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  return `${baseUrl}/${path}`;
 };
 
 // Auth API calls
@@ -77,7 +77,7 @@ const processVerhaalData = (verhaalData) => {
     throw new Error('Alle velden zijn verplicht');
   }
 
-  // Convert categorie_id to number
+  // Convert categorie_id to number and validate
   const categoryId = parseInt(verhaalData.categorie_id, 10);
   if (isNaN(categoryId)) {
     throw new Error('Ongeldige categorie ID');
@@ -87,7 +87,7 @@ const processVerhaalData = (verhaalData) => {
   formData.append('titel', verhaalData.titel);
   formData.append('tekst', verhaalData.tekst);
   formData.append('beschrijving', verhaalData.beschrijving);
-  formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar.toString());
+  formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
   formData.append('categorie_id', categoryId.toString());
   formData.append('datum', verhaalData.datum);
 
@@ -194,8 +194,8 @@ export const adminVerhalenAPI = {
       formData.append('titel', verhaalData.titel);
       formData.append('tekst', verhaalData.tekst);
       formData.append('beschrijving', verhaalData.beschrijving);
-      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar.toString());
-      formData.append('categorie_id', verhaalData.categorie_id.toString());
+      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar);
+      formData.append('categorie_id', parseInt(verhaalData.categorie_id));
       formData.append('datum', verhaalData.datum);
 
       // Add cover image if provided
