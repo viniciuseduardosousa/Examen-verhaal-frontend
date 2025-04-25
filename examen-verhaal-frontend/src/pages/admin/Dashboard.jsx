@@ -105,8 +105,13 @@ const Dashboard = () => {
   };
 
   const handleEditClick = (item) => {
-    setItemToEdit(item);
-    setEditDialogOpen(true);
+    if (showCategories) {
+      setItemToEdit(item);
+      setEditDialogOpen(true);
+    } else {
+      setItemToEdit(item);
+      setEditDialogOpen(true);
+    }
   };
 
   const handleCreateSuccess = async (formData) => {
