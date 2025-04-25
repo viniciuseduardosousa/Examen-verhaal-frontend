@@ -37,32 +37,23 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     setIsLoading(true);
 
     try {
-      // Format data for API
-      const formattedData = {
+      const transformedData = {
         titel: formData.title,
         tekst: formData.text,
         beschrijving: formData.description,
         is_onzichtbaar: !formData.published,
-        categorie_id: formData.category,
+        categorie_id: parseInt(formData.category),
         datum: formData.date,
         cover_image: formData.coverImage
       };
 
-      console.log('Sending data to API:', formattedData);
+      console.log('Sending data to API:', transformedData);
       console.log('Category value:', formData.category);
 
-      // Validate category ID
-      if (!formData.category) {
-        throw new Error('Selecteer een categorie');
-      }
-
-      console.log('Calling onSave with data:', formattedData);
-      await onSave(formattedData);
-      console.log('onSave completed successfully');
-      
+      await onSave(transformedData);
       onClose();
     } catch (err) {
-      console.error('Error in handleSubmit:', err);
+      console.error('Error saving:', err);
       setError(err.message || 'Er is iets misgegaan bij het opslaan');
     } finally {
       setIsLoading(false);
