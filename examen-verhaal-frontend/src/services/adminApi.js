@@ -311,7 +311,16 @@ export const adminCategoriesAPI = {
       const apiData = {
         naam: categoryData.naam
       };
-      const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}/`), getFetchOptions('POST', apiData));
+      const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(apiData),
+        credentials: 'include'
+      });
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');

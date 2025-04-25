@@ -9,7 +9,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     published: true,
     category: '',
     coverImage: null,
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    naam: ''
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -34,11 +35,13 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   useEffect(() => {
     if (data) {
       if (isCategory) {
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           naam: data.naam || ''
-        });
+        }));
       } else {
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           title: data.title || '',
           text: data.text || '',
           description: data.description || '',
@@ -46,7 +49,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           category: data.category || '',
           coverImage: data.coverImage || null,
           date: data.date || new Date().toISOString().split('T')[0]
-        });
+        }));
       }
     }
   }, [data, isCategory]);
