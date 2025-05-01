@@ -10,7 +10,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     category: '',
     coverImage: null,
     date: new Date().toISOString().split('T')[0],
-    naam: ''
+    naam: '',
+    is_uitgelicht: false,
+    cover_image: null
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -37,7 +39,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       if (isCategory) {
         setFormData(prev => ({
           ...prev,
-          naam: data.naam || ''
+          naam: data.naam || '',
+          is_uitgelicht: data.is_uitgelicht || false,
+          cover_image: data.cover_image || null
         }));
       } else {
         setFormData(prev => ({
@@ -61,7 +65,11 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
     try {
       if (isCategory) {
-        await adminCategoriesAPI.update(data.id, formData);
+        await adminCategoriesAPI.update(data.id, {
+          naam: formData.naam,
+          is_uitgelicht: formData.is_uitgelicht,
+          cover_image: formData.cover_image
+        });
       } else {
         const transformedData = {
           titel: formData.title,
@@ -109,19 +117,49 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
         <form onSubmit={handleSubmit}>
           {isCategory ? (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Naam
-              </label>
-              <input
-                type="text"
-                name="naam"
-                value={formData.naam}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
+            <>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Naam
+                </label>
+                <input
+                  type="text"
+                  name="naam"
+                  value={formData.naam}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cover Afbeelding
+                </label>
+                <input
+                  type="file"
+                  name="cover_image"
+                  onChange={handleChange}
+                  accept="image/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_uitgelicht"
+                    checked={formData.is_uitgelicht}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Uitgelicht
+                  </span>
+                </label>
+              </div>
+            </>
           ) : (
             <>
               <div className="mb-4">
