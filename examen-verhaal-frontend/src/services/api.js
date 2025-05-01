@@ -60,7 +60,7 @@ export const authAPI = {
 // Categories API calls
 export const categoriesAPI = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/categories/`, getFetchOptions());
+    const response = await fetch(`${API_BASE_URL}/api/categorieen/`, getFetchOptions());
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -72,8 +72,18 @@ export const categoriesAPI = {
     return response.json();
   },
 
+  getFeatured: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/categorieen/`, getFetchOptions());
+    if (!response.ok) {
+      throw new Error('Failed to fetch categories');
+    }
+    const categories = await response.json();
+    // Filter categories where is_uitgelicht is true
+    return categories.filter(category => category.is_uitgelicht);
+  },
+
   create: async (categoryData) => {
-    const response = await fetch(`${API_BASE_URL}/api/categories/`, getFetchOptions('POST', categoryData));
+    const response = await fetch(`${API_BASE_URL}/api/categorieen/`, getFetchOptions('POST', categoryData));
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -86,7 +96,7 @@ export const categoriesAPI = {
   },
 
   update: async (id, categoryData) => {
-    const response = await fetch(`${API_BASE_URL}/api/categories/${id}/`, getFetchOptions('PUT', categoryData));
+    const response = await fetch(`${API_BASE_URL}/api/categorieen/${id}/`, getFetchOptions('PUT', categoryData));
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -99,7 +109,7 @@ export const categoriesAPI = {
   },
 
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/api/categories/${id}/`, getFetchOptions('DELETE'));
+    const response = await fetch(`${API_BASE_URL}/api/categorieen/${id}/`, getFetchOptions('DELETE'));
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('token');

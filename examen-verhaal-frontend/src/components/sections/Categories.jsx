@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import CategoryCard from '../cards/CategoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
-import { adminCategoriesAPI } from '../../services/adminApi';
+import { categoriesAPI } from '../../services/api';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -11,7 +11,7 @@ const Categories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await adminCategoriesAPI.getFeatured();
+        const data = await categoriesAPI.getFeatured();
         setCategories(data);
         setError(null);
       } catch (err) {
