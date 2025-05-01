@@ -275,8 +275,17 @@ export const adminVerhalenAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}/`), getFetchOptions('DELETE'));
-      return handleApiResponse(response);
+      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), getFetchOptions('DELETE'));
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon verhaal niet verwijderen');
+      }
+      console.log('Verhaal succesvol verwijderd');
+      return true;
     } catch (error) {
       console.error('Error deleting verhaal:', error);
       throw error;
