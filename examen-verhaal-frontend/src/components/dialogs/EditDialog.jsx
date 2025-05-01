@@ -12,7 +12,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     date: new Date().toISOString().split('T')[0],
     naam: '',
     is_uitgelicht: false,
-    cover_image: null
+    cover_image: null,
+    is_spotlighted: false
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -52,7 +53,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           published: data.published !== false,
           category: data.category || '',
           coverImage: data.coverImage || null,
-          date: data.date || new Date().toISOString().split('T')[0]
+          date: data.date || new Date().toISOString().split('T')[0],
+          is_spotlighted: data.is_spotlighted || false
         }));
       }
     }
@@ -71,15 +73,20 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           cover_image: formData.cover_image
         });
       } else {
+        const date = new Date(formData.date);
+        const formattedDate = date.toISOString().split('T')[0];
+        
         const transformedData = {
           titel: formData.title,
           tekst: formData.text,
           beschrijving: formData.description,
           is_onzichtbaar: !formData.published,
           categorie_id: formData.category,
-          datum: formData.date,
-          cover_image: formData.coverImage
+          datum: formattedDate,
+          cover_image: formData.coverImage,
+          is_spotlighted: formData.is_spotlighted
         };
+        console.log('Sending data:', transformedData);
         await adminVerhalenAPI.update(data.id, transformedData);
       }
       onSuccess();
@@ -262,6 +269,21 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   />
                   <span className="text-sm font-medium text-gray-700">
                     Gepubliceerd
+                  </span>
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_spotlighted"
+                    checked={formData.is_spotlighted}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Spotlight verhaal (wordt getoond op de homepage)
                   </span>
                 </label>
               </div>

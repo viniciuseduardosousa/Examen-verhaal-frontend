@@ -11,7 +11,8 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         published: true,
         category: '',
         coverImage: null,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        is_spotlighted: false
       };
     } else {
       return {
@@ -64,19 +65,23 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           throw new Error('Ongeldige categorie ID');
         }
 
+        // Format date to YYYY-MM-DD
+        const date = new Date(formData.date);
+        const formattedDate = date.toISOString().split('T')[0];
+
         transformedData = {
           titel: formData.title,
           tekst: formData.text,
           beschrijving: formData.description,
           is_onzichtbaar: !formData.published,
           categorie_id: categoryId,
-          datum: formData.date,
-          cover_image: formData.coverImage
+          datum: formattedDate,
+          cover_image: formData.coverImage,
+          is_spotlighted: formData.is_spotlighted
         };
         
         console.log('Transformed data:', transformedData);
-        console.log('categorie_id after transform:', transformedData.categorie_id);
-        console.log('categorie_id type:', typeof transformedData.categorie_id);
+        console.log('Date being sent:', formattedDate);
       } else {
         transformedData = {
           naam: formData.naam,
@@ -127,7 +132,8 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         published: true,
         category: '',
         coverImage: null,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        is_spotlighted: false
       } : {
         naam: '',
         is_uitgelicht: false,
@@ -240,6 +246,21 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                   accept="image/*"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_spotlighted"
+                    checked={formData.is_spotlighted}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Spotlight verhaal (wordt getoond op de homepage)
+                  </span>
+                </label>
               </div>
 
               <div className="flex items-center mb-4">
