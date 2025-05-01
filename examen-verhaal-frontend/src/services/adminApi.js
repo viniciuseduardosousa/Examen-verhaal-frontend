@@ -357,7 +357,7 @@ export const adminCategoriesAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}/`), getFetchOptions('DELETE'));
+      const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), getFetchOptions('DELETE'));
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
@@ -366,7 +366,9 @@ export const adminCategoriesAPI = {
         }
         throw new Error('Kon categorie niet verwijderen');
       }
-      return response.json();
+      console.log('Categorie succesvol verwijderd');
+      
+      return true;
     } catch (error) {
       console.error('Error deleting category:', error);
       throw error;
