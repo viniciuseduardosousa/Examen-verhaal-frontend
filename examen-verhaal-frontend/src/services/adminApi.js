@@ -344,12 +344,45 @@ export const adminCategoriesAPI = {
     }
   },
 
+  getFeatured: async () => {
+    try {
+      const response = await fetch(getApiUrl('/api/categorieen/admin/'), getFetchOptions());
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon categorieën niet ophalen');
+      }
+      const categories = await response.json();
+      // Filter categories where is_uitgelicht is true
+      return categories.filter(category => category.is_uitgelicht);
+    } catch (error) {
+      console.error('Error fetching featured categories:', error);
+      throw error;
+    }
+  },
+
   create: async (categoryData) => {
     try {
-      const apiData = {
-        naam: categoryData.naam
-      };
-      const response = await fetch(getApiUrl('/api/categorieen/admin/'), getFetchOptions('POST', apiData));
+      const formData = new FormData();
+      formData.append('naam', categoryData.naam);
+      formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      
+      if (categoryData.cover_image instanceof File) {
+        formData.append('cover_image', categoryData.cover_image);
+      }
+
+      const response = await fetch(getApiUrl('/api/categorieen/admin/'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+        credentials: 'include'
+      });
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
@@ -358,6 +391,7 @@ export const adminCategoriesAPI = {
         }
         throw new Error('Kon categorie niet aanmaken');
       }
+      console.log('Categorie succesvol aangemaakt');
       return response.json();
     } catch (error) {
       console.error('Error creating category:', error);
@@ -367,19 +401,23 @@ export const adminCategoriesAPI = {
 
   update: async (id, categoryData) => {
     try {
-      const apiData = {
-        naam: categoryData.naam
-      };
+      const formData = new FormData();
+      formData.append('naam', categoryData.naam);
+      formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      
+      if (categoryData.cover_image instanceof File) {
+        formData.append('cover_image', categoryData.cover_image);
+      }
+
       const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
-        body: JSON.stringify(apiData),
+        body: formData,
         credentials: 'include'
       });
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
@@ -388,6 +426,7 @@ export const adminCategoriesAPI = {
         }
         throw new Error('Kon categorie niet bijwerken');
       }
+      console.log('Categorie succesvol bijgewerkt');
       return response.json();
     } catch (error) {
       console.error('Error updating category:', error);
