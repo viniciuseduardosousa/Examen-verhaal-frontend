@@ -14,18 +14,38 @@ const FeaturedStory = () => {
     const fetchFeaturedStory = async () => {
       try {
         const stories = await verhalenAPI.getAll();
-        const featuredStory = stories.find(story => story.is_spotlighted);
+        console.log('All stories from API:', stories);
+        
+        // Filter spotlighted stories
+        const spotlightedStories = stories.filter(story => story.is_spotlighted);
+        console.log('Spotlighted stories:', spotlightedStories);
+        
+        // Sort by ID in descending order
+        spotlightedStories.sort((a, b) => b.id - a.id);
+        console.log('Sorted spotlighted stories:', spotlightedStories);
+        
+        // Take the first one (highest ID)
+        const featuredStory = spotlightedStories[0];
+        console.log('Selected featured story:', featuredStory);
+        
         setStory(featuredStory || null);
         setError(null);
       } catch (err) {
+        console.error('Error in fetchFeaturedStory:', err);
         setError('Er is een fout opgetreden bij het ophalen van het uitgelichte verhaal.');
-        console.error('Error fetching featured story:', err);
       } finally {
         setLoading(false);
       }
     };
 
+    // Fetch immediately
     fetchFeaturedStory();
+
+    // Set up polling to refresh every 5 seconds
+    const intervalId = setInterval(fetchFeaturedStory, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleReadMore = () => {

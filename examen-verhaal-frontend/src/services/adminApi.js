@@ -149,16 +149,22 @@ const handleApiResponse = async (response) => {
 };
 
 // Helper function to transform verhaal data
-const transformVerhaalData = (data) => ({
-  id: data.id,
-  title: data.titel,
-  text: data.tekst,
-  description: data.beschrijving,
-  published: !data.is_onzichtbaar,
-  category: data.categorie_id,
-  coverImage: data.cover_image,
-  date: data.datum
-});
+const transformVerhaalData = (data) => {
+  console.log('Transforming verhaal data:', data);
+  return {
+    id: data.id,
+    title: data.titel,
+    text: data.tekst,
+    description: data.beschrijving,
+    published: data.is_onzichtbaar === false, // Explicitly check for false
+    category: data.categorie_id,
+    cover_image: data.cover_image,
+    date: data.datum,
+    is_uitgelicht: data.is_uitgelicht,
+    is_spotlighted: data.is_spotlighted,
+    is_onzichtbaar: data.is_onzichtbaar // Keep the original field
+  };
+};
 
 // Admin Verhalen API calls
 export const adminVerhalenAPI = {
@@ -175,8 +181,17 @@ export const adminVerhalenAPI = {
 
   getById: async (id) => {
     try {
-      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}/`), getFetchOptions());
-      const data = await handleApiResponse(response);
+      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), getFetchOptions());
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon verhaal niet ophalen');
+      }
+      const data = await response.json();
+      console.log('Raw verhaal data from API:', data);
       return transformVerhaalData(data);
     } catch (error) {
       console.error('Error fetching verhaal:', error);
@@ -268,14 +283,27 @@ export const adminVerhalenAPI = {
       formData.append('titel', data.titel);
       formData.append('tekst', data.tekst);
       formData.append('beschrijving', data.beschrijving);
-      formData.append('is_onzichtbaar', data.is_onzichtbaar ? 'true' : 'false');
+      formData.append('is_onzichtbaar', data.is_onzichtbaar);
       formData.append('categorie_id', data.categorie_id);
       formData.append('datum', data.datum);
+      formData.append('is_uitgelicht', data.is_uitgelicht);
+      formData.append('is_spotlighted', data.is_spotlighted);
 
       // Add cover image if provided
       if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
       }
+
+      console.log('Sending update data:', {
+        titel: data.titel,
+        tekst: data.tekst,
+        beschrijving: data.beschrijving,
+        is_onzichtbaar: data.is_onzichtbaar,
+        categorie_id: data.categorie_id,
+        datum: data.datum,
+        is_uitgelicht: data.is_uitgelicht,
+        is_spotlighted: data.is_spotlighted
+      });
 
       const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
         method: 'PUT',
@@ -297,9 +325,8 @@ export const adminVerhalenAPI = {
         throw new Error(errorData.detail || 'Kon verhaal niet bijwerken');
       }
 
-      const updatedData = await response.json();
-      console.log('Verhaal succesvol bijgewerkt');
-      return transformVerhaalData(updatedData);
+      const responseData = await response.json();
+      return transformVerhaalData(responseData);
     } catch (error) {
       console.error('Error updating verhaal:', error);
       throw error;

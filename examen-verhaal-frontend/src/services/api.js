@@ -21,7 +21,8 @@ const getFetchOptions = (method = 'GET', body = null) => {
 // Public Verhalen API calls
 export const verhalenAPI = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/verhalen/`, getFetchOptions());
+    const timestamp = new Date().getTime();
+    const response = await fetch(`${API_BASE_URL}/api/verhalen/?_t=${timestamp}`, getFetchOptions());
     if (!response.ok) {
       throw new Error('Failed to fetch verhalen');
     }

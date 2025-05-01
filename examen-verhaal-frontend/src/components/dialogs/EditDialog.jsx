@@ -3,16 +3,14 @@ import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    text: '',
-    description: '',
-    published: true,
-    category: '',
+    titel: '',
+    tekst: '',
+    beschrijving: '',
+    is_onzichtbaar: false,
+    categorie_id: '',
+    date: '',
     coverImage: null,
-    date: new Date().toISOString().split('T')[0],
-    naam: '',
     is_uitgelicht: false,
-    cover_image: null,
     is_spotlighted: false
   });
   const [error, setError] = useState('');
@@ -37,28 +35,20 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
   useEffect(() => {
     if (data) {
-      if (isCategory) {
-        setFormData(prev => ({
-          ...prev,
-          naam: data.naam || '',
-          is_uitgelicht: data.is_uitgelicht || false,
-          cover_image: data.cover_image || null
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          title: data.title || '',
-          text: data.text || '',
-          description: data.description || '',
-          published: data.published !== false,
-          category: data.category || '',
-          coverImage: data.coverImage || null,
-          date: data.date || new Date().toISOString().split('T')[0],
-          is_spotlighted: data.is_spotlighted || false
-        }));
-      }
+      console.log('Initializing form data with:', data);
+      setFormData({
+        titel: data.titel || '',
+        tekst: data.tekst || '',
+        beschrijving: data.beschrijving || '',
+        is_onzichtbaar: data.is_onzichtbaar || false,
+        categorie_id: data.categorie_id?.toString() || '', // Convert to string for select input
+        date: data.datum || '',
+        coverImage: data.cover_image || null,
+        is_uitgelicht: data.is_uitgelicht || false,
+        is_spotlighted: data.is_spotlighted || false
+      });
     }
-  }, [data, isCategory]);
+  }, [data]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,16 +67,18 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         const formattedDate = date.toISOString().split('T')[0];
         
         const transformedData = {
-          titel: formData.title,
-          tekst: formData.text,
-          beschrijving: formData.description,
-          is_onzichtbaar: !formData.published,
-          categorie_id: formData.category,
+          titel: formData.titel,
+          tekst: formData.tekst,
+          beschrijving: formData.beschrijving,
+          is_onzichtbaar: formData.is_onzichtbaar,
+          categorie_id: formData.categorie_id,
           datum: formattedDate,
           cover_image: formData.coverImage,
+          is_uitgelicht: formData.is_uitgelicht,
           is_spotlighted: formData.is_spotlighted
         };
         console.log('Sending data:', transformedData);
+        console.log('Using ID:', data.id);
         await adminVerhalenAPI.update(data.id, transformedData);
       }
       onSuccess();
@@ -175,8 +167,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
+                  name="titel"
+                  value={formData.titel}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -188,8 +180,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   Tekst
                 </label>
                 <textarea
-                  name="text"
-                  value={formData.text}
+                  name="tekst"
+                  value={formData.tekst}
                   onChange={handleChange}
                   required
                   rows={4}
@@ -202,8 +194,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   Beschrijving
                 </label>
                 <textarea
-                  name="description"
-                  value={formData.description}
+                  name="beschrijving"
+                  value={formData.beschrijving}
                   onChange={handleChange}
                   required
                   rows={2}
@@ -216,8 +208,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   Categorie
                 </label>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="categorie_id"
+                  value={formData.categorie_id}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -262,21 +254,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    name="published"
-                    checked={formData.published}
-                    onChange={handleChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Gepubliceerd
-                  </span>
-                </label>
-              </div>
-
-              <div className="mb-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
                     name="is_spotlighted"
                     checked={formData.is_spotlighted}
                     onChange={handleChange}
@@ -285,6 +262,34 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   <span className="text-sm font-medium text-gray-700">
                     Spotlight verhaal (wordt getoond op de homepage)
                   </span>
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_uitgelicht"
+                    checked={formData.is_uitgelicht}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Uitgelicht verhaal
+                  </span>
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="is_onzichtbaar"
+                    checked={formData.is_onzichtbaar}
+                    onChange={handleChange}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Verborgen</span>
                 </label>
               </div>
             </>

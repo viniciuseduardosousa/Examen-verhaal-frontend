@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const verhalenPerPage = 7;
 
@@ -95,9 +96,33 @@ const Dashboard = () => {
 
   const handlePublishToggle = async (verhaal) => {
     try {
-      const updatedVerhaal = { ...verhaal, published: !verhaal.published };
-      await adminVerhalenAPI.update(verhaal.id, updatedVerhaal);
-      setVerhalen(verhalen.map((v) => (v.id === verhaal.id ? updatedVerhaal : v)));
+      console.log('Original verhaal data:', verhaal);
+      
+      // Get the first item if it's an array
+      const verhaalData = Array.isArray(verhaal) ? verhaal[0] : verhaal;
+      
+      // Transform the data using the API field names
+      const transformedData = {
+        titel: verhaalData.titel || verhaalData.title,
+        tekst: verhaalData.tekst || verhaalData.text,
+        beschrijving: verhaalData.beschrijving || verhaalData.description,
+        is_onzichtbaar: verhaalData.is_onzichtbaar === false, // Toggle based on current state
+        categorie_id: verhaalData.categorie?.id,
+        datum: verhaalData.datum || verhaalData.date,
+        cover_image: verhaalData.cover_image,
+        is_uitgelicht: verhaalData.is_uitgelicht,
+        is_spotlighted: verhaalData.is_spotlighted || false
+      };
+
+      console.log('Transformed data for toggle:', transformedData);
+      
+      // Update the story
+      await adminVerhalenAPI.update(verhaalData.id, transformedData);
+      
+      // Refresh the data
+      await fetchVerhalen();
+
+      setSuccess("Verhaal succesvol bijgewerkt");
     } catch (err) {
       setError("Er is een fout opgetreden bij het bijwerken van het verhaal.");
       console.error("Error updating verhaal:", err);
@@ -109,7 +134,20 @@ const Dashboard = () => {
       setItemToEdit(item);
       setEditDialogOpen(true);
     } else {
-      setItemToEdit(item);
+      const transformedItem = {
+        id: item.id,
+        titel: item.title,
+        tekst: item.text,
+        beschrijving: item.description,
+        is_onzichtbaar: !item.published,
+        categorie_id: item.categorie?.id,
+        datum: item.date,
+        is_uitgelicht: item.is_uitgelicht,
+        is_spotlighted: item.is_spotlighted,
+        cover_image: item.cover_image
+      };
+      console.log('Transformed item for edit:', transformedItem);
+      setItemToEdit(transformedItem);
       setEditDialogOpen(true);
     }
   };
