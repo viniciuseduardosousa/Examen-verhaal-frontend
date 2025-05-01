@@ -2,14 +2,22 @@ import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 
 const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    text: '',
-    description: '',
-    published: true,
-    category: '',
-    coverImage: null,
-    date: new Date().toISOString().split('T')[0]
+  const [formData, setFormData] = useState(() => {
+    if (type === 'story') {
+      return {
+        title: '',
+        text: '',
+        description: '',
+        published: true,
+        category: '',
+        coverImage: null,
+        date: new Date().toISOString().split('T')[0]
+      };
+    } else {
+      return {
+        naam: ''  // Initial state for category
+      };
+    }
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -26,10 +34,10 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       }
     };
 
-    if (isOpen) {
+    if (isOpen && type === 'story') {
       fetchCategories();
     }
-  }, [isOpen]);
+  }, [isOpen, type]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,19 +45,43 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     setIsLoading(true);
 
     try {
-      const transformedData = {
-        titel: formData.title,
-        tekst: formData.text,
-        beschrijving: formData.description,
-        is_onzichtbaar: !formData.published,
-        categorie_id: parseInt(formData.category),
-        datum: formData.date,
-        cover_image: formData.coverImage
-      };
+      let transformedData;
+      
+      if (type === 'story') {
+        console.log('Form data before transform:', formData);
+        console.log('Category value:', formData.category);
+        console.log('Category type:', typeof formData.category);
+        
+        // Validate category ID
+        if (!formData.category) {
+          throw new Error('Selecteer een categorie');
+        }
+
+        const categoryId = parseInt(formData.category, 10);
+        if (isNaN(categoryId)) {
+          throw new Error('Ongeldige categorie ID');
+        }
+
+        transformedData = {
+          titel: formData.title,
+          tekst: formData.text,
+          beschrijving: formData.description,
+          is_onzichtbaar: !formData.published,
+          categorie_id: categoryId,
+          datum: formData.date,
+          cover_image: formData.coverImage
+        };
+        
+        console.log('Transformed data:', transformedData);
+        console.log('categorie_id after transform:', transformedData.categorie_id);
+        console.log('categorie_id type:', typeof transformedData.categorie_id);
+      } else {
+        transformedData = {
+          naam: formData.naam
+        };
+      }
 
       console.log('Sending data to API:', transformedData);
-      console.log('Category value:', formData.category);
-
       await onSave(transformedData);
       onClose();
     } catch (err) {
@@ -68,6 +100,24 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     }));
   };
 
+  // Reset form when dialog opens/closes or type changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(type === 'story' ? {
+        title: '',
+        text: '',
+        description: '',
+        published: true,
+        category: '',
+        coverImage: null,
+        date: new Date().toISOString().split('T')[0]
+      } : {
+        naam: ''
+      });
+      setError('');
+    }
+  }, [isOpen, type]);
+
   if (!isOpen) return null;
 
   return (
@@ -78,14 +128,14 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {type === 'story' && (
+          {type === 'story' ? (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Titel</label>
                 <input
                   type="text"
                   name="title"
-                  value={formData.title}
+                  value={formData.title || ''}
                   onChange={handleChange}
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -96,7 +146,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <label className="block text-sm font-medium text-gray-700">Tekst</label>
                 <textarea
                   name="text"
-                  value={formData.text}
+                  value={formData.text || ''}
                   onChange={handleChange}
                   required
                   rows={4}
@@ -108,7 +158,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <label className="block text-sm font-medium text-gray-700">Beschrijving</label>
                 <textarea
                   name="description"
-                  value={formData.description}
+                  value={formData.description || ''}
                   onChange={handleChange}
                   required
                   rows={2}
@@ -145,7 +195,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <label className="block text-sm font-medium text-gray-700">Categorie</label>
                 <select
                   name="category"
-                  value={formData.category}
+                  value={formData.category || ''}
                   onChange={handleChange}
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -162,7 +212,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <input
                   type="date"
                   name="date"
-                  value={formData.date}
+                  value={formData.date || ''}
                   onChange={handleChange}
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -180,15 +230,13 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <label className="ml-2 block text-sm text-gray-900">Gepubliceerd</label>
               </div>
             </>
-          )}
-
-          {type === 'category' && (
+          ) : (
             <div>
               <label className="block text-sm font-medium text-gray-700">Naam</label>
               <input
                 type="text"
                 name="naam"
-                value={formData.naam}
+                value={formData.naam || ''}
                 onChange={handleChange}
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"

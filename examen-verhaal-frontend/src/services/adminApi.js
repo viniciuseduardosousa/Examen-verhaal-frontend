@@ -88,7 +88,7 @@ const processVerhaalData = (verhaalData) => {
   formData.append('tekst', verhaalData.tekst);
   formData.append('beschrijving', verhaalData.beschrijving);
   formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
-  formData.append('categorie_id', categoryId.toString());
+  formData.append('categorie', categoryId.toString());
   formData.append('datum', verhaalData.datum);
 
   // Add cover image if provided
@@ -188,14 +188,25 @@ export const adminVerhalenAPI = {
     try {
       console.log('Creating verhaal with data:', verhaalData);
       
+      // Validate required fields
+      if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie_id) {
+        throw new Error('Alle velden zijn verplicht');
+      }
+
+      // Validate category ID
+      const categoryId = parseInt(verhaalData.categorie_id, 10);
+      if (isNaN(categoryId)) {
+        throw new Error('Ongeldige categorie ID');
+      }
+      
       const formData = new FormData();
       
       // Add all fields to FormData
       formData.append('titel', verhaalData.titel);
       formData.append('tekst', verhaalData.tekst);
       formData.append('beschrijving', verhaalData.beschrijving);
-      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar);
-      formData.append('categorie_id', parseInt(verhaalData.categorie_id));
+      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
+      formData.append('categorie_id', categoryId.toString());
       formData.append('datum', verhaalData.datum);
 
       // Add cover image if provided
@@ -206,7 +217,7 @@ export const adminVerhalenAPI = {
       // Log FormData contents
       console.log('FormData contents:');
       for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+        console.log(`${key}:`, value, typeof value);
       }
 
       const response = await fetch(getApiUrl('/api/verhalen/admin/'), {
@@ -226,17 +237,25 @@ export const adminVerhalenAPI = {
         try {
           errorText = await response.text();
           console.error('Error response text:', errorText);
+          // Try to parse as JSON if possible
+          try {
+            const errorData = JSON.parse(errorText);
+            throw new Error(errorData.detail || errorData.message || 'Er is een fout opgetreden bij het aanmaken van het verhaal');
+          } catch (e) {
+            // If not JSON, use the raw text
+            throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
+          }
         } catch (e) {
-          console.error('Error reading response text:', e);
+          console.error('Error parsing response:', e);
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
       console.log('Response data:', data);
-      return transformVerhaalData(data);
+      return data;
     } catch (error) {
-      console.error('Error in create method:', error);
+      console.error('Error creating verhaal:', error);
       throw error;
     }
   },
