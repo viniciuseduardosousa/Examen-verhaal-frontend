@@ -261,16 +261,47 @@ export const adminVerhalenAPI = {
   },
 
   update: async (id, data) => {
-    const processedData = processVerhaalData(data);
-    const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: processedData,
-      credentials: 'include'
-    });
-    return handleApiResponse(response);
+    try {
+      const formData = new FormData();
+      
+      // Add all fields to FormData
+      formData.append('titel', data.title);
+      formData.append('tekst', data.text);
+      formData.append('beschrijving', data.description);
+      formData.append('is_onzichtbaar', data.published ? 'false' : 'true');
+      formData.append('categorie_id', data.category);
+      formData.append('datum', data.date);
+
+      // Add cover image if provided
+      if (data.coverImage instanceof File) {
+        formData.append('cover_image', data.coverImage);
+      }
+
+      const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon verhaal niet bijwerken');
+      }
+
+      const updatedData = await response.json();
+      console.log(`Verhaal succesvol ${data.published ? 'zichtbaar' : 'onzichtbaar'} gemaakt`);
+      return transformVerhaalData(updatedData);
+    } catch (error) {
+      console.error('Error updating verhaal:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
