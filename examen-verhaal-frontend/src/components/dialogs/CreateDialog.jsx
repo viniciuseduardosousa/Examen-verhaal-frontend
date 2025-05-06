@@ -42,7 +42,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     }
   }, [isOpen, type]);
 
-  // Lock/unlock scroll when dialog opens/closes
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -50,7 +49,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup function to ensure scroll is restored when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -79,7 +77,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           throw new Error('Ongeldige categorie ID');
         }
 
-        // Format date to YYYY-MM-DD
         const date = new Date(formData.date);
         const formattedDate = date.toISOString().split('T')[0];
 
@@ -138,7 +135,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     }
   };
 
-  // Reset form when dialog opens/closes or type changes
   useEffect(() => {
     if (isOpen) {
       setFormData(type === 'story' ? {

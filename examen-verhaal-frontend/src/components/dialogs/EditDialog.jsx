@@ -41,7 +41,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         tekst: data.tekst || '',
         beschrijving: data.beschrijving || '',
         is_onzichtbaar: data.is_onzichtbaar || false,
-        categorie: data.categorie_id?.toString() || '', // Convert to string for select input
+        categorie: data.categorie_id?.toString() || '', 
         date: data.datum || '',
         coverImage: data.cover_image || null,
         is_uitgelicht: data.is_uitgelicht || false,
@@ -50,7 +50,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     }
   }, [data]);
 
-  // Lock/unlock scroll when dialog opens/closes
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -58,7 +57,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup function to ensure scroll is restored when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
