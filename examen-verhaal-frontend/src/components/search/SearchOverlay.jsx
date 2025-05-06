@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { verhalenAPI } from '../../services/api';
-import { adminCategoriesAPI } from '../../services/adminApi';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 import StoryCard from '../cards/StoryCard';
 
 const SearchOverlay = ({ show, onClose }) => {
@@ -21,7 +20,7 @@ const SearchOverlay = ({ show, onClose }) => {
       setLoading(true);
       Promise.all([
         verhalenAPI.getAll(),
-        adminCategoriesAPI.getAll()
+        categoriesAPI.getAll()
       ])
         .then(([storiesData, categoriesData]) => {
           setAllStories(storiesData);
