@@ -161,7 +161,8 @@ const transformVerhaalData = (data) => {
     date: data.datum,
     is_uitgelicht: data.is_uitgelicht,
     is_spotlighted: data.is_spotlighted,
-    is_onzichtbaar: data.is_onzichtbaar // Keep the original field
+    is_onzichtbaar: data.is_onzichtbaar, // Keep the original field
+    is_downloadable: data.is_downloadable // Add the new field
   };
 };
 
@@ -287,6 +288,7 @@ export const adminVerhalenAPI = {
       formData.append('datum', data.datum);
       formData.append('is_uitgelicht', data.is_uitgelicht ? 'true' : 'false');
       formData.append('is_spotlighted', data.is_spotlighted ? 'true' : 'false');
+      formData.append('is_downloadable', data.is_downloadable ? 'true' : 'false');
 
       // Add cover image if provided
       if (data.cover_image instanceof File) {

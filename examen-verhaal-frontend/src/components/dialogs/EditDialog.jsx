@@ -11,7 +11,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     date: '',
     coverImage: null,
     is_uitgelicht: false,
-    is_spotlighted: false
+    is_spotlighted: false,
+    is_downloadable: false
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -45,7 +46,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         date: data.datum || '',
         coverImage: data.cover_image || null,
         is_uitgelicht: data.is_uitgelicht || false,
-        is_spotlighted: data.is_spotlighted || false
+        is_spotlighted: data.is_spotlighted || false,
+        is_downloadable: data.is_downloadable || false
       });
     }
   }, [data]);
@@ -87,7 +89,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           datum: formattedDate,
           cover_image: formData.coverImage,
           is_uitgelicht: formData.is_uitgelicht,
-          is_spotlighted: formData.is_spotlighted
+          is_spotlighted: formData.is_spotlighted,
+          is_downloadable: formData.is_downloadable
         };
         console.log('Sending data:', transformedData);
         console.log('Using ID:', data.id);
@@ -288,6 +291,21 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   />
                   <span className="text-sm font-medium text-gray-700">
                     Uitgelicht verhaal
+                  </span>
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_downloadable"
+                    checked={formData.is_downloadable}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Downloadbaar als PDF
                   </span>
                 </label>
               </div>
