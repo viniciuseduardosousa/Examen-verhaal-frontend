@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { verhalenAPI } from '../services/api';
+import { adminCategoriesAPI } from '../services/adminApi';
 import HighlightedStories from '../components/sections/HighlightedStories';
 import Divider from '../components/decorative/Divider'; 
 
@@ -10,27 +11,43 @@ const VerhaalDetail = () => {
   const [verhaal, setVerhaal] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const handleCategoryClick = (category) => {
-    navigate(`/verhalen?category=${encodeURIComponent(category)}`);
-  };
+  const [categoryMap, setCategoryMap] = useState({});
 
   useEffect(() => {
-    const fetchVerhaal = async () => {
+    const fetchData = async () => {
       try {
-        const data = await verhalenAPI.getById(id);
-        setVerhaal(data);
+        // Fetch both story and categories
+        const [storyData, categoriesData] = await Promise.all([
+          verhalenAPI.getById(id),
+          adminCategoriesAPI.getAll()
+        ]);
+
+        // Create category map
+        const newCategoryMap = {};
+        categoriesData.forEach(cat => {
+          newCategoryMap[cat.id] = cat.naam;
+        });
+
+        setCategoryMap(newCategoryMap);
+        setVerhaal(storyData);
         setError(null);
       } catch (err) {
         setError('Verhaal niet gevonden');
-        console.error('Error fetching verhaal:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVerhaal();
+    fetchData();
   }, [id]);
+
+  const handleCategoryClick = (categoryId) => {
+    const categoryName = categoryMap[categoryId];
+    if (categoryName) {
+      navigate(`/verhalen?category=${encodeURIComponent(categoryName)}`);
+    }
+  };
 
   if (loading) {
     return <div className="container mx-auto px-4 py-8">Laden...</div>;
@@ -46,6 +63,29 @@ const VerhaalDetail = () => {
 
   return (
     <div className="container mx-auto px-4 pt-32 pb-8">
+      {/* Back button */}
+      <div className="mb-8">
+        <button
+          onClick={() => navigate('/verhalen')}
+          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Terug naar verhalen
+        </button>
+      </div>
+
       {/* Header Section */}
       <section className="py-8 animate-fadeIn">  
         <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
@@ -61,10 +101,10 @@ const VerhaalDetail = () => {
             />
             <div className="flex gap-2 mt-4">
               <button 
-                onClick={() => handleCategoryClick(verhaal.categorie.naam)}
+                onClick={() => handleCategoryClick(verhaal.categorie)}
                 className="px-3 py-1 bg-gray-200 rounded-full text-sm hover:bg-gray-300 transition-colors"
               >
-                {verhaal.categorie.naam}
+                {categoryMap[verhaal.categorie] || 'Onbekende categorie'}
               </button>
               <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
                 {verhaal.datum || 'Geen datum beschikbaar'}
