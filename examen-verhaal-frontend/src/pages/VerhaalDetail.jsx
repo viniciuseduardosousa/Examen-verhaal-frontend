@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { verhalenAPI } from '../services/api';
-import { adminCategoriesAPI } from '../services/adminApi';
+import { verhalenAPI, categoriesAPI } from '../services/api';
 import HighlightedStories from '../components/sections/HighlightedStories';
 import Divider from '../components/decorative/Divider'; 
 
@@ -19,7 +18,7 @@ const VerhaalDetail = () => {
         // Fetch both story and categories
         const [storyData, categoriesData] = await Promise.all([
           verhalenAPI.getById(id),
-          adminCategoriesAPI.getAll()
+          categoriesAPI.getAll()
         ]);
 
         // Create category map
