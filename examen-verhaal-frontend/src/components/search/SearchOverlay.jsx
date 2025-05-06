@@ -1,30 +1,42 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { verhalenAPI } from '../../services/api';
+import { adminCategoriesAPI } from '../../services/adminApi';
 import StoryCard from '../cards/StoryCard';
 
 const SearchOverlay = ({ show, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [allStories, setAllStories] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
   const overlayRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch stories when overlay opens
+  // Fetch stories and categories when overlay opens
   useEffect(() => {
     if (show) {
       setLoading(true);
-      verhalenAPI.getAll()
-        .then(data => {
-          setAllStories(data);
+      Promise.all([
+        verhalenAPI.getAll(),
+        adminCategoriesAPI.getAll()
+      ])
+        .then(([storiesData, categoriesData]) => {
+          setAllStories(storiesData);
+          // Build categoryMap (id → name)
+          const categoryIdToName = {};
+          categoriesData.forEach(category => {
+            categoryIdToName[category.id] = category.naam;
+          });
+          setCategoryMap(categoryIdToName);
           setError(null);
         })
         .catch(err => {
           setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
           setAllStories([]);
+          setCategoryMap({});
         })
         .finally(() => setLoading(false));
       document.body.style.overflow = 'hidden';
@@ -76,6 +88,13 @@ const SearchOverlay = ({ show, onClose }) => {
   const handleStoryClick = (id) => {
     onClose();
     navigate(`/verhaal-detail/${id}`);
+  };
+
+  // Handle click on category tag
+  const handleCategoryClick = (e, category) => {
+    e.stopPropagation();
+    onClose();
+    navigate(`/verhalen?category=${encodeURIComponent(category)}`);
   };
 
   if (!show) return null;
@@ -131,7 +150,8 @@ const SearchOverlay = ({ show, onClose }) => {
                       title={story.titel}
                       description={story.beschrijving}
                       imageUrl={story.cover_image}
-                      category={story.categorie?.naam}
+                      category={categoryMap[story.categorie]}
+                      onCategoryClick={handleCategoryClick}
                     />
                   </div>
                 ))

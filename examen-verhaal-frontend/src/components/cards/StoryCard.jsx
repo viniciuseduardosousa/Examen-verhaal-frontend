@@ -2,7 +2,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 import trainImage from '../../assets/images/train.webp';
 
-const StoryCard = ({ id, title, description, imageUrl, category }) => {
+const StoryCard = ({ id, title, description, imageUrl, category, onCategoryClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -41,7 +41,7 @@ const StoryCard = ({ id, title, description, imageUrl, category }) => {
             <h3 className="font-mono text-base sm:text-lg">{title}</h3>
             {category && (
               <span 
-                onClick={handleCategoryClick}
+                onClick={onCategoryClick ? (e) => onCategoryClick(e, category) : handleCategoryClick}
                 className={`px-2 sm:px-3 py-1 bg-gray-200 rounded-full text-xs sm:text-sm whitespace-nowrap ml-2
                   ${!isCategorySelected ? 'cursor-pointer hover:bg-gray-300' : ''}`}
               >
