@@ -55,15 +55,23 @@ export const authAPI = {
 
   logout: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/accounts/logout/`, getFetchOptions('POST'));
-      if (!response.ok) {
-        throw new Error('Logout mislukt');
-      }
+      // Verwijder eerst de token uit localStorage
       localStorage.removeItem('token');
-      return response.json();
+      
+      // Probeer de logout API aan te roepen
+      const response = await fetch(`${API_BASE_URL}/accounts/logout/`, getFetchOptions('POST'));
+      
+      // Navigeer naar de login pagina, ongeacht of de API call succesvol was
+      window.location.href = '/#/admin/login';
+      
+      // Als de API call succesvol was, return de response
+      if (response.ok) {
+        return response.json();
+      }
     } catch (error) {
       console.error('Logout error:', error);
-      throw error;
+      // Zorg ervoor dat we altijd naar de login pagina navigeren, zelfs als er een error is
+      window.location.href = '/#/admin/login';
     }
   },
 };
