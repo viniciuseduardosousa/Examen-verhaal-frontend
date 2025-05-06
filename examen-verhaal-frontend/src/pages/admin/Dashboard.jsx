@@ -23,6 +23,11 @@ const Dashboard = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  // Reset pagination when switching tabs
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showCategories]);
+
   const verhalenPerPage = 7;
 
   useEffect(() => {
@@ -181,9 +186,7 @@ const Dashboard = () => {
     const matchesSearch = verhaal.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      !showCategories || verhaal.category === categories[showCategories ? 1 : 0];
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   const filteredCategories = categories.filter((category) => {
