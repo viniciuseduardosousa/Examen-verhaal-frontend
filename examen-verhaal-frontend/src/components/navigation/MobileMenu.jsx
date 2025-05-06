@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { verhalenAPI } from '../../services/api';
-import { adminCategoriesAPI } from '../../services/adminApi';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
@@ -17,7 +16,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
         // Fetch both stories and categories
         const [storiesData, categoriesData] = await Promise.all([
           verhalenAPI.getAll(),
-          adminCategoriesAPI.getAll()
+          categoriesAPI.getAll()
         ]);
 
         // Create a map of category IDs to names

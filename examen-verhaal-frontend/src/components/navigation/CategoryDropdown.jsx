@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { verhalenAPI } from '../../services/api';
-import { adminCategoriesAPI } from '../../services/adminApi';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +15,7 @@ const CategoryDropdown = () => {
         // Fetch both stories and categories
         const [storiesData, categoriesData] = await Promise.all([
           verhalenAPI.getAll(),
-          adminCategoriesAPI.getAll()
+          categoriesAPI.getAll()
         ]);
 
         // Create a map of category IDs to names

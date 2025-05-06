@@ -63,11 +63,6 @@ export const categoriesAPI = {
   getAll: async () => {
     const response = await fetch(`${API_BASE_URL}/api/categorieen/`, getFetchOptions());
     if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.href = '/examenverhaalfrontend';
-        throw new Error('Unauthorized access');
-      }
       throw new Error('Failed to fetch categories');
     }
     return response.json();

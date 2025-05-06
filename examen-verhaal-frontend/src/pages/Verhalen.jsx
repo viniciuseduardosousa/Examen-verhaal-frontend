@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
-import { verhalenAPI } from '../services/api';
-import { adminCategoriesAPI } from '../services/adminApi';
+import { verhalenAPI, categoriesAPI } from '../services/api';
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
@@ -22,7 +21,7 @@ const Verhalen = () => {
         // Fetch both stories and categories
         const [storiesData, categoriesData] = await Promise.all([
           verhalenAPI.getAll(),
-          adminCategoriesAPI.getAll()
+          categoriesAPI.getAll()
         ]);
 
         // Create a map of category IDs to names
