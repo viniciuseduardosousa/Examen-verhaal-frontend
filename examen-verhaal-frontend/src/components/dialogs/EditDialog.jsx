@@ -71,7 +71,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           tekst: formData.tekst,
           beschrijving: formData.beschrijving,
           is_onzichtbaar: formData.is_onzichtbaar,
-          categorie_id: formData.categorie_id,
+          categorie: formData.categorie_id,
           datum: formattedDate,
           cover_image: formData.coverImage,
           is_uitgelicht: formData.is_uitgelicht,

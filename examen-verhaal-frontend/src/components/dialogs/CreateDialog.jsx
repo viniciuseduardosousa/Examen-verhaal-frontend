@@ -60,7 +60,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           throw new Error('Selecteer een categorie');
         }
 
-        const categoryId = parseInt(formData.category, 10);
+        const categoryId = Number(formData.category);
         if (isNaN(categoryId)) {
           throw new Error('Ongeldige categorie ID');
         }
@@ -74,10 +74,12 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           tekst: formData.text,
           beschrijving: formData.description,
           is_onzichtbaar: !formData.published,
-          categorie_id: categoryId,
+          categorie: categoryId,
           datum: formattedDate,
           cover_image: formData.coverImage,
-          is_spotlighted: formData.is_spotlighted
+          is_spotlighted: formData.is_spotlighted,
+          is_uitgelicht: formData.is_spotlighted,
+          is_downloadable: false
         };
         
         console.log('Transformed data:', transformedData);

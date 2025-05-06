@@ -73,12 +73,12 @@ const processVerhaalData = (verhaalData) => {
   const formData = new FormData();
   
   // Validate required fields
-  if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie_id) {
+  if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie) {
     throw new Error('Alle velden zijn verplicht');
   }
 
-  // Convert categorie_id to number and validate
-  const categoryId = parseInt(verhaalData.categorie_id, 10);
+  // Validate category ID
+  const categoryId = parseInt(verhaalData.categorie, 10);
   if (isNaN(categoryId)) {
     throw new Error('Ongeldige categorie ID');
   }
@@ -204,12 +204,12 @@ export const adminVerhalenAPI = {
       console.log('Creating verhaal with data:', verhaalData);
       
       // Validate required fields
-      if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie_id) {
+      if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie) {
         throw new Error('Alle velden zijn verplicht');
       }
 
       // Validate category ID
-      const categoryId = parseInt(verhaalData.categorie_id, 10);
+      const categoryId = parseInt(verhaalData.categorie, 10);
       if (isNaN(categoryId)) {
         throw new Error('Ongeldige categorie ID');
       }
@@ -221,7 +221,7 @@ export const adminVerhalenAPI = {
       formData.append('tekst', verhaalData.tekst);
       formData.append('beschrijving', verhaalData.beschrijving);
       formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
-      formData.append('categorie_id', categoryId.toString());
+      formData.append('categorie', categoryId.toString());
       formData.append('datum', verhaalData.datum);
 
       // Add cover image if provided
@@ -283,27 +283,16 @@ export const adminVerhalenAPI = {
       formData.append('titel', data.titel);
       formData.append('tekst', data.tekst);
       formData.append('beschrijving', data.beschrijving);
-      formData.append('is_onzichtbaar', data.is_onzichtbaar);
-      formData.append('categorie_id', data.categorie_id);
+      formData.append('is_onzichtbaar', data.is_onzichtbaar ? 'true' : 'false');
+      formData.append('categorie', data.categorie);
       formData.append('datum', data.datum);
-      formData.append('is_uitgelicht', data.is_uitgelicht);
-      formData.append('is_spotlighted', data.is_spotlighted);
+      formData.append('is_uitgelicht', data.is_uitgelicht ? 'true' : 'false');
+      formData.append('is_spotlighted', data.is_spotlighted ? 'true' : 'false');
 
       // Add cover image if provided
       if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
       }
-
-      console.log('Sending update data:', {
-        titel: data.titel,
-        tekst: data.tekst,
-        beschrijving: data.beschrijving,
-        is_onzichtbaar: data.is_onzichtbaar,
-        categorie_id: data.categorie_id,
-        datum: data.datum,
-        is_uitgelicht: data.is_uitgelicht,
-        is_spotlighted: data.is_spotlighted
-      });
 
       const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
         method: 'PUT',
@@ -321,7 +310,6 @@ export const adminVerhalenAPI = {
           throw new Error('Niet geautoriseerd');
         }
         const errorData = await response.json();
-        console.error('Update error response:', errorData);
         throw new Error(errorData.detail || 'Kon verhaal niet bijwerken');
       }
 

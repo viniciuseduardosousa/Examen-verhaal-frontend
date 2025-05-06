@@ -101,8 +101,6 @@ const Dashboard = () => {
 
   const handlePublishToggle = async (verhaal) => {
     try {
-      console.log('Original verhaal data:', verhaal);
-      
       // Get the first item if it's an array
       const verhaalData = Array.isArray(verhaal) ? verhaal[0] : verhaal;
       
@@ -111,15 +109,13 @@ const Dashboard = () => {
         titel: verhaalData.titel || verhaalData.title,
         tekst: verhaalData.tekst || verhaalData.text,
         beschrijving: verhaalData.beschrijving || verhaalData.description,
-        is_onzichtbaar: verhaalData.is_onzichtbaar === false, // Toggle based on current state
-        categorie_id: verhaalData.categorie?.id,
+        is_onzichtbaar: !verhaalData.published,
+        categorie: verhaalData.categorie,
         datum: verhaalData.datum || verhaalData.date,
         cover_image: verhaalData.cover_image,
         is_uitgelicht: verhaalData.is_uitgelicht,
         is_spotlighted: verhaalData.is_spotlighted || false
       };
-
-      console.log('Transformed data for toggle:', transformedData);
       
       // Update the story
       await adminVerhalenAPI.update(verhaalData.id, transformedData);
@@ -145,7 +141,7 @@ const Dashboard = () => {
         tekst: item.text,
         beschrijving: item.description,
         is_onzichtbaar: !item.published,
-        categorie_id: item.categorie?.id,
+        categorie: item.categorie?.id,
         datum: item.date,
         is_uitgelicht: item.is_uitgelicht,
         is_spotlighted: item.is_spotlighted,
