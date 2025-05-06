@@ -150,14 +150,13 @@ const handleApiResponse = async (response) => {
 
 // Helper function to transform verhaal data
 const transformVerhaalData = (data) => {
-  console.log('Transforming verhaal data:', data);
   return {
     id: data.id,
     title: data.titel,
     text: data.tekst,
     description: data.beschrijving,
     published: data.is_onzichtbaar === false, // Explicitly check for false
-    category: data.categorie_id,
+    categorie_id: data.categorie_id || data.categorie?.id || data.categorie, // Keep both category ID formats
     cover_image: data.cover_image,
     date: data.datum,
     is_uitgelicht: data.is_uitgelicht,

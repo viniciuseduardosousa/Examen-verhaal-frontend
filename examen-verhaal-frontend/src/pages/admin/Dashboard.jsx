@@ -104,16 +104,24 @@ const Dashboard = () => {
       // Get the first item if it's an array
       const verhaalData = Array.isArray(verhaal) ? verhaal[0] : verhaal;
       
+      // Get category ID and ensure it's a number
+      const categoryId = verhaalData.categorie_id || verhaalData.categorie?.id || verhaalData.categorie;
+      const numericCategoryId = parseInt(categoryId, 10);
+      
+      if (isNaN(numericCategoryId)) {
+        throw new Error('Ongeldige categorie ID');
+      }
+      
       // Transform the data using the API field names
       const transformedData = {
         titel: verhaalData.titel || verhaalData.title,
         tekst: verhaalData.tekst || verhaalData.text,
         beschrijving: verhaalData.beschrijving || verhaalData.description,
-        is_onzichtbaar: !verhaalData.published,
-        categorie: verhaalData.categorie,
+        is_onzichtbaar: verhaalData.is_onzichtbaar === undefined ? !verhaalData.published : !verhaalData.is_onzichtbaar,
+        categorie: numericCategoryId,
         datum: verhaalData.datum || verhaalData.date,
         cover_image: verhaalData.cover_image,
-        is_uitgelicht: verhaalData.is_uitgelicht,
+        is_uitgelicht: verhaalData.is_uitgelicht || false,
         is_spotlighted: verhaalData.is_spotlighted || false
       };
       

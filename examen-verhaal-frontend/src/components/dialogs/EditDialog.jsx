@@ -7,7 +7,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     tekst: '',
     beschrijving: '',
     is_onzichtbaar: false,
-    categorie_id: '',
+    categorie: '',
     date: '',
     coverImage: null,
     is_uitgelicht: false,
@@ -41,7 +41,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         tekst: data.tekst || '',
         beschrijving: data.beschrijving || '',
         is_onzichtbaar: data.is_onzichtbaar || false,
-        categorie_id: data.categorie_id?.toString() || '', // Convert to string for select input
+        categorie: data.categorie_id?.toString() || '', // Convert to string for select input
         date: data.datum || '',
         coverImage: data.cover_image || null,
         is_uitgelicht: data.is_uitgelicht || false,

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { verhalenAPI } from '../services/api';
+import { adminCategoriesAPI } from '../services/adminApi';
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
@@ -11,27 +12,43 @@ const Verhalen = () => {
   const [sortBy, setSortBy] = useState('');
   const [stories, setStories] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStories = async () => {
+    const fetchData = async () => {
       try {
-        const data = await verhalenAPI.getAll();
-        setStories(data);
-        // Extract unique categories from stories
-        const uniqueCategories = [...new Set(data.map(verhaal => verhaal.categorie.naam))];
-        setCategories(uniqueCategories);
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          adminCategoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+
+        setStories(storiesData);
+        setCategoryMap(categoryIdToName);
+        
+        // Get unique category names from the stories
+        const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
+        const uniqueCategoryNames = uniqueCategoryIds.map(id => categoryIdToName[id]).filter(Boolean);
+        
+        setCategories(uniqueCategoryNames);
         setError(null);
       } catch (err) {
-        setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
-        console.error('Error fetching stories:', err);
+        setError('Er is een fout opgetreden bij het ophalen van de gegevens.');
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStories();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -65,7 +82,8 @@ const Verhalen = () => {
   const filteredStories = stories
     .filter(story => {
       if (selectedCategories.length === 0) return true;
-      return selectedCategories.includes(story.categorie.naam);
+      const categoryName = categoryMap[story.categorie];
+      return selectedCategories.includes(categoryName);
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -101,9 +119,9 @@ const Verhalen = () => {
         <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
           {/* Category Buttons */}
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <button 
-                key={category}
+                key={`${category}-${index}`}
                 onClick={() => toggleCategory(category)}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-2 ${
                   selectedCategories.includes(category) ? 'bg-gray-300' : 'bg-gray-200 hover:bg-gray-300'
@@ -168,7 +186,7 @@ const Verhalen = () => {
                 title={story.titel}
                 description={story.beschrijving}
                 imageUrl={story.cover_image}
-                category={story.categorie.naam}
+                category={categoryMap[story.categorie]}
               />
             </div>
           ))
@@ -206,7 +224,7 @@ const Verhalen = () => {
                 title={story.titel}
                 description={story.beschrijving}
                 imageUrl={story.cover_image}
-                category={story.categorie.naam}
+                category={categoryMap[story.categorie]}
               />
             </div>
           ))}
