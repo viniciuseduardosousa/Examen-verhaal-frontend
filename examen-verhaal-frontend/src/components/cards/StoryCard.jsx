@@ -22,7 +22,7 @@ const StoryCard = ({ id, title, description, imageUrl, category }) => {
   };
 
   return (
-    <div className="flex flex-col border-2 border-gray-800 bg-white w-full">
+    <div className="flex flex-col border-2 border-gray-800 bg-white w-full h-full">
       {/* Image container met vaste hoogte */}
       <div className="p-3 sm:p-4">
         <div className="relative w-full h-[160px] sm:h-[200px]">
