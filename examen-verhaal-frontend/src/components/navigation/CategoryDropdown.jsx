@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { verhalenAPI } from '../../services/api';
+import { adminCategoriesAPI } from '../../services/adminApi';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,16 +13,29 @@ const CategoryDropdown = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const verhalen = await verhalenAPI.getAll();
-        // Extract unique categories from stories
-        const uniqueCategories = [...new Set(verhalen.map(verhaal => verhaal.categorie.naam))];
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          adminCategoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+
+        // Get unique category IDs from stories
+        const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
+        
         // Create category objects with count
-        const categoriesWithCount = uniqueCategories.map(category => ({
-          id: category,
-          name: category,
-          path: `/verhalen?category=${encodeURIComponent(category)}`,
-          count: verhalen.filter(verhaal => verhaal.categorie.naam === category).length
-        }));
+        const categoriesWithCount = uniqueCategoryIds.map(id => ({
+          id: id,
+          name: categoryIdToName[id],
+          path: `/verhalen?category=${encodeURIComponent(categoryIdToName[id])}`,
+          count: storiesData.filter(verhaal => verhaal.categorie === id).length
+        })).filter(category => category.name); // Filter out any categories without names
+
         setCategories(categoriesWithCount);
         setError(null);
       } catch (err) {
@@ -115,17 +129,25 @@ const CategoryDropdown = () => {
       
       {isOpen && (
         <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50 border-2 border-gray-800">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              to={category.path}
-              className="flex items-center justify-between px-4 py-2 text-gray-800 hover:bg-gray-50 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <span>{category.name}</span>
-              <span className="text-sm text-gray-500">({category.count})</span>
-            </Link>
-          ))}
+          {loading ? (
+            <div className="px-4 py-2 text-gray-600">Laden...</div>
+          ) : error ? (
+            <div className="px-4 py-2 text-red-500">{error}</div>
+          ) : categories.length === 0 ? (
+            <div className="px-4 py-2 text-gray-600">Geen categorieën beschikbaar</div>
+          ) : (
+            categories.map((category) => (
+              <Link
+                key={category.id}
+                to={category.path}
+                className="flex items-center justify-between px-4 py-2 text-gray-800 hover:bg-gray-50 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <span>{category.name}</span>
+                <span className="text-sm text-gray-500">({category.count})</span>
+              </Link>
+            ))
+          )}
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { verhalenAPI } from '../../services/api';
+import { adminCategoriesAPI } from '../../services/adminApi';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
@@ -8,20 +9,34 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const verhalen = await verhalenAPI.getAll();
-        // Extract unique categories from stories
-        const uniqueCategories = [...new Set(verhalen.map(verhaal => verhaal.categorie.naam))];
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          adminCategoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+
+        // Get unique category IDs from stories
+        const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
+        
         // Create category objects with count
-        const categoriesWithCount = uniqueCategories.map(category => ({
-          id: category,
-          name: category,
-          path: `/verhalen?category=${encodeURIComponent(category)}`,
-          count: verhalen.filter(verhaal => verhaal.categorie.naam === category).length
-        }));
+        const categoriesWithCount = uniqueCategoryIds.map(id => ({
+          id: id,
+          name: categoryIdToName[id],
+          path: `/verhalen?category=${encodeURIComponent(categoryIdToName[id])}`,
+          count: storiesData.filter(verhaal => verhaal.categorie === id).length
+        })).filter(category => category.name); // Filter out any categories without names
+
         setCategories(categoriesWithCount);
         setError(null);
       } catch (err) {
@@ -34,6 +49,19 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
 
   // Lock/unlock scroll when menu opens/closes
   useEffect(() => {
@@ -55,7 +83,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-[#FFFFF5] z-50 animate-fadeIn overflow-y-auto">
-      <div className="flex flex-col h-full p-8">
+      <div className="flex flex-col h-full p-8" ref={menuRef}>
         {/* Header with Logo and Close */}
         <div className="flex justify-between items-center mb-12">
           <span className="text-3xl font-medium tracking-tight">Ingscribblings</span>
@@ -161,6 +189,8 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <div className="text-xl pl-4">Laden...</div>
                 ) : error ? (
                   <div className="text-xl pl-4 text-red-500">{error}</div>
+                ) : categories.length === 0 ? (
+                  <div className="text-xl pl-4 text-gray-600">Geen categorieën beschikbaar</div>
                 ) : (
                   categories.map((category) => (
                     <Link 
