@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { verhalenAPI, categoriesAPI } from '../../services/api';
+import StoryCard from '../cards/StoryCard';
+import { useNavigate } from 'react-router-dom';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
@@ -8,7 +10,11 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [allStories, setAllStories] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -19,11 +25,14 @@ const MobileMenu = ({ isOpen, onClose }) => {
           categoriesAPI.getAll()
         ]);
 
+        setAllStories(storiesData);
+
         // Create a map of category IDs to names
         const categoryIdToName = {};
         categoriesData.forEach(category => {
           categoryIdToName[category.id] = category.naam;
         });
+        setCategoryMap(categoryIdToName);
 
         // Get unique category IDs from stories
         const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
@@ -34,7 +43,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
           name: categoryIdToName[id],
           path: `/verhalen?category=${encodeURIComponent(categoryIdToName[id])}`,
           count: storiesData.filter(verhaal => verhaal.categorie === id).length
-        })).filter(category => category.name); // Filter out any categories without names
+        })).filter(category => category.name);
 
         setCategories(categoriesWithCount);
         setError(null);
@@ -48,6 +57,34 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
     fetchCategories();
   }, []);
+
+  // Filter stories on search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const term = searchQuery.toLowerCase();
+    setSearchResults(
+      allStories.filter(story =>
+        (story.titel && story.titel.toLowerCase().includes(term)) ||
+        (story.beschrijving && story.beschrijving.toLowerCase().includes(term))
+      )
+    );
+  }, [searchQuery, allStories]);
+
+  // Handle click on StoryCard
+  const handleStoryClick = (id) => {
+    onClose();
+    navigate(`/verhaal-detail/${id}`);
+  };
+
+  // Handle click on category tag
+  const handleCategoryClick = (e, category) => {
+    e.stopPropagation();
+    onClose();
+    navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -208,6 +245,85 @@ const MobileMenu = ({ isOpen, onClose }) => {
             </div>
           </div>
         </nav>
+
+        {/* Search Results Overlay */}
+        {searchQuery ? (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-32 bg-black/40 backdrop-blur-sm animate-fadeIn">
+            <div className="w-full flex flex-col items-center px-4 h-[calc(100vh-8rem)] overflow-y-auto">
+              {/* Search Bar */}
+              <div className="relative w-full max-w-md mb-4">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Verhaal zoeken..."
+                  className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg shadow bg-white/90"
+                />
+                {searchQuery ? (
+                  <button
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    onClick={() => setSearchQuery('')}
+                    tabIndex={-1}
+                    aria-label="Wis zoekopdracht"
+                    type="button"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                ) : (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+
+              <div className="w-full max-w-4xl">
+                <h2 className="text-left text-xl font-semibold mb-4 text-white drop-shadow">Resultaten:</h2>
+                {loading ? (
+                  <div className="text-center py-8 text-white">Laden...</div>
+                ) : error ? (
+                  <div className="text-center py-8 text-red-400">{error}</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 pb-8">
+                    {searchResults.length > 0 ? (
+                      searchResults.map(story => (
+                        <div key={story.id} onClick={() => handleStoryClick(story.id)} className="cursor-pointer">
+                          <StoryCard
+                            id={story.id}
+                            title={story.titel}
+                            description={story.beschrijving}
+                            imageUrl={story.cover_image}
+                            category={categoryMap[story.categorie]}
+                            onCategoryClick={handleCategoryClick}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-white">
+                        <p className="text-lg">Geen resultaten gevonden</p>
+                        <p className="text-sm mt-2">Probeer een andere zoekterm</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Close button */}
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+              aria-label="Sluit zoeken"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
