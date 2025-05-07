@@ -158,193 +158,211 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${isOpen ? '' : 'hidden'}`}>
-      <div className="bg-white p-6 rounded-lg w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">
-          {type === 'story' ? 'Nieuw Verhaal' : 'Nieuwe Categorie'}
-        </h2>
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="p-4 sm:p-6">
+          <h2 className="text-xl font-bold mb-4">
+            {type === 'story' ? 'Nieuw Verhaal' : 'Nieuwe Categorie'}
+          </h2>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          {type === 'story' ? (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Titel
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tekst
-                </label>
-                <textarea
-                  name="text"
-                  value={formData.text}
-                  onChange={handleChange}
-                  required
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Beschrijving
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  rows="2"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categorie
-                </label>
-                <select
-                  name="category"
-                  value={formData.category || ''}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="">Selecteer een categorie</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.naam}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Datum
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date || ''}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cover Afbeelding
-                </label>
-                <input
-                  type="file"
-                  name="coverImage"
-                  onChange={handleChange}
-                  accept="image/*"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="is_spotlighted"
-                    checked={formData.is_spotlighted}
-                    onChange={handleChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Spotlight verhaal (wordt getoond op de homepage)
-                  </span>
-                </label>
-              </div>
-
-              <div className="flex items-center mb-4">
-                <input
-                  type="checkbox"
-                  name="published"
-                  checked={formData.published}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-900">Gepubliceerd</label>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Naam
-                </label>
-                <input
-                  type="text"
-                  name="naam"
-                  value={formData.naam}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cover Afbeelding
-                </label>
-                <input
-                  type="file"
-                  name="cover_image"
-                  onChange={handleChange}
-                  accept="image/*"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="flex items-center mb-4">
-                <input
-                  type="checkbox"
-                  name="is_uitgelicht"
-                  checked={formData.is_uitgelicht}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-900">Uitgelicht</label>
-              </div>
-            </>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
           )}
 
-          <div className="flex justify-end gap-4 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Annuleren
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-            >
-              {isLoading ? 'Bezig...' : 'Opslaan'}
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            {type === 'story' ? (
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Titel
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tekst
+                    </label>
+                    <textarea
+                      name="text"
+                      value={formData.text}
+                      onChange={handleChange}
+                      required
+                      rows="4"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Beschrijving
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      rows="2"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Categorie
+                    </label>
+                    <select
+                      name="category"
+                      value={formData.category || ''}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Selecteer een categorie</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.naam}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Datum
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={formData.date || ''}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cover Afbeelding
+                    </label>
+                    <input
+                      type="file"
+                      name="coverImage"
+                      onChange={handleChange}
+                      accept="image/*"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="is_spotlighted"
+                        checked={formData.is_spotlighted}
+                        onChange={handleChange}
+                        className="mr-2"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Spotlight verhaal (wordt getoond op de homepage)
+                      </span>
+                    </label>
+
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="published"
+                        checked={formData.published}
+                        onChange={handleChange}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 block text-sm text-gray-900">Gepubliceerd</span>
+                    </label>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Naam
+                    </label>
+                    <input
+                      type="text"
+                      name="naam"
+                      value={formData.naam}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cover Afbeelding
+                    </label>
+                    <input
+                      type="file"
+                      name="cover_image"
+                      onChange={handleChange}
+                      accept="image/*"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="is_uitgelicht"
+                        checked={formData.is_uitgelicht}
+                        onChange={handleChange}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 block text-sm text-gray-900">Uitgelicht</span>
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Annuleren
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              >
+                {isLoading ? 'Bezig...' : 'Opslaan'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
