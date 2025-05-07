@@ -1,10 +1,66 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import ArrowIcon from '../icons/ArrowIcon';
+import { useState, useRef, useEffect } from 'react';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          categoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+
+        // Get unique category IDs from stories
+        const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
+        
+        // Create category objects with count
+        const categoriesWithCount = uniqueCategoryIds.map(id => ({
+          id: id,
+          name: categoryIdToName[id],
+          path: `/verhalen?category=${encodeURIComponent(categoryIdToName[id])}`,
+          count: storiesData.filter(verhaal => verhaal.categorie === id).length
+        })).filter(category => category.name); // Filter out any categories without names
+
+        setCategories(categoriesWithCount);
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de categorieën.');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
 
   // Lock/unlock scroll when menu opens/closes
   useEffect(() => {
@@ -26,10 +82,10 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-[#FFFFF5] z-50 animate-fadeIn overflow-y-auto">
-      <div className="flex flex-col h-full p-8">
+      <div className="flex flex-col h-full p-8" ref={menuRef}>
         {/* Header with Logo and Close */}
         <div className="flex justify-between items-center mb-12">
-          <span className="text-3xl font-medium tracking-tight">ReadKeep</span>
+          <span className="text-3xl font-medium tracking-tight">Ingscribblings</span>
           <button
             onClick={onClose}
             className="text-gray-800 hover:rotate-90 transition-all duration-300"
@@ -96,14 +152,14 @@ const MobileMenu = ({ isOpen, onClose }) => {
             Over-mij
           </Link>
           
-          {/* Genre's Dropdown */}
+          {/* Categories Dropdown */}
           <div className="border-b-2 border-gray-800">
             <button 
               className="w-full flex items-center justify-between text-2xl py-4
                        hover:pl-4 transition-all duration-300 hover:text-gray-600"
               onClick={() => setIsGenreOpen(!isGenreOpen)}
             >
-              Genre's
+              Categorieën
               <svg
                 className={`w-6 h-6 transform transition-transform duration-300 ${
                   isGenreOpen ? 'rotate-180' : ''
@@ -121,24 +177,33 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </svg>
             </button>
             
-            {/* Genre Items */}
+            {/* Category Items */}
             <div 
               className={`overflow-hidden transition-all duration-300 ${
                 isGenreOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
               }`}
             >
               <div className="py-4 space-y-6">
-                {['Actie', '50 words', 'Actie', 'Actie'].map((genre, index) => (
-                  <Link 
-                    key={index}
-                    to={`/genre/${genre.toLowerCase().replace(' ', '-')}`}
-                    className="block text-xl pl-4 hover:pl-8 transition-all duration-300
-                             hover:text-gray-600"
-                    onClick={onClose}
-                  >
-                    {genre}
-                  </Link>
-                ))}
+                {loading ? (
+                  <div className="text-xl pl-4">Laden...</div>
+                ) : error ? (
+                  <div className="text-xl pl-4 text-red-500">{error}</div>
+                ) : categories.length === 0 ? (
+                  <div className="text-xl pl-4 text-gray-600">Geen categorieën beschikbaar</div>
+                ) : (
+                  categories.map((category) => (
+                    <Link 
+                      key={category.id}
+                      to={category.path}
+                      className="block text-xl pl-4 hover:pl-8 transition-all duration-300
+                               hover:text-gray-600 flex justify-between items-center"
+                      onClick={onClose}
+                    >
+                      <span>{category.name}</span>
+                      <span className="text-sm text-gray-500">({category.count})</span>
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           </div>

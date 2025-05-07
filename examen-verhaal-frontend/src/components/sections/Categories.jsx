@@ -1,24 +1,37 @@
+import { useState, useEffect } from 'react';
 import CategoryCard from '../cards/CategoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
+import { categoriesAPI } from '../../services/api';
 
 const Categories = () => {
-  const categories = [
-    {
-      title: "Korte Verhalen",
-      description: "Ontdek onze collectie korte verhalen, perfect voor een moment van ontspanning.",
-      imageUrl: "/category1.jpg"
-    },
-    {
-      title: "50 Words Stories",
-      description: "Krachtige verhalen verteld in precies vijftig woorden.",
-      imageUrl: "/category2.jpg"
-    },
-    {
-      title: "Sound Stories",
-      description: "Verhalen die tot leven komen door geluid en muziek.",
-      imageUrl: ""
-    }
-  ];
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesAPI.getFeatured();
+        setCategories(data);
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de categorieën.');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return <div className="py-16">Laden...</div>;
+  }
+
+  if (error) {
+    return <div className="py-16 text-red-500">{error}</div>;
+  }
 
   return (
     <section className="py-16">
@@ -28,8 +41,14 @@ const Categories = () => {
           <ArrowIcon className="w-6 h-6" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category, index) => (
-            <CategoryCard key={index} {...category} />
+          {categories.map((category) => (
+            <CategoryCard
+              key={category.id}
+              title={category.naam}
+              description={category.beschrijving || 'Ontdek onze collectie verhalen in deze categorie.'}
+              imageUrl={category.cover_image}
+              category={category.naam}
+            />
           ))}
         </div>
       </div>

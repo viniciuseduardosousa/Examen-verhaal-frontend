@@ -1,31 +1,47 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-// Mock data voor development
-const mockCategories = [
-  { id: 1, name: 'UKV Columns', path: '/categorie/ukv-columns', count: 12 },
-  { id: 2, name: 'Korte Verhalen', path: '/categorie/korte-verhalen', count: 8 },
-  { id: 3, name: '50 Words Stories', path: '/categorie/50-words-stories', count: 15 },
-  { id: 4, name: 'Sound Stories', path: '/categorie/sound-stories', count: 5 },
-];
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [categories, setCategories] = useState(mockCategories); // Direct mock data gebruiken
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Alleen error handling voor productie
   useEffect(() => {
     const fetchCategories = async () => {
-      if (process.env.NODE_ENV !== 'development') {
-        try {
-          const response = await fetch('https://api.example.com/categories');
-          if (!response.ok) throw new Error('Failed to fetch categories');
-          const data = await response.json();
-          setCategories(data);
-        } catch (err) {
-          console.error('Error fetching categories:', err);
-        }
+      try {
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          categoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+
+        // Get unique category IDs from stories
+        const uniqueCategoryIds = [...new Set(storiesData.map(verhaal => verhaal.categorie))].filter(Boolean);
+        
+        // Create category objects with count
+        const categoriesWithCount = uniqueCategoryIds.map(id => ({
+          id: id,
+          name: categoryIdToName[id],
+          path: `/verhalen?category=${encodeURIComponent(categoryIdToName[id])}`,
+          count: storiesData.filter(verhaal => verhaal.categorie === id).length
+        })).filter(category => category.name); // Filter out any categories without names
+
+        setCategories(categoriesWithCount);
+        setError(null);
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het ophalen van de categorieën.');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -42,6 +58,48 @@ const CategoryDropdown = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="text-xl text-gray-800 relative group flex items-center gap-2">
+        <span>Categorieën</span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-xl text-gray-800 relative group flex items-center gap-2">
+        <span>Categorieën</span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -70,17 +128,25 @@ const CategoryDropdown = () => {
       
       {isOpen && (
         <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50 border-2 border-gray-800">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              to={category.path}
-              className="flex items-center justify-between px-4 py-2 text-gray-800 hover:bg-gray-50 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <span>{category.name}</span>
-              <span className="text-sm text-gray-500">({category.count})</span>
-            </Link>
-          ))}
+          {loading ? (
+            <div className="px-4 py-2 text-gray-600">Laden...</div>
+          ) : error ? (
+            <div className="px-4 py-2 text-red-500">{error}</div>
+          ) : categories.length === 0 ? (
+            <div className="px-4 py-2 text-gray-600">Geen categorieën beschikbaar</div>
+          ) : (
+            categories.map((category) => (
+              <Link
+                key={category.id}
+                to={category.path}
+                className="flex items-center justify-between px-4 py-2 text-gray-800 hover:bg-gray-50 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <span>{category.name}</span>
+                <span className="text-sm text-gray-500">({category.count})</span>
+              </Link>
+            ))
+          )}
         </div>
       )}
     </div>

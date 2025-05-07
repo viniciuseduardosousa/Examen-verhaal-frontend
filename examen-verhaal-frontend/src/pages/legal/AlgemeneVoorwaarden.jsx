@@ -7,7 +7,7 @@ const AlgemeneVoorwaarden = () => {
       
       <div className="prose prose-lg">
         <p className="mb-6">
-          Door gebruik te maken van ReadKeep gaat u akkoord met deze algemene voorwaarden. 
+          Door gebruik te maken van Ingscribblings gaat u akkoord met deze algemene voorwaarden. 
           Lees deze voorwaarden zorgvuldig door voordat u onze diensten gebruikt.
         </p>
 
@@ -16,7 +16,7 @@ const AlgemeneVoorwaarden = () => {
           In deze voorwaarden wordt verstaan onder:
         </p>
         <ul className="list-disc pl-6 mb-6">
-          <li className="mb-2">"Platform": de website en diensten van ReadKeep</li>
+          <li className="mb-2">"Platform": de website en diensten van Ingscribblings</li>
           <li className="mb-2">"Gebruiker": iedereen die gebruik maakt van het Platform</li>
           <li className="mb-2">"Inhoud": alle teksten, afbeeldingen en andere materialen op het Platform</li>
         </ul>
@@ -34,14 +34,14 @@ const AlgemeneVoorwaarden = () => {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">3. Intellectueel Eigendom</h2>
         <p className="mb-6">
-          Alle inhoud op het Platform is intellectueel eigendom van ReadKeep of haar 
+          Alle inhoud op het Platform is intellectueel eigendom van Ingscribblings of haar 
           licentiegevers. Gebruikers mogen deze inhoud niet kopiëren, distribueren of 
           op andere wijze gebruiken zonder voorafgaande schriftelijke toestemming.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">4. Aansprakelijkheid</h2>
         <p className="mb-6">
-          ReadKeep is niet aansprakelijk voor:
+        Ingscribblings is niet aansprakelijk voor:
         </p>
         <ul className="list-disc pl-6 mb-6">
           <li className="mb-2">Directe of indirecte schade door gebruik van het Platform</li>
@@ -52,15 +52,15 @@ const AlgemeneVoorwaarden = () => {
 
         <h2 className="text-2xl font-bold mt-8 mb-4">5. Wijzigingen</h2>
         <p className="mb-6">
-          ReadKeep behoudt zich het recht voor om deze voorwaarden op elk moment te wijzigen. 
+        Ingscribblings behoudt zich het recht voor om deze voorwaarden op elk moment te wijzigen. 
           Wijzigingen worden van kracht zodra ze op het Platform worden gepubliceerd.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">6. Contact</h2>
         <p className="mb-6">
           Voor vragen over deze voorwaarden kunt u contact met ons opnemen via 
-          <a href="mailto:info@readkeep.nl" className="text-[#303655] hover:underline ml-1">
-            info@readkeep.nl
+          <a href="mailto:info@Ingscribblings.nl" className="text-[#303655] hover:underline ml-1">
+            info@Ingscribblings.nl
           </a>
         </p>
 

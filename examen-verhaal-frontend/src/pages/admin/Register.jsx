@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/adminApi';
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
+    email: '',
     password: '',
+    confirmPassword: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -14,23 +15,29 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Wachtwoorden komen niet overeen');
+      return;
+    }
+
     setIsLoading(true);
 
+    // Simuleer een API call
     try {
-      const response = await authAPI.login(formData);
-      console.log('Login response:', response);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (response.access) {
-        localStorage.setItem('token', response.access);
-        console.log('Token stored, navigating to dashboard...');
-        navigate('/admin/dashboard', { replace: true });
+      // Mock registration
+      if (formData.email && formData.password) {
+        // In een echte app zou je hier de gebruiker registreren
+        localStorage.setItem('isAuthenticated', 'true');
+        navigate('/admin/dashboard');
       } else {
-        console.error('No access token in response');
-        setError('Login mislukt - geen token ontvangen');
+        setError('Vul alle velden correct in');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.message || 'Er is iets misgegaan. Probeer het opnieuw.');
+      setError('Er is iets misgegaan. Probeer het opnieuw.');
     } finally {
       setIsLoading(false);
     }
@@ -59,18 +66,33 @@ const Login = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Input */}
+            {/* Name Input */}
             <div>
               <input
                 type="text"
-                id="username"
-                name="username"
-                value={formData.username}
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
                 className="w-full px-6 py-3 border-2 border-gray-800 rounded-lg focus:outline-none
                          focus:ring-2 focus:ring-gray-500 transition-all text-lg"
-                placeholder="Gebruikersnaam"
+                placeholder="Naam"
+              />
+            </div>
+
+            {/* Email Input */}
+            <div>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-6 py-3 border-2 border-gray-800 rounded-lg focus:outline-none
+                         focus:ring-2 focus:ring-gray-500 transition-all text-lg"
+                placeholder="E-mail"
               />
             </div>
 
@@ -89,22 +111,27 @@ const Login = () => {
               />
             </div>
 
+            {/* Confirm Password Input */}
+            <div>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                className="w-full px-6 py-3 border-2 border-gray-800 rounded-lg focus:outline-none
+                         focus:ring-2 focus:ring-gray-500 transition-all text-lg"
+                placeholder="Bevestig wachtwoord"
+              />
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="text-red-500 text-sm">
                 {error}
               </div>
             )}
-
-            {/* Wachtwoord vergeten link */}
-            <div className="text-center">
-              <a 
-                href="/admin/forgot-password" 
-                className="text-[#bdc6c7] hover:underline text-sm"
-              >
-                Wachtwoord vergeten?
-              </a>
-            </div>
 
             {/* Submit Button */}
             <div className="flex justify-center">
@@ -122,12 +149,22 @@ const Login = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Inloggen...
+                    Registreren...
                   </>
                 ) : (
-                  'Inloggen'
+                  'Registreren'
                 )}
               </button>
+            </div>
+
+            {/* Login Link */}
+            <div className="text-center">
+              <a 
+                href="#/admin/login" 
+                className="text-[#bdc6c7] hover:underline text-sm"
+              >
+                Al een account? Log in
+              </a>
             </div>
           </form>
         </div>
@@ -136,4 +173,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Register; 

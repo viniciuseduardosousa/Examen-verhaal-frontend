@@ -7,7 +7,7 @@ const PrivacyBeleid = () => {
       
       <div className="prose prose-lg">
         <p className="mb-6">
-          ReadKeep hecht grote waarde aan uw privacy. In dit privacybeleid leggen we uit 
+        Ingscribblings hecht grote waarde aan uw privacy. In dit privacybeleid leggen we uit 
           welke gegevens we verzamelen en hoe we deze gebruiken.
         </p>
 
@@ -16,10 +16,7 @@ const PrivacyBeleid = () => {
           We verzamelen alleen de gegevens die nodig zijn voor het functioneren van onze diensten:
         </p>
         <ul className="list-disc pl-6 mb-6">
-          <li className="mb-2">Naam en e-mailadres (bij registratie)</li>
-          <li className="mb-2">Verhalen en bijdragen die u plaatst</li>
           <li className="mb-2">Technische gegevens zoals IP-adres en browsergegevens</li>
-          <li className="mb-2">Interactiegegevens zoals likes en reacties</li>
         </ul>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Hoe gebruiken wij uw gegevens?</h2>
@@ -29,8 +26,6 @@ const PrivacyBeleid = () => {
         <ul className="list-disc pl-6 mb-6">
           <li className="mb-2">Het leveren van onze diensten</li>
           <li className="mb-2">Het verbeteren van onze website</li>
-          <li className="mb-2">Het communiceren met u over uw account</li>
-          <li className="mb-2">Het versturen van nieuwsbrieven (met uw toestemming)</li>
         </ul>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Uw rechten</h2>
@@ -39,7 +34,6 @@ const PrivacyBeleid = () => {
         </p>
         <ul className="list-disc pl-6 mb-6">
           <li className="mb-2">Uw gegevens in te zien</li>
-          <li className="mb-2">Uw gegevens te laten wijzigen</li>
           <li className="mb-2">Uw gegevens te laten verwijderen</li>
           <li className="mb-2">Uw toestemming in te trekken</li>
         </ul>
@@ -47,8 +41,8 @@ const PrivacyBeleid = () => {
         <h2 className="text-2xl font-bold mt-8 mb-4">Contact</h2>
         <p className="mb-6">
           Voor vragen over ons privacybeleid kunt u contact met ons opnemen via 
-          <a href="mailto:info@readkeep.nl" className="text-[#303655] hover:underline ml-1">
-            info@readkeep.nl
+          <a href="mailto:info@Ingscribblings.nl" className="text-[#303655] hover:underline ml-1">
+            info@Ingscribblings.nl
           </a>
         </p>
 

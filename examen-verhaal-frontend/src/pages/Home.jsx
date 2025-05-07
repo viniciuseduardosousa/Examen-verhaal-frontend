@@ -13,14 +13,9 @@ const Home = () => {
       <Divider />
       <Categories />
       <Divider />
-      <FeaturedStory 
-        title="De Verloren Brief"
-        description="Een meeslepend verhaal over een brief die vijftig jaar te laat werd bezorgd. Het onthult een vergeten liefdesverhaal en verbindt twee generaties door een toevallige ontdekking. De brief, vergeeld door de tijd maar perfect bewaard, brengt lang bewaarde geheimen aan het licht en zet een reeks gebeurtenissen in gang die niemand had kunnen voorzien. Een verhaal over tijd, herinneringen en de onverwachte manieren waarop het verleden ons heden kan vormgeven."
-        imageUrl="/path/to/image.jpg"
-      />
+      <FeaturedStory />
       <Divider />
       <div className="container mx-auto px-4 py-8">
-        {/* Voeg hier je content toe */}
       </div>
     </div>
   );

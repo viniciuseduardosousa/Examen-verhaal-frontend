@@ -1,16 +1,22 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import CategoryDropdown from './navigation/CategoryDropdown';
 import MobileMenu from './navigation/MobileMenu';
+import SearchOverlay from './search/SearchOverlay';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const location = useLocation();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log('Zoeken naar:', searchQuery);
-  };
+  // Hide header on admin pages
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
+  const openOverlay = () => setShowSearchOverlay(true);
+  const closeOverlay = () => setShowSearchOverlay(false);
 
   return (
     <header className="fixed w-full top-0 z-50 bg-[#FFFFF5] shadow-sm">
@@ -20,7 +26,7 @@ const Header = () => {
           <div className="flex items-center gap-12">
             {/* Logo */}
             <Link to="/" className="text-2xl font-bold text-gray-800">
-              ReadKeep
+              Ingsscribblings
             </Link>
 
             {/* Desktop Navigation */}
@@ -50,23 +56,32 @@ const Header = () => {
               <input
                 type="text"
                 placeholder="Zoeken..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 px-4 py-2 bg-white border-2 border-gray-800 rounded-full pr-10 focus:outline-none"
+                className="w-64 px-4 py-2 bg-white border-2 border-gray-800 rounded-full pr-10 focus:outline-none cursor-pointer"
+                onFocus={openOverlay}
+                onClick={openOverlay}
+                readOnly
               />
-              <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                onClick={openOverlay}
+                tabIndex={-1}
+                aria-label="Open zoekoverlay"
+                type="button"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -97,6 +112,8 @@ const Header = () => {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
       />
+      {/* Search Overlay */}
+      <SearchOverlay show={showSearchOverlay} onClose={closeOverlay} />
     </header>
   );
 };
