@@ -4,7 +4,7 @@ import ArrowIcon from '../icons/ArrowIcon';
 import trainImage from '../../assets/images/train.webp';
 import { verhalenAPI } from '../../services/api';
 
-const FeaturedStory = () => {
+const FeaturedStory = ({ onStoryLoaded }) => {
   const navigate = useNavigate();
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,14 +29,20 @@ const FeaturedStory = () => {
         console.log('Selected featured story:', featuredStory);
         
         setStory(featuredStory || null);
+        onStoryLoaded(!!featuredStory);
         setError(null);
       } catch (err) {
         console.error('Error in fetchFeaturedStory:', err);
         setError('Er is een fout opgetreden bij het ophalen van het uitgelichte verhaal.');
+        onStoryLoaded(false);
       } finally {
         setLoading(false);
       }
     };
+
+    // Set loading state and notify parent
+    setLoading(true);
+    onStoryLoaded(false);
 
     // Fetch immediately
     fetchFeaturedStory();
@@ -46,7 +52,7 @@ const FeaturedStory = () => {
 
     // Cleanup interval on unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [onStoryLoaded]);
 
   const handleReadMore = () => {
     if (story) {
@@ -54,15 +60,7 @@ const FeaturedStory = () => {
     }
   };
 
-  if (loading) {
-    return <div className="py-16">Laden...</div>;
-  }
-
-  if (error) {
-    return <div className="py-16 text-red-500">{error}</div>;
-  }
-
-  if (!story) {
+  if (loading || error || !story) {
     return null;
   }
 
