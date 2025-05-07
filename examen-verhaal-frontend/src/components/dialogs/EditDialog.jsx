@@ -12,7 +12,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     coverImage: null,
     is_uitgelicht: false,
     is_spotlighted: false,
-    is_downloadable: false
+    is_downloadable: false,
+    naam: '',
+    cover_image: null
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -37,20 +39,30 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   useEffect(() => {
     if (data) {
       console.log('Initializing form data with:', data);
-      setFormData({
-        titel: data.titel || '',
-        tekst: data.tekst || '',
-        beschrijving: data.beschrijving || '',
-        is_onzichtbaar: data.is_onzichtbaar || false,
-        categorie: data.categorie_id?.toString() || '', 
-        date: data.datum || '',
-        coverImage: data.cover_image || null,
-        is_uitgelicht: data.is_uitgelicht || false,
-        is_spotlighted: data.is_spotlighted || false,
-        is_downloadable: data.is_downloadable || false
-      });
+      if (isCategory) {
+        setFormData(prev => ({
+          ...prev,
+          naam: data.naam || '',
+          is_uitgelicht: data.is_uitgelicht || false,
+          cover_image: data.cover_image || null
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          titel: data.titel || '',
+          tekst: data.tekst || '',
+          beschrijving: data.beschrijving || '',
+          is_onzichtbaar: data.is_onzichtbaar || false,
+          categorie: data.categorie?.toString() || '', 
+          date: data.datum || '',
+          coverImage: data.cover_image || null,
+          is_uitgelicht: data.is_uitgelicht || false,
+          is_spotlighted: data.is_spotlighted || false,
+          is_downloadable: data.is_downloadable || false
+        }));
+      }
     }
-  }, [data]);
+  }, [data, isCategory]);
 
   useEffect(() => {
     if (isOpen) {
@@ -85,7 +97,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           tekst: formData.tekst,
           beschrijving: formData.beschrijving,
           is_onzichtbaar: formData.is_onzichtbaar,
-          categorie: formData.categorie_id,
+          categorie: formData.categorie,
           datum: formattedDate,
           cover_image: formData.coverImage,
           is_uitgelicht: formData.is_uitgelicht,
@@ -235,8 +247,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       Categorie
                     </label>
                     <select
-                      name="categorie_id"
-                      value={formData.categorie_id}
+                      name="categorie"
+                      value={formData.categorie}
                       onChange={handleChange}
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
