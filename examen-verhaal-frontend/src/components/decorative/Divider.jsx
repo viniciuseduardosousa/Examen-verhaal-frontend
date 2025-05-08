@@ -1,4 +1,6 @@
-const Divider = () => {
+const Divider = ({ show = true }) => {
+  if (!show) return null;
+  
   return (
     <div className="w-full py-12">
       <div className="container mx-auto px-8">

@@ -140,7 +140,12 @@ const Dashboard = () => {
 
   const handleEditClick = (item) => {
     if (showCategories) {
-      setItemToEdit(item);
+      const transformedItem = {
+        id: item.id,
+        naam: item.naam,
+        cover_image: item.cover_image
+      };
+      setItemToEdit(transformedItem);
       setEditDialogOpen(true);
     } else {
       const transformedItem = {
@@ -149,7 +154,7 @@ const Dashboard = () => {
         tekst: item.text,
         beschrijving: item.description,
         is_onzichtbaar: !item.published,
-        categorie: item.categorie?.id,
+        categorie: item.categorie?.id || item.categorie_id,
         datum: item.date,
         is_uitgelicht: item.is_uitgelicht,
         is_spotlighted: item.is_spotlighted,

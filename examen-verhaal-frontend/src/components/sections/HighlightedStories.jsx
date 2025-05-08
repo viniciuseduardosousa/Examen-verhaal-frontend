@@ -3,7 +3,7 @@ import StoryCard from '../cards/StoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
 import { verhalenAPI } from '../../services/api';
 
-const HighlightedStories = () => {
+const HighlightedStories = ({ onStoriesLoaded }) => {
   const [verhalen, setVerhalen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,19 +12,22 @@ const HighlightedStories = () => {
     const fetchVerhalen = async () => {
       try {
         const data = await verhalenAPI.getAll();
-        // Take the first 3 verhalen as highlighted
-        setVerhalen(data.slice(0, 3));
+        // Filter for highlighted stories
+        const highlightedStories = data.filter(story => story.is_uitgelicht);
+        setVerhalen(highlightedStories);
+        onStoriesLoaded(highlightedStories.length > 0);
         setError(null);
       } catch (err) {
         setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
         console.error('Error fetching verhalen:', err);
+        onStoriesLoaded(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchVerhalen();
-  }, []);
+  }, [onStoriesLoaded]);
 
   if (loading) {
     return <div className="py-16">Laden...</div>;
@@ -34,13 +37,16 @@ const HighlightedStories = () => {
     return <div className="py-16 text-red-500">{error}</div>;
   }
 
+  if (verhalen.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-8">
         {/* Header met pijl */}
         <div className="flex items-center gap-4 mb-12">
           <h2 className="text-2xl font-medium">Uitgelichte verhalen</h2>
-          <ArrowIcon className="w-6 h-6" />
         </div>
 
         {/* Grid met kaarten */}
