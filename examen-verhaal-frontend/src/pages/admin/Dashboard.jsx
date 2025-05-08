@@ -277,11 +277,12 @@ const Dashboard = () => {
                   {showSearch ? (
                     <motion.div
                       key="searchbar"
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 40 }}
-                      transition={{ duration: 0.25 }}
-                      className="absolute inset-0 flex items-center bg-[#F5F5F5] rounded-full shadow-inner px-4 py-2"
+                      initial={{ opacity: 0, width: "40px" }}
+                      animate={{ opacity: 1, width: "100%" }}
+                      exit={{ opacity: 0, width: "40px" }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="absolute right-0 flex items-center bg-[#F5F5F5] rounded-full shadow-inner px-4 py-2"
+                      style={{ transformOrigin: "right" }}
                     >
                       <input
                         type="text"
@@ -307,12 +308,12 @@ const Dashboard = () => {
                   ) : (
                     <motion.button
                       key="searchbutton"
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 40 }}
-                      transition={{ duration: 0.25 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
                       onClick={() => setShowSearch(true)}
-                      className="absolute inset-0 p-2 bg-[#F5F5F5] rounded-full shadow-inner hover:bg-gray-200 transition flex items-center justify-center"
+                      className="absolute right-0 w-10 h-10 bg-[#F5F5F5] rounded-full shadow-inner hover:bg-gray-200 transition flex items-center justify-center"
                     >
                       <svg className="h-5 w-5 text-black" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
