@@ -211,7 +211,7 @@ const Dashboard = () => {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-mono">Ingscribblings</h1>
+          <h1 className="text-xl font-mono font-bold">Ingscribblings</h1>
           <button 
             onClick={handleLogout}
             className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
@@ -234,254 +234,270 @@ const Dashboard = () => {
 
         {/* Welcome and Create Button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-mono">welkom, Ingrid</h2>
+          <h2 className="text-xl font-mono font-bold">welkom, Ingrid</h2>
           <button
             onClick={() => setCreateDialogOpen(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 shadow hover:bg-blue-700 transition font-bold"
           >
-            {showCategories ? "Nieuwe categorie" : "Nieuw verhaal"}{" "}
-            <span className="text-xl leading-none">+</span>
+            {showCategories ? "Nieuwe categorie" : "Nieuw verhaal"} {" "}
+            <span className="text-xl leading-none font-bold">+</span>
           </button>
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow p-6">
           {/* Tabs and Search */}
-          <div className="flex items-center gap-4 border-b border-gray-200 mb-6">
-            <div className="flex-1 flex">
-              <>
-                <button
-                  onClick={() => setShowCategories(false)}
-                  className={`px-6 py-2 font-mono ${
-                    !showCategories
-                      ? "text-blue-500 border-b-2 border-blue-500"
-                      : "text-gray-600"
-                  }`}
-                >
-                  Verhalen
-                </button>
-                <button
-                  onClick={() => setShowCategories(true)}
-                  className={`px-6 py-2 font-mono ${
-                    showCategories
-                      ? "text-blue-500 border-b-2 border-blue-500"
-                      : "text-gray-600"
-                  }`}
-                >
-                  Categorieën
-                </button>
-              </>
-              {showSearch ? (
-                <AnimatePresence>
-                  {showSearch && (
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex bg-[#F5F5F5] rounded-full shadow-inner p-1 w-fit">
+              <button
+                onClick={() => setShowCategories(false)}
+                className={`px-6 py-2 font-mono rounded-full transition-all font-bold ${
+                  !showCategories
+                    ? "bg-white text-blue-600 shadow"
+                    : "text-gray-500 font-normal"
+                }`}
+              >
+                Verhalen
+              </button>
+              <button
+                onClick={() => setShowCategories(true)}
+                className={`px-6 py-2 font-mono rounded-full transition-all font-bold ${
+                  showCategories
+                    ? "bg-white text-blue-600 shadow"
+                    : "text-gray-500 font-normal"
+                }`}
+              >
+                Categorieën
+              </button>
+            </div>
+            <div className="flex-1 flex justify-end">
+              {/* Zoekbalk container met vaste breedte en relatieve positie */}
+              <div className="relative w-full max-w-md h-10 flex items-center">
+                <AnimatePresence mode="wait">
+                  {showSearch ? (
                     <motion.div
-                      initial={{ opacity: 0, x: 30 }}
+                      key="searchbar"
+                      initial={{ opacity: 0, x: 40 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 100 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full ml-auto"
+                      exit={{ opacity: 0, x: 40 }}
+                      transition={{ duration: 0.25 }}
+                      className="absolute inset-0 flex items-center bg-[#F5F5F5] rounded-full shadow-inner px-4 py-2"
                     >
                       <input
                         type="text"
                         placeholder="Zoeken..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border-2 border-gray-800 rounded-full pr-10 focus:outline-none"
+                        className="bg-transparent flex-1 outline-none font-mono"
                         autoFocus
                       />
+                      <button
+                        onClick={() => {
+                          setSearchTerm("");
+                          setShowSearch(false);
+                        }}
+                        className="ml-2 text-black hover:text-gray-700"
+                        title="Zoekbalk sluiten"
+                      >
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L11.414 10l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
                     </motion.div>
+                  ) : (
+                    <motion.button
+                      key="searchbutton"
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 40 }}
+                      transition={{ duration: 0.25 }}
+                      onClick={() => setShowSearch(true)}
+                      className="absolute inset-0 p-2 bg-[#F5F5F5] rounded-full shadow-inner hover:bg-gray-200 transition flex items-center justify-center"
+                    >
+                      <svg className="h-5 w-5 text-black" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                      </svg>
+                    </motion.button>
                   )}
                 </AnimatePresence>
-              ) : null}
+              </div>
             </div>
-            <button onClick={() => setShowSearch(!showSearch)} className="p-2">
-              <svg
-                className="h-5 w-5 text-gray-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
           </div>
 
           {/* Content */}
           {loading ? (
             <div className="text-center py-8">Laden...</div>
           ) : (
-            <div className="h-[450px] overflow-y-auto">
-              <div className="space-y-4">
-                {showCategories ? (
-                  currentItems.length > 0 ? (
-                    currentItems.map((category) => (
-                      <div
-                        key={category.id}
-                        className="flex items-center justify-between py-3 border-b border-gray-200"
-                      >
-                        <span className="font-mono">{category.naam}</span>
-                        <div className="flex gap-6">
-                          <button
-                            onClick={() => handleEditClick(category)}
-                            className="text-gray-600 hover:text-gray-900"
+            <div className={showCategories ? "space-y-4" : "h-[450px] overflow-y-auto space-y-4"}>
+              {showCategories ? (
+                currentItems.length > 0 ? (
+                  currentItems.map((category) => (
+                    <div
+                      key={category.id}
+                      className="flex items-center justify-between py-3 border-b border-black"
+                    >
+                      <span className="font-mono font-bold">{category.naam}</span>
+                      <div className="flex gap-6">
+                        <button
+                          onClick={() => handleEditClick(category)}
+                          className="text-black hover:text-black"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(category)}
-                            className="text-gray-600 hover:text-gray-900"
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(category)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </div>
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      {searchTerm ? (
-                        <>
-                          <p className="font-mono">Geen categorieën gevonden voor "{searchTerm}"</p>
-                          <p className="text-sm mt-2">Probeer een andere zoekterm of bekijk alle categorieën</p>
-                        </>
-                      ) : (
-                        <p className="font-mono">Nog geen categorieën beschikbaar</p>
-                      )}
                     </div>
-                  )
+                  ))
                 ) : (
-                  currentItems.length > 0 ? (
-                    currentItems.map((verhaal) => (
-                      <div
-                        key={verhaal.id}
-                        className="flex items-center justify-between py-3 border-b border-gray-200"
-                      >
-                        <span className="font-mono">{verhaal.title}</span>
-                        <div className="flex gap-6">
-                          <button
-                            onClick={() => handlePublishToggle(verhaal)}
-                            className="text-gray-600 hover:text-gray-900"
-                            title={
-                              verhaal.published
-                                ? "Verhaal verbergen"
-                                : "Verhaal publiceren"
-                            }
-                          >
-                            {verhaal.published ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
-                                  clipRule="evenodd"
-                                />
-                                <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                              </svg>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleEditClick(verhaal)}
-                            className="text-gray-600 hover:text-gray-900"
-                          >
+                  <div className="text-center py-8 text-black">
+                    {searchTerm ? (
+                      <>
+                        <p className="font-mono font-bold">Geen categorieën gevonden voor "{searchTerm}"</p>
+                        <p className="text-sm mt-2">Probeer een andere zoekterm of bekijk alle categorieën</p>
+                      </>
+                    ) : (
+                      <p className="font-mono font-bold">Nog geen categorieën beschikbaar</p>
+                    )}
+                  </div>
+                )
+              ) : (
+                currentItems.length > 0 ? (
+                  currentItems.map((verhaal) => (
+                    <div
+                      key={verhaal.id}
+                      className="flex items-center justify-between py-3 border-b border-black"
+                    >
+                      <span className="font-mono font-bold">{verhaal.title}</span>
+                      <div className="flex gap-6">
+                        <button
+                          onClick={() => handlePublishToggle(verhaal)}
+                          className="text-black hover:text-black"
+                          title={
+                            verhaal.published
+                              ? "Verhaal verbergen"
+                              : "Verhaal publiceren"
+                          }
+                        >
+                          {/* Oude oog iconen, zwart */}
+                          {verhaal.published ? (
+                               <svg
+                               xmlns="http://www.w3.org/2000/svg"
+                               className="h-5 w-5"
+                               viewBox="0 0 20 20"
+                               fill="#111"
+                               >
+                               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                               <path
+                                 fillRule="evenodd"
+                                 d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                 clipRule="evenodd"
+                               />
+                             </svg>
+                          ) : (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-5 w-5"
                               viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(verhaal)}
-                            className="text-gray-600 hover:text-gray-900"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
+                              fill="#111"
                             >
                               <path
                                 fillRule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
                                 clipRule="evenodd"
                               />
+                              <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                             </svg>
-                          </button>
-                        </div>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(verhaal)}
+                          className="text-black hover:text-black"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(verhaal)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      {searchTerm ? (
-                        <>
-                          <p className="font-mono">Geen resultaten gevonden voor "{searchTerm}"</p>
-                          <p className="text-sm mt-2">Probeer een andere zoekterm of bekijk alle verhalen</p>
-                        </>
-                      ) : (
-                        <p className="font-mono">Nog geen verhalen beschikbaar</p>
-                      )}
                     </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === page ? "bg-gray-200" : ""
-                    }`}
-                  >
-                    {page}
-                  </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-black">
+                    {searchTerm ? (
+                      <>
+                        <p className="font-mono font-bold">Geen verhalen gevonden voor "{searchTerm}"</p>
+                        <p className="text-sm mt-2">Probeer een andere zoekterm of bekijk alle verhalen</p>
+                      </>
+                    ) : (
+                      <p className="font-mono font-bold">Nog geen verhalen beschikbaar</p>
+                    )}
+                  </div>
                 )
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded font-mono transition-all font-bold ${
+                          currentPage === page
+                            ? "bg-gray-800 text-white"
+                            : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+                </div>
               )}
             </div>
           )}
