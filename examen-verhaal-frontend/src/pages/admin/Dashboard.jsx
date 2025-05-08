@@ -6,6 +6,28 @@ import CreateDialog from "../../components/dialogs/CreateDialog";
 import EditDialog from "../../components/dialogs/EditDialog";
 import DeleteDialog from "../../components/dialogs/DeleteDialog";
 
+// Custom hook voor dynamische items per pagina
+const useItemsPerPage = () => {
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+
+  useEffect(() => {
+    const calculateItemsPerPage = () => {
+      const itemHeight = 60;
+      const containerHeight = window.innerHeight - 300;
+      const calculatedItems = Math.floor(containerHeight / itemHeight);
+      const clampedItems = Math.min(Math.max(calculatedItems, 4), 8);
+      setItemsPerPage(clampedItems);
+    };
+
+    calculateItemsPerPage();
+    window.addEventListener('resize', calculateItemsPerPage);
+
+    return () => window.removeEventListener('resize', calculateItemsPerPage);
+  }, []);
+
+  return itemsPerPage;
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [verhalen, setVerhalen] = useState([]);
@@ -23,12 +45,13 @@ const Dashboard = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  // Voor dynamische items per pagina, het is beter en wat globaler
+  const verhalenPerPage = useItemsPerPage();
+
   // Reset pagination when switching tabs
   useEffect(() => {
     setCurrentPage(1);
   }, [showCategories]);
-
-  const verhalenPerPage = 7;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -104,7 +127,6 @@ const Dashboard = () => {
       // Get the first item if it's an array
       const verhaalData = Array.isArray(verhaal) ? verhaal[0] : verhaal;
       
-      // Get category ID and ensure it's a number
       const categoryId = verhaalData.categorie_id || verhaalData.categorie?.id || verhaalData.categorie;
       const numericCategoryId = parseInt(categoryId, 10);
       
@@ -334,7 +356,7 @@ const Dashboard = () => {
           {loading ? (
             <div className="text-center py-8">Laden...</div>
           ) : (
-            <div className={showCategories ? "space-y-4" : "h-[450px] overflow-y-auto space-y-4"}>
+            <div className={showCategories ? "space-y-4" : "space-y-4"}>
               {showCategories ? (
                 currentItems.length > 0 ? (
                   currentItems.map((category) => (
@@ -391,10 +413,12 @@ const Dashboard = () => {
                 )
               ) : (
                 currentItems.length > 0 ? (
-                  currentItems.map((verhaal) => (
+                  currentItems.map((verhaal, index) => (
                     <div
                       key={verhaal.id}
-                      className="flex items-center justify-between py-3 border-b border-black"
+                      className={`flex items-center justify-between py-3 ${
+                        index !== currentItems.length - 1 ? 'border-b border-black' : 'pb-0'
+                      }`}
                     >
                       <span className="font-mono font-bold">{verhaal.title}</span>
                       <div className="flex gap-6">
@@ -407,7 +431,7 @@ const Dashboard = () => {
                               : "Verhaal publiceren"
                           }
                         >
-                          {/* Oude oog iconen, zwart */}
+                          {/* Oog iconen, zwart */}
                           {verhaal.published ? (
                                <svg
                                xmlns="http://www.w3.org/2000/svg"
@@ -487,7 +511,7 @@ const Dashboard = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-6">
+                <div className="flex justify-center gap-2 mt-2 pt-4 border-t">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (page) => (
                       <button
