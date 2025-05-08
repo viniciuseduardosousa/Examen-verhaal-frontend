@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CreateDialog from "../../components/dialogs/CreateDialog";
 import EditDialog from "../../components/dialogs/EditDialog";
 import DeleteDialog from "../../components/dialogs/DeleteDialog";
+import toast from 'react-hot-toast';
 
 // Custom hook voor dynamische items per pagina
 const useItemsPerPage = () => {
@@ -53,10 +54,22 @@ const Dashboard = () => {
     setCurrentPage(1);
   }, [showCategories]);
 
+  // Error handler voor API calls
+  const handleApiError = (error) => {
+    console.error("API Error:", error);
+    // Als de error een 401 (Unauthorized) of 403 (Forbidden) is, of als de token ongeldig is
+    if (error?.response?.status === 401 || error?.response?.status === 403 || error?.message?.includes('token')) {
+      localStorage.removeItem('token');
+      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+    } else {
+      setError("Er is een fout opgetreden. Probeer het later opnieuw.");
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/admin/login');
+      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
       return;
     }
     fetchVerhalen();
@@ -89,7 +102,7 @@ const Dashboard = () => {
     try {
       await authAPI.logout();
       localStorage.removeItem('token');
-      navigate('/admin/login');
+      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
     } catch (err) {
       console.error("Error logging out:", err);
     }
@@ -106,12 +119,10 @@ const Dashboard = () => {
     try {
       if (showCategories) {
         await adminCategoriesAPI.delete(verhaalToDelete.id);
+        setCategories(categories.filter(cat => cat.id !== verhaalToDelete.id));
+        toast.success('Categorie succesvol verwijderd');
       } else {
         await adminVerhalenAPI.delete(verhaalToDelete.id);
-      }
-      if (showCategories) {
-        setCategories(categories.filter(cat => cat.id !== verhaalToDelete.id));
-      } else {
         const newVerhalen = verhalen.filter((v) => v.id !== verhaalToDelete.id);
         setVerhalen(newVerhalen);
         
@@ -122,11 +133,12 @@ const Dashboard = () => {
         if (currentPage > newTotalPages) {
           setCurrentPage(newTotalPages);
         }
+        toast.success('Verhaal succesvol verwijderd');
       }
       setDeleteModalOpen(false);
       setVerhaalToDelete(null);
     } catch (err) {
-      setError("Er is een fout opgetreden bij het verwijderen.");
+      toast.error('Er is een fout opgetreden bij het verwijderen');
       console.error("Error deleting:", err);
     }
   };
@@ -162,9 +174,9 @@ const Dashboard = () => {
       // Refresh the data
       await fetchVerhalen();
 
-      setSuccess("Verhaal succesvol bijgewerkt");
+      toast.success(transformedData.is_onzichtbaar ? 'Verhaal verborgen' : 'Verhaal gepubliceerd');
     } catch (err) {
-      setError("Er is een fout opgetreden bij het bijwerken van het verhaal.");
+      toast.error('Er is een fout opgetreden bij het bijwerken van het verhaal');
       console.error("Error updating verhaal:", err);
     }
   };
@@ -203,22 +215,26 @@ const Dashboard = () => {
       if (showCategories) {
         await adminCategoriesAPI.create(formData);
         fetchCategories();
+        toast.success('Categorie succesvol aangemaakt');
       } else {
         await adminVerhalenAPI.create(formData);
         fetchVerhalen();
+        toast.success('Verhaal succesvol aangemaakt');
       }
       setCreateDialogOpen(false);
     } catch (err) {
       console.error('Error creating item:', err);
-      setError("Er is een fout opgetreden bij het aanmaken.");
+      toast.error('Er is een fout opgetreden bij het aanmaken');
     }
   };
 
   const handleEditSuccess = () => {
     if (showCategories) {
       fetchCategories();
+      toast.success('Categorie succesvol bijgewerkt');
     } else {
       fetchVerhalen();
+      toast.success('Verhaal succesvol bijgewerkt');
     }
   };
 

@@ -132,7 +132,7 @@ const handleApiResponse = async (response) => {
     
     if (response.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/admin/login';
+      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
       throw new Error('Niet geautoriseerd');
     }
     
@@ -193,7 +193,7 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon verhaal niet ophalen');
@@ -315,7 +315,7 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         const errorData = await response.json();
@@ -336,7 +336,7 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon verhaal niet verwijderen');
@@ -358,7 +358,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorieën niet ophalen');
@@ -412,7 +412,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorie niet aanmaken');
@@ -447,7 +447,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorie niet bijwerken');
@@ -466,7 +466,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorie niet verwijderen');

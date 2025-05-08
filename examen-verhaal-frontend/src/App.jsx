@@ -2,6 +2,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import Toast from './components/Toast';
 import Home from './pages/Home';
 import Verhalen from './pages/Verhalen';
 import VerhaalDetail from './pages/VerhaalDetail';
@@ -15,6 +16,7 @@ import EditVerhaal from './pages/admin/EditVerhaal';
 function App() {
   return (
     <Router>
+      <Toast />
       <ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <Header />
