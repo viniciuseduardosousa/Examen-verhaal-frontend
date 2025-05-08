@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 import trainImage from '../../assets/images/train.webp';
 import { verhalenAPI } from '../../services/api';
+import Loader from '../Loader';
 
 const FeaturedStory = ({ onStoryLoaded }) => {
   const navigate = useNavigate();
@@ -45,7 +46,20 @@ const FeaturedStory = ({ onStoryLoaded }) => {
     }
   };
 
-  if (loading || error || !story) {
+  if (loading) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-8">
+          <div className="flex items-center gap-4 mb-12">
+            <h2 className="text-2xl font-medium">Uitgelicht verhaal</h2>
+          </div>
+          <Loader size="large" className="py-8" />
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !story) {
     return null;
   }
 

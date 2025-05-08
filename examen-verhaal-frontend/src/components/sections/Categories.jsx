@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import CategoryCard from '../cards/CategoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
 import { categoriesAPI } from '../../services/api';
+import Loader from '../Loader';
 
 const Categories = ({ onCategoriesLoaded }) => {
   const [categories, setCategories] = useState([]);
@@ -28,7 +29,16 @@ const Categories = ({ onCategoriesLoaded }) => {
   }, [onCategoriesLoaded]);
 
   if (loading) {
-    return <div className="py-16">Laden...</div>;
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-8">
+          <div className="flex items-center gap-4 mb-12">
+            <h2 className="text-2xl font-medium">Categorieën</h2>
+          </div>
+          <Loader size="large" className="py-8" />
+        </div>
+      </section>
+    );
   }
 
   if (error) {

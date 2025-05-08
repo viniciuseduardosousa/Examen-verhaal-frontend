@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import Divider from '../components/decorative/Divider';
 import { verhalenAPI, categoriesAPI } from '../services/api';
+import Loader from '../components/Loader';
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
@@ -103,7 +104,14 @@ const Verhalen = () => {
   const otherCategoriesStories = stories.slice(0, 3);
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-8">Laden...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <Loader size="large" className="mb-4" />
+          <p className="text-gray-600">Verhalen laden...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
