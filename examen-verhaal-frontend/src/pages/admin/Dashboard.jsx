@@ -112,7 +112,16 @@ const Dashboard = () => {
       if (showCategories) {
         setCategories(categories.filter(cat => cat.id !== verhaalToDelete.id));
       } else {
-        setVerhalen(verhalen.filter((v) => v.id !== verhaalToDelete.id));
+        const newVerhalen = verhalen.filter((v) => v.id !== verhaalToDelete.id);
+        setVerhalen(newVerhalen);
+        
+        // Bereken het nieuwe aantal pagina's
+        const newTotalPages = Math.ceil(newVerhalen.length / verhalenPerPage);
+        
+        // Als we op de laatste pagina zijn en die wordt leeg, ga naar de vorige pagina
+        if (currentPage > newTotalPages) {
+          setCurrentPage(newTotalPages);
+        }
       }
       setDeleteModalOpen(false);
       setVerhaalToDelete(null);
@@ -510,9 +519,9 @@ const Dashboard = () => {
               )}
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {currentItems.length > 0 && (
                 <div className="flex justify-center gap-2 mt-2 pt-4 border-t">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  {totalPages > 1 && Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (page) => (
                       <button
                         key={page}
