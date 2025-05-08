@@ -11,9 +11,6 @@ import Register from './pages/admin/Register';
 import VerhalenDashboard from './pages/admin/Dashboard';
 import CreateVerhaal from './pages/admin/CreateVerhaal';
 import EditVerhaal from './pages/admin/EditVerhaal';
-import CookieBeleid from './pages/legal/CookieBeleid';
-import PrivacyBeleid from './pages/legal/PrivacyBeleid';
-import AlgemeneVoorwaarden from './pages/legal/AlgemeneVoorwaarden';
 
 function App() {
   return (
@@ -32,9 +29,6 @@ function App() {
             <Route path="/admin/dashboard" element={<VerhalenDashboard />} />
             <Route path="/admin/verhalen/create" element={<CreateVerhaal />} />
             <Route path="/admin/verhalen/edit/:id" element={<EditVerhaal />} />
-            <Route path="/cookie-beleid" element={<CookieBeleid />} />
-            <Route path="/privacy-beleid" element={<PrivacyBeleid />} />
-            <Route path="/algemene-voorwaarden" element={<AlgemeneVoorwaarden />} />
           </Routes>
         </main>
         <Footer />
