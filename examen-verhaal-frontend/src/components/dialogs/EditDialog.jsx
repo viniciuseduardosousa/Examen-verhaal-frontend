@@ -39,7 +39,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
   useEffect(() => {
     if (data) {
-      console.log('Initializing form data with:', data);
+      console.log('is_downloadable value:', data.is_downloadable, typeof data.is_downloadable);
       if (isCategory) {
         setFormData(prev => ({
           ...prev,
@@ -48,19 +48,22 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           cover_image: data.cover_image || null
         }));
       } else {
-        setFormData(prev => ({
-          ...prev,
-          titel: data.titel || '',
-          tekst: data.tekst || '',
-          beschrijving: data.beschrijving || '',
-          is_onzichtbaar: data.is_onzichtbaar || false,
-          categorie: data.categorie?.toString() || '', 
-          date: data.datum || '',
-          coverImage: data.cover_image || null,
-          is_uitgelicht: data.is_uitgelicht || false,
-          is_spotlighted: data.is_spotlighted || false,
-          is_downloadable: data.is_downloadable || false
-        }));
+        setFormData(prev => {
+          const newFormData = {
+            titel: data.titel || '',
+            tekst: data.tekst || '',
+            beschrijving: data.beschrijving || '',
+            is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
+            categorie: data.categorie?.toString() || '', 
+            date: data.datum || '',
+            coverImage: data.cover_image || null,
+            is_uitgelicht: data.is_uitgelicht === true || data.is_uitgelicht === 'true',
+            is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
+            is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true' || prev.is_downloadable
+          };
+          console.log('is_downloadable in newFormData:', newFormData.is_downloadable, typeof newFormData.is_downloadable);
+          return newFormData;
+        });
       }
     }
   }, [data, isCategory]);
@@ -112,6 +115,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_downloadable: formData.is_downloadable
         };
         console.log('Sending data:', transformedData);
+        console.log('is_downloadable in transformedData:', transformedData.is_downloadable, typeof transformedData.is_downloadable);
         console.log('Using ID:', data.id);
         await adminVerhalenAPI.update(data.id, transformedData);
       }
