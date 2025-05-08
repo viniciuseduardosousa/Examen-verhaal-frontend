@@ -327,6 +327,14 @@ const Dashboard = () => {
                     initial={false}
                     animate={{ width: showSearch ? '100%' : 0, opacity: showSearch ? 1 : 0 }}
                     transition={{ width: { duration: 0.3, ease: 'easeInOut' }, opacity: { duration: 0.2 } }}
+                    onAnimationComplete={() => {
+                      if (showSearch) {
+                        const searchInput = document.querySelector('input[type="text"]');
+                        if (searchInput) {
+                          searchInput.focus();
+                        }
+                      }
+                    }}
                     className="flex items-center bg-[#F5F5F5] rounded-full shadow-inner px-4 h-10 absolute right-0 w-full z-10"
                     style={{ overflow: 'hidden' }}
                   >
