@@ -284,12 +284,24 @@ const Dashboard = () => {
         <div className="bg-white rounded-2xl shadow p-6">
           {/* Tabs and Search */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex bg-[#F5F5F5] rounded-full shadow-inner p-1 w-fit">
+            <div className="flex bg-[#F5F5F5] rounded-full shadow-inner h-10 w-full max-w-sm relative">
+              <motion.div
+                className="absolute bg-white rounded-full shadow"
+                initial={false}
+                animate={{
+                  x: showCategories ? '100%' : '0%',
+                  width: '50%',
+                  height: '100%',
+                  top: '0',
+                  left: '0'
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
               <button
                 onClick={() => setShowCategories(false)}
-                className={`px-6 py-2 font-mono rounded-full transition-all font-bold ${
+                className={`w-1/2 flex justify-center items-center px-3 h-10 text-base font-mono rounded-full transition-all font-bold relative z-10 ${
                   !showCategories
-                    ? "bg-white text-blue-600 shadow"
+                    ? "text-blue-600"
                     : "text-gray-500 font-normal"
                 }`}
               >
@@ -297,9 +309,9 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setShowCategories(true)}
-                className={`px-6 py-2 font-mono rounded-full transition-all font-bold ${
+                className={`w-1/2 flex justify-center items-center px-3 h-10 text-base font-mono rounded-full transition-all font-bold relative z-10 ${
                   showCategories
-                    ? "bg-white text-blue-600 shadow"
+                    ? "text-blue-600"
                     : "text-gray-500 font-normal"
                 }`}
               >
