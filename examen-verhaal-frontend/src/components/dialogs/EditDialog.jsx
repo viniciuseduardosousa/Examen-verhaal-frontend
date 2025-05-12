@@ -20,6 +20,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -39,7 +40,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
   useEffect(() => {
     if (data) {
-      console.log('is_downloadable value:', data.is_downloadable, typeof data.is_downloadable);
       if (isCategory) {
         setFormData(prev => ({
           ...prev,
@@ -61,10 +61,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
             is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true' || prev.is_downloadable
           };
-          console.log('is_downloadable in newFormData:', newFormData.is_downloadable, typeof newFormData.is_downloadable);
           return newFormData;
         });
       }
+      setRemoveImage(false);
     }
   }, [data, isCategory]);
 
@@ -93,31 +93,43 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
     try {
       if (isCategory) {
-        await adminCategoriesAPI.update(data.id, {
+        const updateData = {
           naam: formData.naam,
           is_uitgelicht: formData.is_uitgelicht,
-          cover_image: formData.cover_image
-        });
+        };
+
+        // Only include cover_image if there's a file or we want to remove it
+        if (formData.cover_image instanceof File) {
+          updateData.cover_image = formData.cover_image;
+        } else if (removeImage) {
+          updateData.remove_image = true;
+        }
+
+        await adminCategoriesAPI.update(data.id, updateData);
       } else {
         const date = new Date(formData.date);
         const formattedDate = date.toISOString().split('T')[0];
         
-        const transformedData = {
+        const updateData = {
           titel: formData.titel,
           tekst: formData.tekst,
           beschrijving: formData.beschrijving,
           is_onzichtbaar: formData.is_onzichtbaar,
           categorie: formData.categorie,
           datum: formattedDate,
-          cover_image: formData.coverImage,
           is_uitgelicht: formData.is_uitgelicht,
           is_spotlighted: formData.is_spotlighted,
           is_downloadable: formData.is_downloadable
         };
-        console.log('Sending data:', transformedData);
-        console.log('is_downloadable in transformedData:', transformedData.is_downloadable, typeof transformedData.is_downloadable);
-        console.log('Using ID:', data.id);
-        await adminVerhalenAPI.update(data.id, transformedData);
+
+        // Only include coverImage if there's a file or we want to remove it
+        if (formData.coverImage instanceof File) {
+          updateData.cover_image = formData.coverImage;
+        } else if (removeImage) {
+          updateData.remove_image = true;
+        }
+        
+        await adminVerhalenAPI.update(data.id, updateData);
       }
       onSuccess();
       onClose();
@@ -138,6 +150,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       }));
       if (files && files[0]) {
         setCoverPreview(URL.createObjectURL(files[0]));
+        setRemoveImage(false);
       }
     } else {
       setFormData(prev => ({
@@ -326,6 +339,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                                 e.stopPropagation();
                                 setCoverPreview(null);
                                 setFormData(prev => ({ ...prev, coverImage: null }));
+                                setRemoveImage(true);
                               }}
                               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
                               title="Verwijder omslagfoto"
@@ -347,7 +361,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                                 </clipPath>
                               </defs>
                             </svg>
-                            <span className="text-gray-500  text-center text-lg select-none pointer-events-none z-0">Klik om omslagfoto toe te voegen</span>
+                            <span className="text-gray-500 text-center text-lg select-none pointer-events-none z-0">Klik om omslagfoto toe te voegen</span>
                           </div>
                         )}
                       </div>

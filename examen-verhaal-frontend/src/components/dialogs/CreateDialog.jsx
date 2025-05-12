@@ -26,6 +26,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -61,13 +62,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     setIsLoading(true);
 
     try {
-      let transformedData;
+      let updateData;
       
       if (type === 'story') {
-        console.log('Form data before transform:', formData);
-        console.log('Category value:', formData.category);
-        console.log('Category type:', typeof formData.category);
-        
         // Validate category ID
         if (!formData.category) {
           throw new Error('Selecteer een categorie');
@@ -81,31 +78,39 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         const date = new Date(formData.date);
         const formattedDate = date.toISOString().split('T')[0];
 
-        transformedData = {
+        updateData = {
           titel: formData.title,
           tekst: formData.text,
           beschrijving: formData.description,
           is_onzichtbaar: !formData.published,
           categorie: categoryId,
           datum: formattedDate,
-          cover_image: formData.coverImage,
           is_spotlighted: formData.is_spotlighted,
           is_uitgelicht: formData.is_spotlighted,
           is_downloadable: false
         };
-        
-        console.log('Transformed data:', transformedData);
-        console.log('Date being sent:', formattedDate);
+
+        // Only include coverImage if there's a file or we want to remove it
+        if (formData.coverImage instanceof File) {
+          updateData.cover_image = formData.coverImage;
+        } else if (removeImage) {
+          updateData.remove_image = true;
+        }
       } else {
-        transformedData = {
+        updateData = {
           naam: formData.naam,
-          is_uitgelicht: formData.is_uitgelicht,
-          cover_image: formData.cover_image
+          is_uitgelicht: formData.is_uitgelicht
         };
+
+        // Only include cover_image if there's a file or we want to remove it
+        if (formData.cover_image instanceof File) {
+          updateData.cover_image = formData.cover_image;
+        } else if (removeImage) {
+          updateData.remove_image = true;
+        }
       }
 
-      console.log('Sending data to API:', transformedData);
-      await onSave(transformedData);
+      await onSave(updateData);
       onClose();
     } catch (err) {
       console.error('Error saving:', err);
@@ -125,6 +130,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       }));
       if (files && files[0]) {
         setCoverPreview(URL.createObjectURL(files[0]));
+        setRemoveImage(false);
       }
     } else if (type === 'checkbox') {
       setFormData(prev => ({
@@ -157,6 +163,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       });
       setError('');
       setCoverPreview(null);
+      setRemoveImage(false);
     }
   }, [isOpen, type]);
 
@@ -295,6 +302,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                                 e.stopPropagation();
                                 setCoverPreview(null);
                                 setFormData(prev => ({ ...prev, coverImage: null }));
+                                setRemoveImage(true);
                               }}
                               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"
                               title="Verwijder omslagfoto"
