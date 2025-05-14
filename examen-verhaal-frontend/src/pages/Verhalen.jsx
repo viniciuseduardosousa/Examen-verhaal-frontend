@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
+import NoCoverStoryCard from '../components/cards/NoCoverStoryCard';
 import Divider from '../components/decorative/Divider';
 import { verhalenAPI, categoriesAPI } from '../services/api';
 import Loader from '../components/Loader';
@@ -182,21 +183,34 @@ const Verhalen = () => {
       {/* Stories Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
         {filteredStories.length > 0 ? (
-          filteredStories.map((story, index) => (
-            <div 
-              key={story.id}
-              className="animate-slideDown"
-              style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-            >
-              <StoryCard
-                id={story.id}
-                title={story.titel}
-                description={story.beschrijving}
-                imageUrl={story.cover_image}
-                category={categoryMap[story.categorie]}
-              />
-            </div>
-          ))
+          filteredStories.map((story, index) => {
+            const hasCoverImage = Boolean(story.cover_image);
+            
+            return (
+              <div 
+                key={story.id}
+                className="animate-slideDown"
+                style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+              >
+                {hasCoverImage ? (
+                  <StoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    imageUrl={story.cover_image}
+                    category={categoryMap[story.categorie]}
+                  />
+                ) : (
+                  <NoCoverStoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    category={categoryMap[story.categorie]}
+                  />
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-600 text-lg">Geen verhalen beschikbaar voor deze categorie</p>
@@ -220,21 +234,34 @@ const Verhalen = () => {
           </svg>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {otherCategoriesStories.map((story, index) => (
-            <div 
-              key={story.id}
-              className="animate-slideDown"
-              style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-            >
-              <StoryCard
-                id={story.id}
-                title={story.titel}
-                description={story.beschrijving}
-                imageUrl={story.cover_image}
-                category={categoryMap[story.categorie]}
-              />
-            </div>
-          ))}
+          {otherCategoriesStories.map((story, index) => {
+            const hasCoverImage = Boolean(story.cover_image);
+            
+            return (
+              <div 
+                key={story.id}
+                className="animate-slideDown"
+                style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+              >
+                {hasCoverImage ? (
+                  <StoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    imageUrl={story.cover_image}
+                    category={categoryMap[story.categorie]}
+                  />
+                ) : (
+                  <NoCoverStoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    category={categoryMap[story.categorie]}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import StoryCard from '../cards/StoryCard';
+import NoCoverStoryCard from '../cards/NoCoverStoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
 import { verhalenAPI } from '../../services/api';
 import Loader from '../Loader';
@@ -61,16 +62,28 @@ const HighlightedStories = ({ onStoriesLoaded }) => {
 
         {/* Grid met kaarten */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {verhalen.map((verhaal) => (
-            <StoryCard
-              key={verhaal.id}
-              id={verhaal.id}
-              title={verhaal.titel}
-              description={verhaal.beschrijving}
-              imageUrl={verhaal.cover_image}
-              category={verhaal.categorie.naam}
-            />
-          ))}
+          {verhalen.map((verhaal) => {
+            const hasCoverImage = Boolean(verhaal.cover_image);
+            
+            return hasCoverImage ? (
+              <StoryCard
+                key={verhaal.id}
+                id={verhaal.id}
+                title={verhaal.titel}
+                description={verhaal.beschrijving}
+                imageUrl={verhaal.cover_image}
+                category={verhaal.categorie.naam}
+              />
+            ) : (
+              <NoCoverStoryCard
+                key={verhaal.id}
+                id={verhaal.id}
+                title={verhaal.titel}
+                description={verhaal.beschrijving}
+                category={verhaal.categorie.naam}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

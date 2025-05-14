@@ -87,8 +87,12 @@ const FeaturedStory = ({ onStoryLoaded }) => {
           {/* Rechter kolom met content */}
           <div className="w-full md:w-1/2 flex flex-col h-[500px]">
             <div className="flex-grow flex flex-col">
-              <h2 className="text-3xl font-medium mb-4">{story.titel}</h2>
-              <p className="text-gray-700 overflow-y-auto pr-4">{story.beschrijving}</p>
+              <h2 className="text-3xl font-medium mb-4 break-words">{story.titel}</h2>
+              <div className="overflow-hidden flex-grow pr-4">
+                <p className="text-gray-700 text-base sm:text-lg break-words whitespace-normal leading-relaxed line-clamp-[15]">
+                  {story.beschrijving}
+                </p>
+              </div>
             </div>
             
             {/* Lees het hele verhaal button */}
