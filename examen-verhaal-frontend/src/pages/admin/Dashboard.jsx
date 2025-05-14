@@ -249,11 +249,29 @@ const Dashboard = () => {
     return category.naam.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
+  // Sort verhalen by date (newest first)
+  const sortedVerhalen = [...filteredVerhalen].sort((a, b) => {
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  // Sort categories by updated_at or created_at date (newest first)
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    // Try to get updated_at, or fall back to created_at or other timestamp fields
+    const dateA = a.updated_at || a.created_at || a.timestamp || 0;
+    const dateB = b.updated_at || b.created_at || b.timestamp || 0;
+    
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    
+    return new Date(dateB) - new Date(dateA);
+  });
+
   const indexOfLastItem = currentPage * verhalenPerPage;
   const indexOfFirstItem = indexOfLastItem - verhalenPerPage;
   const currentItems = showCategories
-    ? filteredCategories.slice(indexOfFirstItem, indexOfLastItem)
-    : filteredVerhalen.slice(indexOfFirstItem, indexOfLastItem);
+    ? sortedCategories.slice(indexOfFirstItem, indexOfLastItem)
+    : sortedVerhalen.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(
     (showCategories ? filteredCategories.length : filteredVerhalen.length) / verhalenPerPage
   );
