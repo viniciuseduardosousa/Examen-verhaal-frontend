@@ -17,6 +17,11 @@ const NoCoverStoryCard = ({ id, title, description, category, onCategoryClick })
     if (!isCategorySelected) {
       e.stopPropagation();
       navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 

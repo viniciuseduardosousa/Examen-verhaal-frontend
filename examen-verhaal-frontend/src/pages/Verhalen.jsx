@@ -67,16 +67,31 @@ const Verhalen = () => {
       const newCategories = selectedCategories.filter(c => c !== category);
       setSelectedCategories(newCategories);
       navigate(newCategories.length > 0 ? `/verhalen?category=${encodeURIComponent(newCategories.join(','))}` : '/verhalen');
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     } else {
       const newCategories = [...selectedCategories, category];
       setSelectedCategories(newCategories);
       navigate(`/verhalen?category=${encodeURIComponent(newCategories.join(','))}`);
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
     navigate('/verhalen');
+    // Scroll to top of page after navigation
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   // Filter stories for the grid
