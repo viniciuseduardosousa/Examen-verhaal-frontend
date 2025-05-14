@@ -11,6 +11,7 @@ const VerhaalDetail = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [categoryMap, setCategoryMap] = useState({});
+  const [hasHighlightedStories, setHasHighlightedStories] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,8 +152,8 @@ const VerhaalDetail = () => {
         </div>
       </section>
 
-      <Divider />
-      <HighlightedStories />
+      <Divider show={hasHighlightedStories} />
+      <HighlightedStories onStoriesLoaded={(hasStories) => setHasHighlightedStories(hasStories)} />
     </div>
   );
 };
