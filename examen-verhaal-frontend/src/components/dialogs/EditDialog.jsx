@@ -22,11 +22,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Reset form when dialog is opened or closed
   useEffect(() => {
     if (!isOpen) {
-      // Reset when closed
+      setIsSubmitted(false);
       setFormData({
         titel: '',
         tekst: '',
@@ -123,6 +124,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
     setError('');
     setIsLoading(true);
 
@@ -133,7 +135,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_uitgelicht: formData.is_uitgelicht,
         };
 
-        // Only include cover_image if there's a file or we want to remove it
         if (formData.cover_image instanceof File) {
           updateData.cover_image = formData.cover_image;
         } else if (removeImage) {
@@ -157,7 +158,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_downloadable: formData.is_downloadable
         };
 
-        // Only include coverImage if there's a file or we want to remove it
         if (formData.coverImage instanceof File) {
           updateData.cover_image = formData.coverImage;
         } else if (removeImage) {
@@ -269,13 +269,13 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
               {error}
             </div>
           )}
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             {isCategory ? (
               <>
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-mono font-bold mb-1">
-                      Naam
+                      Naam <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
                     </label>
                     <input
                       type="text"
@@ -283,7 +283,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       value={formData.naam}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
 
@@ -386,24 +388,32 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     {/* Linkerkant */}
                     <div className="flex-1 flex flex-col gap-3 min-w-[200px]">
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Titel</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Titel <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <input
                           type="text"
                           name="titel"
                           value={formData.titel}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Categorie</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Categorie <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <select
                           name="categorie"
                           value={formData.categorie || ''}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         >
                           <option value="">Selecteer een categorie</option>
                           {categories.map(cat => (
@@ -412,14 +422,18 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Datum</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Datum <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <input
                           type="date"
                           name="date"
                           value={formData.date || ''}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         />
                       </div>
                       <div className="flex flex-col gap-2 mt-2">
@@ -541,25 +555,33 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">Korte beschrijving</label>
+                    <label className="block text-base font-mono font-bold mb-1">
+                      Korte beschrijving <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                    </label>
                     <textarea
                       name="beschrijving"
                       value={formData.beschrijving}
                       onChange={handleChange}
                       required
                       rows="2"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#D9D9D9] font-mono"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">Verhaal</label>
+                    <label className="block text-base font-mono font-bold mb-1">
+                      Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                    </label>
                     <textarea
                       name="tekst"
                       value={formData.displayText || formData.tekst}
                       onChange={handleChange}
                       required
                       rows="6"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#D9D9D9] font-mono"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
                 </div>

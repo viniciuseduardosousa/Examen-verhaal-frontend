@@ -25,6 +25,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -56,6 +57,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
     setError('');
     setIsLoading(true);
 
@@ -195,6 +197,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
 
   useEffect(() => {
     if (isOpen) {
+      setIsSubmitted(false);
       // Always keep all fields in formData to avoid undefined to defined transitions
       setFormData({
         // Story fields
@@ -244,21 +247,25 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             {type === 'story' ? (
               <>
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 flex flex-col gap-3 min-w-[200px]">
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Titel</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Titel <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <input
                           type="text"
                           name="title"
                           value={formData.title}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         />
                       </div>
                       <div>
@@ -271,13 +278,17 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Categorie</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Categorie <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <select
                           name="category"
                           value={formData.category || ''}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         >
                           <option value="">Selecteer een categorie</option>
                           {categories.map(cat => (
@@ -286,14 +297,18 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-mono font-bold mb-1">Datum</label>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          Datum <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                        </label>
                         <input
                           type="date"
                           name="date"
                           value={formData.date || ''}
                           onChange={handleChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                          }`}
                         />
                       </div>
                       <div className="flex flex-col gap-2 mt-2">
@@ -391,25 +406,33 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">Korte beschrijving</label>
+                    <label className="block text-base font-mono font-bold mb-1">
+                      Korte beschrijving <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                    </label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
                       required
                       rows="2"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#D9D9D9] font-mono"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">Verhaal</label>
+                    <label className="block text-base font-mono font-bold mb-1">
+                      Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                    </label>
                     <textarea
                       name="text"
                       value={formData.displayText || formData.text}
                       onChange={handleChange}
                       required
                       rows="6"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#D9D9D9] font-mono"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
                 </div>
@@ -445,7 +468,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-mono font-bold mb-1">
-                      Naam
+                      Naam <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
                     </label>
                     <input
                       type="text"
@@ -453,7 +476,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                       value={formData.naam}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                      className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
+                      }`}
                     />
                   </div>
 
