@@ -232,7 +232,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
                     <Link 
                       key={category.id}
                       to={category.path}
-                      className="block text-xl pl-4 hover:pl-8 transition-all duration-300
+                      className="text-xl pl-4 hover:pl-8 transition-all duration-300
                                hover:text-gray-600 flex justify-between items-center"
                       onClick={onClose}
                     >
