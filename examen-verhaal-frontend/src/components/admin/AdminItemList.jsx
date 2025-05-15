@@ -22,6 +22,7 @@ const AdminItemList = ({
                 <button
                   onClick={() => handleEditClick(category)}
                   className="text-black hover:text-black"
+                  aria-label="Bewerk categorie"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -35,6 +36,7 @@ const AdminItemList = ({
                 <button
                   onClick={() => handleDeleteClick(category)}
                   className="text-red-600 hover:text-red-800"
+                  aria-label="Verwijder categorie"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -118,6 +120,7 @@ const AdminItemList = ({
                 <button
                   onClick={() => handleEditClick(verhaal)}
                   className="text-black hover:text-black"
+                  aria-label="Bewerk verhaal"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -131,6 +134,7 @@ const AdminItemList = ({
                 <button
                   onClick={() => handleDeleteClick(verhaal)}
                   className="text-red-600 hover:text-red-800"
+                  aria-label="Verwijder verhaal"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

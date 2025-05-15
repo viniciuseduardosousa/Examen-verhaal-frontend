@@ -20,8 +20,8 @@ const AdminTabs = ({ showCategories, setShowCategories }) => {
         onClick={() => setShowCategories(false)}
         className={`w-1/2 flex justify-center items-center px-3 h-10 text-base font-mono rounded-full transition-all font-bold relative z-10 ${
           !showCategories
-            ? "text-blue-600"
-            : "text-gray-500 font-normal"
+            ? "text-blue-700"
+            : "text-gray-700 font-normal"
         }`}
       >
         Verhalen
@@ -30,8 +30,8 @@ const AdminTabs = ({ showCategories, setShowCategories }) => {
         onClick={() => setShowCategories(true)}
         className={`w-1/2 flex justify-center items-center px-3 h-10 text-base font-mono rounded-full transition-all font-bold relative z-10 ${
           showCategories
-            ? "text-blue-600"
-            : "text-gray-500 font-normal"
+            ? "text-blue-700"
+            : "text-gray-700 font-normal"
         }`}
       >
         Categorieën

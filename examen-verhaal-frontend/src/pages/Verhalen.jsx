@@ -147,8 +147,9 @@ const Verhalen = () => {
                 key={`${category}-${index}`}
                 onClick={() => toggleCategory(category)}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-2 ${
-                  selectedCategories.includes(category) ? 'bg-gray-300' : 'bg-gray-200 hover:bg-gray-300'
+                  selectedCategories.includes(category) ? 'bg-gray-400 text-gray-900' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
+                aria-label={`${selectedCategories.includes(category) ? 'Verwijder' : 'Selecteer'} categorie ${category}`}
               >
                 <span className="text-sm sm:text-base">{category}</span>
                 {selectedCategories.includes(category) && (

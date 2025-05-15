@@ -88,6 +88,7 @@ const Header = () => {
             <button
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
             >
               <svg
                 className="w-8 h-8 text-gray-800"
