@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
+import mammoth from 'mammoth';
 
 const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   // Initialize with empty values for both story and category types
@@ -142,6 +143,56 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     }
   };
 
+  const handleWordImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const html = result.value;
+
+      const cleanHtml = html
+        .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '<br /><h2>$1</h2>')
+        .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '<br /><h2>$1</h2>')
+        .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '<br /><h3>$1</h3>')
+        .replace(/<p[^>]*>(.*?)<\/p>/gi, '<p>$1</p>')
+        .replace(/<ul[^>]*>(.*?)<\/ul>/gi, '<ul>$1</ul>')
+        .replace(/<ol[^>]*>(.*?)<\/ol>/gi, '<ol>$1</ol>')
+        .replace(/<li[^>]*>(.*?)<\/li>/gi, '<li>$1</li>')
+        .replace(/<table[^>]*>(.*?)<\/table>/gi, '<table>$1</table>')
+        .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
+        .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
+        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
+        .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1">$2</a>')
+        .replace(/<br\s*\/?>/gi, '<br />')
+        .replace(/\n\s*\n/g, '\n')
+        .replace(/\n/g, '<br />')
+        .replace(/<br \/><br \/><h/g, '<br /><h')
+        .trim();
+
+      const displayText = cleanHtml
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      setFormData(prev => ({
+        ...prev,
+        text: cleanHtml,
+        displayText: displayText
+      }));
+    } catch (error) {
+      console.error('Error importing Word document:', error);
+      setError('Er is een fout opgetreden bij het importeren van het Word document');
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       // Always keep all fields in formData to avoid undefined to defined transitions
@@ -207,6 +258,15 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                           value={formData.title}
                           onChange={handleChange}
                           required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-mono font-bold mb-1">Importeer Word Document</label>
+                        <input
+                          type="file"
+                          accept=".docx"
+                          onChange={handleWordImport}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#F7F6ED]"
                         />
                       </div>
@@ -345,7 +405,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                     <label className="block text-base font-mono font-bold mb-1">Verhaal</label>
                     <textarea
                       name="text"
-                      value={formData.text}
+                      value={formData.displayText || formData.text}
                       onChange={handleChange}
                       required
                       rows="6"
