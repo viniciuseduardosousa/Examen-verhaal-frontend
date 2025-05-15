@@ -170,7 +170,9 @@ const transformVerhaalData = (data) => {
     is_uitgelicht: data.is_uitgelicht,
     is_spotlighted: data.is_spotlighted,
     is_onzichtbaar: data.is_onzichtbaar, // Keep the original field
-    is_downloadable: data.is_downloadable // Add the new field
+    is_downloadable: data.is_downloadable, // Add the new field
+    word_file: data.word_file, // Add the Word document field
+    word_file_name: data.word_file_name // Add the Word document filename
   };
 };
 
@@ -199,7 +201,6 @@ export const adminVerhalenAPI = {
         throw new Error('Kon verhaal niet ophalen');
       }
       const data = await response.json();
-      console.log('Raw verhaal data from API:', data);
       return transformVerhaalData(data);
     } catch (error) {
       console.error('Error fetching verhaal:', error);
@@ -246,6 +247,13 @@ export const adminVerhalenAPI = {
         formData.append('cover_image', '');
       } else if (verhaalData.cover_image instanceof File) {
         formData.append('cover_image', verhaalData.cover_image);
+      }
+      
+      // Handle Word document
+      if (verhaalData.word_file === null) {
+        formData.append('word_file', '');
+      } else if (verhaalData.word_file instanceof File) {
+        formData.append('word_file', verhaalData.word_file);
       }
 
       const response = await fetch(getApiUrl('/api/verhalen/admin/'), {
@@ -294,6 +302,13 @@ export const adminVerhalenAPI = {
         formData.append('cover_image', '');
       } else if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
+      }
+      
+      // Handle Word document
+      if (data.word_file === null) {
+        formData.append('word_file', '');
+      } else if (data.word_file instanceof File) {
+        formData.append('word_file', data.word_file);
       }
 
       const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {

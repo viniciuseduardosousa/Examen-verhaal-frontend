@@ -15,7 +15,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     is_spotlighted: false,
     is_downloadable: false,
     naam: '',
-    cover_image: null
+    cover_image: null,
+    word_file: null
   });
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -23,6 +24,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [coverPreview, setCoverPreview] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [wordFilename, setWordFilename] = useState('');
 
   // Reset form when dialog is opened or closed
   useEffect(() => {
@@ -40,11 +42,13 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         is_spotlighted: false,
         is_downloadable: false,
         naam: '',
-        cover_image: null
+        cover_image: null,
+        word_file: null
       });
       setCoverPreview(null);
       setRemoveImage(false);
       setError('');
+      setWordFilename('');
     } else if (isOpen && data) {
       // Initialize with data when opened with data
       if (isCategory) {
@@ -60,7 +64,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_spotlighted: false,
           is_downloadable: false,
           naam: data.naam || '',
-          cover_image: data.cover_image || null
+          cover_image: data.cover_image || null,
+          word_file: data.word_file
         });
         
         if (data.cover_image && typeof data.cover_image === 'string') {
@@ -81,13 +86,26 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
           is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
           naam: '',
-          cover_image: null
+          cover_image: null,
+          word_file: data.word_file
         });
         
         if (data.cover_image && typeof data.cover_image === 'string') {
           setCoverPreview(data.cover_image);
         } else {
           setCoverPreview(null);
+        }
+        
+        // Check localStorage for stored filename
+        const storedFilename = data.id ? localStorage.getItem(`word_filename_${data.id}`) : null;
+        
+        // Set filename from data or localStorage
+        if (data.word_file !== null && data.word_file !== undefined) {
+          setWordFilename(data.word_file_name || `${data.titel || 'Document'}.docx`);
+        } else if (storedFilename) {
+          setWordFilename(storedFilename);
+        } else {
+          setWordFilename('');
         }
       }
       setRemoveImage(false);
@@ -155,13 +173,21 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           datum: formattedDate,
           is_uitgelicht: formData.is_uitgelicht,
           is_spotlighted: formData.is_spotlighted,
-          is_downloadable: formData.is_downloadable
+          is_downloadable: formData.is_downloadable,
+          word_file: wordFilename === '' ? null : formData.word_file
         };
 
         if (formData.coverImage instanceof File) {
           updateData.cover_image = formData.coverImage;
         } else if (removeImage) {
           updateData.remove_image = true;
+        }
+        
+        // Store or remove the filename in localStorage 
+        if (wordFilename === '') {
+          localStorage.removeItem(`word_filename_${data.id}`);
+        } else if (data && data.id) {
+          localStorage.setItem(`word_filename_${data.id}`, wordFilename);
         }
         
         await adminVerhalenAPI.update(data.id, updateData);
@@ -237,8 +263,15 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       setFormData(prev => ({
         ...prev,
         tekst: cleanHtml,
-        displayText: displayText
+        displayText: displayText,
+        word_file: file
       }));
+      setWordFilename(file.name);
+      
+      // Store the filename in localStorage when a file is uploaded
+      if (data && data.id) {
+        localStorage.setItem(`word_filename_${data.id}`, file.name);
+      }
     } catch (error) {
       console.error('Error importing Word document:', error);
       setError('Er is een fout opgetreden bij het importeren van het Word document');
@@ -584,6 +617,70 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       }`}
                     />
                   </div>
+                </div>
+                <div className="relative mb-4">
+                  <label className="block text-base font-mono font-bold mb-2">
+                    Word Document
+                  </label>
+                  
+                  {wordFilename ? (
+                    <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-green-700 font-mono flex-grow truncate">
+                        {wordFilename}
+                      </span>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Wilt u het document "${wordFilename}" verwijderen?`)) {
+                            setWordFilename('');
+                            setFormData(prev => ({
+                              ...prev,
+                              tekst: '',
+                              displayText: '',
+                              word_file: null
+                            }));
+                            
+                            // Remove filename from localStorage when document is removed
+                            if (data && data.id) {
+                              localStorage.removeItem(`word_filename_${data.id}`);
+                            }
+                            
+                            // Reset file input
+                            const fileInput = document.querySelector('input[type="file"][accept=".docx"]');
+                            if (fileInput) {
+                              fileInput.value = "";
+                            }
+                          }
+                        }}
+                        className="ml-2 text-red-500 hover:text-red-700 focus:outline-none"
+                        title="Verwijder document"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex">
+                      <label className="flex-grow flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 rounded-md cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-blue-700 font-mono">
+                          Word document importeren
+                        </span>
+                        <input
+                          type="file"
+                          accept=".docx"
+                          onChange={handleWordImport}
+                          className="sr-only"
+                        />
+                      </label>
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
                   <button
