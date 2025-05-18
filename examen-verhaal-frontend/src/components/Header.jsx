@@ -26,7 +26,7 @@ const Header = () => {
           <div className="flex items-center gap-12">
             {/* Logo */}
             <Link to="/" className="text-2xl font-bold text-gray-800">
-              Ingscribblings
+              IngsScribblings
             </Link>
 
             {/* Desktop Navigation */}

@@ -5,7 +5,7 @@ const AdminHeader = ({ onLogout }) => {
     <>
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-mono font-bold">Ingscribblings</h1>
+        <h1 className="text-xl font-mono font-bold">IngsScribblings</h1>
         <button 
           onClick={onLogout}
           className="text-gray-600 hover:text-gray-900 flex items-center gap-2"

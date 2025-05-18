@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 relative">
           {/* Logo/Brand section */}
           <div className="relative min-h-[120px] flex flex-col">
-            <h3 className="text-2xl font-medium mb-6 h-[32px]">Ingscribblings</h3>
+            <h3 className="text-2xl font-medium mb-6 h-[32px]">IngsScribblings</h3>
             <p className="text-gray-700 flex-grow text-lg leading-relaxed">
               Ontdek verhalen die je raken, 
               inspireren en vermaken. Een plek 
@@ -44,14 +44,14 @@ const Footer = () => {
             <ul className="space-y-4 flex-grow">
               <li>
                 <a 
-                  href="mailto:info@Ingscribblings.nl" 
+                  href="mailto:info@IngsScribblings.nl" 
                   className="text-gray-700 hover:text-gray-900 text-lg transition-colors duration-200 flex items-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                   </svg>
-                  info@Ingscribblings.nl
+                  info@IngsScribblings.nl
                 </a>
               </li>
             </ul>
@@ -63,7 +63,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="text-center text-gray-700 h-[24px]">
-          <p>&copy; {currentYear} Ingscribblings. Alle rechten voorbehouden.</p>
+          <p>&copy; {currentYear} IngsScribblings. Alle rechten voorbehouden.</p>
         </div>
       </div>
     </footer>
