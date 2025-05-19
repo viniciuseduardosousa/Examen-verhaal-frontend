@@ -27,7 +27,7 @@ const CategoryCard = ({ title, description, imageUrl, category }) => {
         
         {/* Button onder de afbeelding */}
         <button className="flex items-center justify-center gap-2 w-full border-2 border-gray-800 py-2 px-4 hover:bg-gray-50 transition-colors">
-          <span>Bekijk categorie</span>
+          <span>Bekijk verhalen</span>
           <ArrowIcon className="w-4 h-4" />
         </button>
       </div>
