@@ -444,9 +444,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                           value={formData.categorie || ''}
                           onChange={handleChange}
                           required
-                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-no-repeat bg-[right_0.75rem_center] pr-8 ${
                             isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                           }`}
+                          style={{ backgroundImage: "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")", backgroundSize: "1.5em 1.5em" }}
                         >
                           <option value="">Selecteer een categorie</option>
                           {categories.map(cat => (
