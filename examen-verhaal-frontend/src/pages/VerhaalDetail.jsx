@@ -146,7 +146,29 @@ const VerhaalDetail = () => {
                   Deel
                 </button>
                 {verhaal.is_downloadable && (
-                  <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2">
+                  <button 
+                    onClick={async () => {
+                      try {
+                        // Open PDF in new tab
+                        window.open(verhaal.pdf_file, '_blank');
+                        
+                        // Download PDF
+                        const response = await fetch(verhaal.pdf_file);
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${verhaal.titel}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                      } catch (error) {
+                        console.error('Error downloading PDF:', error);
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       height="24px"
