@@ -9,7 +9,7 @@ import AdminHeader from "../../components/admin/AdminHeader";
 import AdminTabs from "../../components/admin/AdminTabs";
 import AdminSearchBar from "../../components/admin/AdminSearchBar";
 import AdminItemList from "../../components/admin/AdminItemList";
-import AdminPagination from "../../components/admin/AdminPagination";
+import { AdminPagination } from "../../components/Pagination";
 import toast from 'react-hot-toast';
 
 // Custom hook voor dynamische items per pagina

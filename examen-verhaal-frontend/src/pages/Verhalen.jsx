@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
 import NoCoverStoryCard from '../components/cards/NoCoverStoryCard';
 import Divider from '../components/decorative/Divider';
+import { StoriesPagination } from '../components/Pagination';
 import { verhalenAPI, categoriesAPI } from '../services/api';
 import Loader from '../components/Loader';
 
@@ -16,6 +17,8 @@ const Verhalen = () => {
   const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const storiesPerPage = 12;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,7 +119,13 @@ const Verhalen = () => {
       }
     });
 
-  // Get stories for "Andere categorieën" section
+  // berekenen van de pagination
+  const indexOfLastStory = currentPage * storiesPerPage;
+  const indexOfFirstStory = indexOfLastStory - storiesPerPage;
+  const currentStories = filteredStories.slice(indexOfFirstStory, indexOfLastStory);
+  const totalPages = Math.ceil(filteredStories.length / storiesPerPage);
+
+  // Get verhalen voor "Andere verhalen" sectie
   const otherCategoriesStories = stories.slice(0, 3);
 
   if (loading) {
@@ -197,9 +206,9 @@ const Verhalen = () => {
       </div>
 
       {/* Stories Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
-        {filteredStories.length > 0 ? (
-          filteredStories.map((story, index) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
+        {currentStories.length > 0 ? (
+          currentStories.map((story, index) => {
             const hasCoverImage = Boolean(story.cover_image);
             
             return (
@@ -239,6 +248,13 @@ const Verhalen = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <StoriesPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+      />
       
       {/* Andere verhalen sectie */}
       <Divider />
