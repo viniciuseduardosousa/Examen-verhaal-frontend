@@ -11,7 +11,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     description: '',
     published: true,
     category: '',
-    coverImage: null,
+    cover_image: null,
     date: new Date().toISOString().split('T')[0],
     is_spotlighted: false,
     is_uitgelicht: false,
@@ -19,7 +19,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     url: '',
     // Category fields
     naam: '',
-    cover_image: null,
     word_file: null
   });
   const [error, setError] = useState('');
@@ -95,9 +94,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           word_file: wordFilename === '' ? null : formData.word_file
         };
 
-        // Only include coverImage if there's a file or we want to remove it
-        if (formData.coverImage instanceof File) {
-          updateData.cover_image = formData.coverImage;
+        // Only include cover_image if there's a file or we want to remove it
+        if (formData.cover_image instanceof File) {
+          updateData.cover_image = formData.cover_image;
         } else if (removeImage) {
           updateData.cover_image = '';
         }
@@ -223,7 +222,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         description: '',
         published: true,
         category: '',
-        coverImage: null,
+        cover_image: null,
         date: new Date().toISOString().split('T')[0],
         is_spotlighted: false,
         is_uitgelicht: false,
@@ -231,7 +230,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         url: '',
         // Category fields
         naam: '',
-        cover_image: null,
         word_file: null
       });
       setError('');
@@ -370,7 +368,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                       <div className="relative w-full h-[200px] flex items-center justify-center border-2 border-dashed border-gray-400 rounded-md bg-[#D9D9D9] cursor-pointer group">
                         <input
                           type="file"
-                          name="coverImage"
+                          name="cover_image"
                           onChange={handleChange}
                           accept="image/*"
                           className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
@@ -383,7 +381,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                               className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center z-20 cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                document.querySelector('input[name="coverImage"]').click();
+                                document.querySelector('input[name="cover_image"]').click();
                               }}
                             >
                               <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-sm font-mono">
@@ -395,7 +393,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setCoverPreview(null);
-                                setFormData(prev => ({ ...prev, coverImage: null }));
+                                setFormData(prev => ({ ...prev, cover_image: null }));
                                 setRemoveImage(true);
                               }}
                               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"

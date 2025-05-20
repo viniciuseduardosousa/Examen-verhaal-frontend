@@ -3,6 +3,7 @@ import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
+  console.log('EditDialog received data:', JSON.stringify(data, null, 2));
   const [formData, setFormData] = useState({
     titel: '',
     tekst: '',
@@ -10,13 +11,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     is_onzichtbaar: false,
     categorie: '',
     date: '',
-    coverImage: null,
+    cover_image: null,
     is_uitgelicht: false,
     is_spotlighted: false,
     is_downloadable: false,
     url: '',
     naam: '',
-    cover_image: null,
     word_file: null
   });
   const [error, setError] = useState('');
@@ -38,13 +38,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         is_onzichtbaar: false,
         categorie: '',
         date: '',
-        coverImage: null,
+        cover_image: null,
         is_uitgelicht: false,
         is_spotlighted: false,
         is_downloadable: false,
         url: '',
         naam: '',
-        cover_image: null,
         word_file: null
       });
       setCoverPreview(null);
@@ -61,16 +60,19 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_onzichtbaar: false,
           categorie: '',
           date: '',
-          coverImage: null,
+          cover_image: data.cover_image || null,
           is_uitgelicht: data.is_uitgelicht || false,
           is_spotlighted: false,
           is_downloadable: false,
-          url: '',
+          url: data.url || '',
           naam: data.naam || '',
-          cover_image: data.cover_image || null,
           word_file: data.word_file
         });
+        if (data.cover_image) {
+          setCoverPreview(data.cover_image);
+        }
       } else {
+        console.log('Setting form data with:', data); // Debug log
         setFormData({
           titel: data.titel || '',
           tekst: data.tekst || '',
@@ -78,18 +80,32 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
           categorie: data.categorie?.toString() || '',
           date: data.datum || '',
-          coverImage: data.cover_image || null,
+          cover_image: data.cover_image || null,
           is_uitgelicht: data.is_uitgelicht === true || data.is_uitgelicht === 'true',
           is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
           is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
           url: data.url || '',
           naam: '',
-          cover_image: null,
           word_file: data.word_file
         });
+        if (data.cover_image) {
+          setCoverPreview(data.cover_image);
+        }
         
-        // Log the data to verify URL is present
+        // Load word filename from localStorage
+        if (data.id) {
+          const storedFilename = localStorage.getItem(`word_filename_${data.id}`);
+          if (storedFilename) {
+            setWordFilename(storedFilename);
+          }
+        }
+        
+        // Log the data to verify URL and is_downloadable are present
         console.log('Loading data in EditDialog:', data);
+        console.log('Form data after setting:', {
+          is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
+          url: data.url || ''
+        });
       }
       setRemoveImage(false);
     }
@@ -162,8 +178,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           word_file: wordFilename === '' ? null : formData.word_file
         };
 
-        if (formData.coverImage instanceof File) {
-          updateData.cover_image = formData.coverImage;
+        if (formData.cover_image instanceof File) {
+          updateData.cover_image = formData.cover_image;
         } else if (removeImage) {
           updateData.remove_image = true;
         }
@@ -512,7 +528,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       <div className="relative w-full h-[200px] flex items-center justify-center border-2 border-dashed border-gray-400 rounded-md bg-[#D9D9D9] cursor-pointer group">
                         <input
                           type="file"
-                          name="coverImage"
+                          name="cover_image"
                           onChange={handleChange}
                           accept="image/*"
                           className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
@@ -525,7 +541,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center z-20 cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                document.querySelector('input[name="coverImage"]').click();
+                                document.querySelector('input[name="cover_image"]').click();
                               }}
                             >
                               <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-sm font-mono">
@@ -537,7 +553,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setCoverPreview(null);
-                                setFormData(prev => ({ ...prev, coverImage: null }));
+                                setFormData(prev => ({ ...prev, cover_image: null }));
                                 setRemoveImage(true);
                               }}
                               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30"

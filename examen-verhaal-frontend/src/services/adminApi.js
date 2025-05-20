@@ -170,10 +170,10 @@ const transformVerhaalData = (data) => {
     is_uitgelicht: data.is_uitgelicht,
     is_spotlighted: data.is_spotlighted,
     is_onzichtbaar: data.is_onzichtbaar, // Keep the original field
-    is_downloadable: data.is_downloadable, // Add the new field
+    is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true', // Explicitly check for true
     word_file: data.word_file, // Add the Word document field
     word_file_name: data.word_file_name, // Add the Word document filename
-    url: data.url // Add the URL field
+    url: data.url || '' // Add the URL field with empty string as fallback
   };
 };
 

@@ -206,6 +206,8 @@ const Dashboard = () => {
         datum: item.date,
         is_uitgelicht: item.is_uitgelicht,
         is_spotlighted: item.is_spotlighted,
+        is_downloadable: item.is_downloadable,
+        url: item.url,
         cover_image: item.cover_image
       };
       console.log('Transformed item for edit:', transformedItem);
