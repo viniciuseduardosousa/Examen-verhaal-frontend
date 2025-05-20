@@ -590,17 +590,14 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   </div>
                   <div>
                     <label className="block text-base font-mono font-bold mb-1">
-                      Korte beschrijving <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                      Korte beschrijving
                     </label>
                     <textarea
                       name="beschrijving"
                       value={formData.beschrijving}
                       onChange={handleChange}
-                      required
                       rows="2"
-                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     />
                   </div>
 
