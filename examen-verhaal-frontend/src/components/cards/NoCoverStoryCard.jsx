@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 
-const NoCoverStoryCard = ({ id, title, text, category, onCategoryClick }) => {
+const NoCoverStoryCard = ({ id, title, text, category, date, onCategoryClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();

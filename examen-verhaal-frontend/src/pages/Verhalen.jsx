@@ -105,19 +105,41 @@ const Verhalen = () => {
       return selectedCategories.includes(categoryName);
     })
     .sort((a, b) => {
+      // First apply the selected sort order
+      let sortResult;
       switch (sortBy) {
         case 'date-new':
         case '':
-          return new Date(b.datum) - new Date(a.datum);
+          sortResult = new Date(b.datum) - new Date(a.datum);
+          break;
         case 'date-old':
-          return new Date(a.datum) - new Date(b.datum);
+          sortResult = new Date(a.datum) - new Date(b.datum);
+          break;
         case 'az':
-          return a.titel.localeCompare(b.titel);
+          sortResult = a.titel.localeCompare(b.titel);
+          break;
         case 'za':
-          return b.titel.localeCompare(a.titel);
+          sortResult = b.titel.localeCompare(a.titel);
+          break;
         default:
-          return new Date(b.datum) - new Date(a.datum);
+          sortResult = new Date(b.datum) - new Date(a.datum);
       }
+
+      // If there are multiple selected categories, prioritize the first selected one
+      if (selectedCategories.length > 1) {
+        const categoryA = categoryMap[a.categorie];
+        const categoryB = categoryMap[b.categorie];
+        const indexA = selectedCategories.indexOf(categoryA);
+        const indexB = selectedCategories.indexOf(categoryB);
+
+        // If both stories are from the same category, use the original sort result
+        if (indexA === indexB) return sortResult;
+
+        // Otherwise, prioritize the first selected category (lower index = higher priority)
+        return indexB - indexA;
+      }
+
+      return sortResult;
     });
 
   // berekenen van de pagination
@@ -232,6 +254,7 @@ const Verhalen = () => {
                     title={story.titel}
                     text={story.tekst}
                     category={categoryMap[story.categorie]}
+                    date={story.datum}
                   />
                 )}
               </div>
@@ -287,6 +310,7 @@ const Verhalen = () => {
                     title={story.titel}
                     text={story.tekst}
                     category={categoryMap[story.categorie]}
+                    date={story.datum}
                   />
                 )}
               </div>

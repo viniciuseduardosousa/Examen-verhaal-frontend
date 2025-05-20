@@ -127,6 +127,19 @@ const VerhaalDetail = () => {
               <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-gray-800 leading-tight">
                 {verhaal.titel}
               </h1>
+              {!verhaal.cover_image && (
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => handleCategoryClick(verhaal.categorie)}
+                    className="px-3 py-1 bg-gray-200 rounded-full text-sm hover:bg-gray-300 transition-colors"
+                  >
+                    {categoryMap[verhaal.categorie] || "Onbekende categorie"}
+                  </button>
+                  <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                    {verhaal.datum || "Geen datum beschikbaar"}
+                  </span>
+                </div>
+              )}
               <p className="text-xl text-gray-600 max-w-2xl mb-6 leading-relaxed font-serif whitespace-pre-wrap break-words overflow-wrap-anywhere">
                 {verhaal.beschrijving}
               </p>
