@@ -229,7 +229,7 @@ const Verhalen = () => {
                   <NoCoverStoryCard
                     id={story.id}
                     title={story.titel}
-                    description={story.beschrijving}
+                    text={story.tekst}
                     category={categoryMap[story.categorie]}
                   />
                 )}
@@ -284,7 +284,7 @@ const Verhalen = () => {
                   <NoCoverStoryCard
                     id={story.id}
                     title={story.titel}
-                    description={story.beschrijving}
+                    text={story.tekst}
                     category={categoryMap[story.categorie]}
                   />
                 )}

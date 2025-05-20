@@ -55,7 +55,7 @@ const StoriesSection = () => {
                 key={verhaal.id}
                 id={verhaal.id}
                 title={verhaal.titel}
-                description={verhaal.beschrijving}
+                text={verhaal.tekst}
                 category={verhaal.categorie.naam}
               />
             );
