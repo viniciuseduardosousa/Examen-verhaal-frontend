@@ -172,7 +172,8 @@ const transformVerhaalData = (data) => {
     is_onzichtbaar: data.is_onzichtbaar, // Keep the original field
     is_downloadable: data.is_downloadable, // Add the new field
     word_file: data.word_file, // Add the Word document field
-    word_file_name: data.word_file_name // Add the Word document filename
+    word_file_name: data.word_file_name, // Add the Word document filename
+    url: data.url // Add the URL field
   };
 };
 
@@ -241,6 +242,9 @@ export const adminVerhalenAPI = {
       if (verhaalData.is_downloadable !== undefined) {
         formData.append('is_downloadable', verhaalData.is_downloadable ? 'true' : 'false');
       }
+      if (verhaalData.url !== undefined) {
+        formData.append('url', verhaalData.url || '');
+      }
 
       // Handle cover image
       if (verhaalData.remove_image) {
@@ -296,6 +300,7 @@ export const adminVerhalenAPI = {
       formData.append('is_uitgelicht', data.is_uitgelicht ? 'true' : 'false');
       formData.append('is_spotlighted', data.is_spotlighted ? 'true' : 'false');
       formData.append('is_downloadable', data.is_downloadable ? 'true' : 'false');
+      formData.append('url', data.url || ''); // Add URL field
 
       // Handle cover image
       if (data.remove_image) {

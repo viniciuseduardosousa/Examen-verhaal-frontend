@@ -14,6 +14,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     is_uitgelicht: false,
     is_spotlighted: false,
     is_downloadable: false,
+    url: '',
     naam: '',
     cover_image: null,
     word_file: null
@@ -41,6 +42,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         is_uitgelicht: false,
         is_spotlighted: false,
         is_downloadable: false,
+        url: '',
         naam: '',
         cover_image: null,
         word_file: null
@@ -63,16 +65,11 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_uitgelicht: data.is_uitgelicht || false,
           is_spotlighted: false,
           is_downloadable: false,
+          url: '',
           naam: data.naam || '',
           cover_image: data.cover_image || null,
           word_file: data.word_file
         });
-        
-        if (data.cover_image && typeof data.cover_image === 'string') {
-          setCoverPreview(data.cover_image);
-        } else {
-          setCoverPreview(null);
-        }
       } else {
         setFormData({
           titel: data.titel || '',
@@ -85,28 +82,14 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_uitgelicht: data.is_uitgelicht === true || data.is_uitgelicht === 'true',
           is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
           is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
+          url: data.url || '',
           naam: '',
           cover_image: null,
           word_file: data.word_file
         });
         
-        if (data.cover_image && typeof data.cover_image === 'string') {
-          setCoverPreview(data.cover_image);
-        } else {
-          setCoverPreview(null);
-        }
-        
-        // Check localStorage for stored filename
-        const storedFilename = data.id ? localStorage.getItem(`word_filename_${data.id}`) : null;
-        
-        // Set filename from data or localStorage
-        if (data.word_file !== null && data.word_file !== undefined) {
-          setWordFilename(data.word_file_name || `${data.titel || 'Document'}.docx`);
-        } else if (storedFilename) {
-          setWordFilename(storedFilename);
-        } else {
-          setWordFilename('');
-        }
+        // Log the data to verify URL is present
+        console.log('Loading data in EditDialog:', data);
       }
       setRemoveImage(false);
     }
@@ -151,6 +134,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         const updateData = {
           naam: formData.naam,
           is_uitgelicht: formData.is_uitgelicht,
+          url: formData.url || '',
         };
 
         if (formData.cover_image instanceof File) {
@@ -174,6 +158,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_uitgelicht: formData.is_uitgelicht,
           is_spotlighted: formData.is_spotlighted,
           is_downloadable: formData.is_downloadable,
+          url: formData.url || null,
           word_file: wordFilename === '' ? null : formData.word_file
         };
 
@@ -189,6 +174,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         } else if (data && data.id) {
           localStorage.setItem(`word_filename_${data.id}`, wordFilename);
         }
+        
+        // Log the update data to verify URL is included
+        console.log('Sending update data:', updateData);
         
         await adminVerhalenAPI.update(data.id, updateData);
       }
@@ -468,6 +456,19 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                           className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                             isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                           }`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-mono font-bold mb-1">
+                          URL
+                        </label>
+                        <input
+                          type="url"
+                          name="url"
+                          value={formData.url}
+                          onChange={handleChange}
+                          placeholder="https://example.com"
+                          className="w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                       <div className="flex flex-col gap-2 mt-2">

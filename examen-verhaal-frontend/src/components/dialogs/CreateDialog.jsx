@@ -16,6 +16,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     is_spotlighted: false,
     is_uitgelicht: false,
     is_downloadable: false,
+    url: '',
     // Category fields
     naam: '',
     cover_image: null,
@@ -90,6 +91,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           is_spotlighted: formData.is_spotlighted || false,
           is_uitgelicht: formData.is_uitgelicht || false,
           is_downloadable: formData.is_downloadable || false,
+          url: formData.url || null,
           word_file: wordFilename === '' ? null : formData.word_file
         };
 
@@ -226,6 +228,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         is_spotlighted: false,
         is_uitgelicht: false,
         is_downloadable: false,
+        url: '',
         // Category fields
         naam: '',
         cover_image: null,
@@ -470,6 +473,19 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-mono font-bold mb-1">
+                      URL
+                    </label>
+                    <input
+                      type="url"
+                      name="url"
+                      value={formData.url}
+                      onChange={handleChange}
+                      placeholder="https://example.com"
+                      className="w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
