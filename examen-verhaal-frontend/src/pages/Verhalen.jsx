@@ -11,7 +11,7 @@ const Verhalen = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState('sorteren op');
   const [stories, setStories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
@@ -107,6 +107,7 @@ const Verhalen = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'date-new':
+        case '':
           return new Date(b.datum) - new Date(a.datum);
         case 'date-old':
           return new Date(a.datum) - new Date(b.datum);
@@ -115,7 +116,7 @@ const Verhalen = () => {
         case 'za':
           return b.titel.localeCompare(a.titel);
         default:
-          return 0;
+          return new Date(b.datum) - new Date(a.datum);
       }
     });
 
@@ -188,7 +189,7 @@ const Verhalen = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-auto appearance-none bg-white pr-8 cursor-pointer"
+              className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-[240px] appearance-none bg-white pr-8 cursor-pointer"
             >
               <option value="">Sorteren op</option>
               <option value="date-new">Datum (nieuwste eerst)</option>
