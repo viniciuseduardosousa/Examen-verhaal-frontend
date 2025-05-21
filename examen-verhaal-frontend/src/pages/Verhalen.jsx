@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import StoryCard from '../components/cards/StoryCard';
+import NoCoverStoryCard from '../components/cards/NoCoverStoryCard';
 import Divider from '../components/decorative/Divider';
+import { StoriesPagination } from '../components/Pagination';
 import { verhalenAPI, categoriesAPI } from '../services/api';
+import Loader from '../components/Loader';
 
 const Verhalen = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState('sorteren op');
   const [stories, setStories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const storiesPerPage = 12;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,16 +70,31 @@ const Verhalen = () => {
       const newCategories = selectedCategories.filter(c => c !== category);
       setSelectedCategories(newCategories);
       navigate(newCategories.length > 0 ? `/verhalen?category=${encodeURIComponent(newCategories.join(','))}` : '/verhalen');
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     } else {
       const newCategories = [...selectedCategories, category];
       setSelectedCategories(newCategories);
       navigate(`/verhalen?category=${encodeURIComponent(newCategories.join(','))}`);
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
     navigate('/verhalen');
+    // Scroll to top of page after navigation
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   // Filter stories for the grid
@@ -85,25 +105,61 @@ const Verhalen = () => {
       return selectedCategories.includes(categoryName);
     })
     .sort((a, b) => {
+      // First apply the selected sort order
+      let sortResult;
       switch (sortBy) {
         case 'date-new':
-          return new Date(b.datum) - new Date(a.datum);
+        case '':
+          sortResult = new Date(b.datum) - new Date(a.datum);
+          break;
         case 'date-old':
-          return new Date(a.datum) - new Date(b.datum);
+          sortResult = new Date(a.datum) - new Date(b.datum);
+          break;
         case 'az':
-          return a.titel.localeCompare(b.titel);
+          sortResult = a.titel.localeCompare(b.titel);
+          break;
         case 'za':
-          return b.titel.localeCompare(a.titel);
+          sortResult = b.titel.localeCompare(a.titel);
+          break;
         default:
-          return 0;
+          sortResult = new Date(b.datum) - new Date(a.datum);
       }
+
+      // If there are multiple selected categories, prioritize the first selected one
+      if (selectedCategories.length > 1) {
+        const categoryA = categoryMap[a.categorie];
+        const categoryB = categoryMap[b.categorie];
+        const indexA = selectedCategories.indexOf(categoryA);
+        const indexB = selectedCategories.indexOf(categoryB);
+
+        // If both stories are from the same category, use the original sort result
+        if (indexA === indexB) return sortResult;
+
+        // Otherwise, prioritize the first selected category (lower index = higher priority)
+        return indexB - indexA;
+      }
+
+      return sortResult;
     });
 
-  // Get stories for "Andere categorieën" section
+  // berekenen van de pagination
+  const indexOfLastStory = currentPage * storiesPerPage;
+  const indexOfFirstStory = indexOfLastStory - storiesPerPage;
+  const currentStories = filteredStories.slice(indexOfFirstStory, indexOfLastStory);
+  const totalPages = Math.ceil(filteredStories.length / storiesPerPage);
+
+  // Get verhalen voor "Andere verhalen" sectie
   const otherCategoriesStories = stories.slice(0, 3);
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-8">Laden...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <Loader size="large" className="mb-4" />
+          <p className="text-gray-600">Verhalen laden...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -123,8 +179,9 @@ const Verhalen = () => {
                 key={`${category}-${index}`}
                 onClick={() => toggleCategory(category)}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-2 ${
-                  selectedCategories.includes(category) ? 'bg-gray-300' : 'bg-gray-200 hover:bg-gray-300'
+                  selectedCategories.includes(category) ? 'bg-gray-400 text-gray-900' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
+                aria-label={`${selectedCategories.includes(category) ? 'Verwijder' : 'Selecteer'} categorie ${category}`}
               >
                 <span className="text-sm sm:text-base">{category}</span>
                 {selectedCategories.includes(category) && (
@@ -154,7 +211,7 @@ const Verhalen = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-auto appearance-none bg-white pr-8 cursor-pointer"
+              className="border border-gray-300 rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base w-full sm:w-[240px] appearance-none bg-white pr-8 cursor-pointer"
             >
               <option value="">Sorteren op</option>
               <option value="date-new">Datum (nieuwste eerst)</option>
@@ -172,23 +229,37 @@ const Verhalen = () => {
       </div>
 
       {/* Stories Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16">
-        {filteredStories.length > 0 ? (
-          filteredStories.map((story, index) => (
-            <div 
-              key={story.id}
-              className="animate-slideDown"
-              style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-            >
-              <StoryCard
-                id={story.id}
-                title={story.titel}
-                description={story.beschrijving}
-                imageUrl={story.cover_image}
-                category={categoryMap[story.categorie]}
-              />
-            </div>
-          ))
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
+        {currentStories.length > 0 ? (
+          currentStories.map((story, index) => {
+            const hasCoverImage = Boolean(story.cover_image);
+            
+            return (
+              <div 
+                key={story.id}
+                className="animate-slideDown"
+                style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+              >
+                {hasCoverImage ? (
+                  <StoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    imageUrl={story.cover_image}
+                    category={categoryMap[story.categorie]}
+                  />
+                ) : (
+                  <NoCoverStoryCard
+                    id={story.id}
+                    title={story.titel}
+                    text={story.tekst}
+                    category={categoryMap[story.categorie]}
+                    date={story.datum}
+                  />
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-600 text-lg">Geen verhalen beschikbaar voor deze categorie</p>
@@ -201,32 +272,50 @@ const Verhalen = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <StoriesPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+      />
       
-      {/* Andere categorieën sectie */}
+      {/* Andere verhalen sectie */}
       <Divider />
       <div className="mt-16">
         <h2 className="text-xl font-medium mb-8 flex items-center">
-          Andere categorieën
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-          </svg>
+          Andere verhalen
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {otherCategoriesStories.map((story, index) => (
-            <div 
-              key={story.id}
-              className="animate-slideDown"
-              style={{ animationDelay: `${(index % 3) * 0.1}s` }}
-            >
-              <StoryCard
-                id={story.id}
-                title={story.titel}
-                description={story.beschrijving}
-                imageUrl={story.cover_image}
-                category={categoryMap[story.categorie]}
-              />
-            </div>
-          ))}
+          {otherCategoriesStories.map((story, index) => {
+            const hasCoverImage = Boolean(story.cover_image);
+            
+            return (
+              <div 
+                key={story.id}
+                className="animate-slideDown"
+                style={{ animationDelay: `${(index % 3) * 0.1}s` }}
+              >
+                {hasCoverImage ? (
+                  <StoryCard
+                    id={story.id}
+                    title={story.titel}
+                    description={story.beschrijving}
+                    imageUrl={story.cover_image}
+                    category={categoryMap[story.categorie]}
+                  />
+                ) : (
+                  <NoCoverStoryCard
+                    id={story.id}
+                    title={story.titel}
+                    text={story.tekst}
+                    category={categoryMap[story.categorie]}
+                    date={story.datum}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

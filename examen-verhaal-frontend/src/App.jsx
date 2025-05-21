@@ -2,6 +2,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import Toast from './components/Toast';
 import Home from './pages/Home';
 import Verhalen from './pages/Verhalen';
 import VerhaalDetail from './pages/VerhaalDetail';
@@ -11,13 +12,11 @@ import Register from './pages/admin/Register';
 import VerhalenDashboard from './pages/admin/Dashboard';
 import CreateVerhaal from './pages/admin/CreateVerhaal';
 import EditVerhaal from './pages/admin/EditVerhaal';
-import CookieBeleid from './pages/legal/CookieBeleid';
-import PrivacyBeleid from './pages/legal/PrivacyBeleid';
-import AlgemeneVoorwaarden from './pages/legal/AlgemeneVoorwaarden';
 
 function App() {
   return (
     <Router>
+      <Toast />
       <ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <Header />
@@ -32,9 +31,6 @@ function App() {
             <Route path="/admin/dashboard" element={<VerhalenDashboard />} />
             <Route path="/admin/verhalen/create" element={<CreateVerhaal />} />
             <Route path="/admin/verhalen/edit/:id" element={<EditVerhaal />} />
-            <Route path="/cookie-beleid" element={<CookieBeleid />} />
-            <Route path="/privacy-beleid" element={<PrivacyBeleid />} />
-            <Route path="/algemene-voorwaarden" element={<AlgemeneVoorwaarden />} />
           </Routes>
         </main>
         <Footer />

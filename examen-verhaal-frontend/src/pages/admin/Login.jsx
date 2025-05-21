@@ -53,7 +53,7 @@ const Login = () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <a href="/" className="inline-block">
-              <h1 className="text-3xl font-bold text-[#000000]">Ingscribblings</h1>
+              <h1 className="text-3xl font-bold text-[#000000]">IngsScribblings</h1>
             </a>
           </div>
 

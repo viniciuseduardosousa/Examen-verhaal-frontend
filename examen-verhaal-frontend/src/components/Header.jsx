@@ -26,7 +26,7 @@ const Header = () => {
           <div className="flex items-center gap-12">
             {/* Logo */}
             <Link to="/" className="text-2xl font-bold text-gray-800">
-              Ingsscribblings
+              IngsScribblings
             </Link>
 
             {/* Desktop Navigation */}
@@ -88,6 +88,7 @@ const Header = () => {
             <button
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
             >
               <svg
                 className="w-8 h-8 text-gray-800"

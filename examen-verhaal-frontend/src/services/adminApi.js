@@ -132,7 +132,7 @@ const handleApiResponse = async (response) => {
     
     if (response.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/admin/login';
+      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
       throw new Error('Niet geautoriseerd');
     }
     
@@ -170,7 +170,10 @@ const transformVerhaalData = (data) => {
     is_uitgelicht: data.is_uitgelicht,
     is_spotlighted: data.is_spotlighted,
     is_onzichtbaar: data.is_onzichtbaar, // Keep the original field
-    is_downloadable: data.is_downloadable // Add the new field
+    is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true', // Explicitly check for true
+    word_file: data.word_file, // Add the Word document field
+    word_file_name: data.word_file_name, // Add the Word document filename
+    url: data.url || '' // Add the URL field with empty string as fallback
   };
 };
 
@@ -193,13 +196,12 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon verhaal niet ophalen');
       }
       const data = await response.json();
-      console.log('Raw verhaal data from API:', data);
       return transformVerhaalData(data);
     } catch (error) {
       console.error('Error fetching verhaal:', error);
@@ -209,8 +211,6 @@ export const adminVerhalenAPI = {
 
   create: async (verhaalData) => {
     try {
-      console.log('Creating verhaal with data:', verhaalData);
-      
       // Validate required fields
       if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie) {
         throw new Error('Alle velden zijn verplicht');
@@ -224,23 +224,40 @@ export const adminVerhalenAPI = {
       
       const formData = new FormData();
       
-      // Add all fields to FormData
+      // Add required fields
       formData.append('titel', verhaalData.titel);
       formData.append('tekst', verhaalData.tekst);
       formData.append('beschrijving', verhaalData.beschrijving);
       formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
       formData.append('categorie', categoryId.toString());
       formData.append('datum', verhaalData.datum);
-
-      // Add cover image if provided
-      if (verhaalData.cover_image instanceof File) {
-        formData.append('cover_image', verhaalData.cover_image);
+      
+      // Add optional fields
+      if (verhaalData.is_uitgelicht !== undefined) {
+        formData.append('is_uitgelicht', verhaalData.is_uitgelicht ? 'true' : 'false');
+      }
+      if (verhaalData.is_spotlighted !== undefined) {
+        formData.append('is_spotlighted', verhaalData.is_spotlighted ? 'true' : 'false');
+      }
+      if (verhaalData.is_downloadable !== undefined) {
+        formData.append('is_downloadable', verhaalData.is_downloadable ? 'true' : 'false');
+      }
+      if (verhaalData.url !== undefined) {
+        formData.append('url', verhaalData.url || '');
       }
 
-      // Log FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value, typeof value);
+      // Handle cover image
+      if (verhaalData.remove_image) {
+        formData.append('cover_image', '');
+      } else if (verhaalData.cover_image instanceof File) {
+        formData.append('cover_image', verhaalData.cover_image);
+      }
+      
+      // Handle Word document
+      if (verhaalData.word_file === null) {
+        formData.append('word_file', '');
+      } else if (verhaalData.word_file instanceof File) {
+        formData.append('word_file', verhaalData.word_file);
       }
 
       const response = await fetch(getApiUrl('/api/verhalen/admin/'), {
@@ -252,31 +269,17 @@ export const adminVerhalenAPI = {
         credentials: 'include'
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
-        let errorText;
+        const errorText = await response.text();
         try {
-          errorText = await response.text();
-          console.error('Error response text:', errorText);
-          // Try to parse as JSON if possible
-          try {
-            const errorData = JSON.parse(errorText);
-            throw new Error(errorData.detail || errorData.message || 'Er is een fout opgetreden bij het aanmaken van het verhaal');
-          } catch (e) {
-            // If not JSON, use the raw text
-            throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
-          }
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || errorData.message || 'Er is een fout opgetreden bij het aanmaken van het verhaal');
         } catch (e) {
-          console.error('Error parsing response:', e);
           throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
       }
 
-      const data = await response.json();
-      console.log('Response data:', data);
-      return data;
+      return response.json();
     } catch (error) {
       console.error('Error creating verhaal:', error);
       throw error;
@@ -287,7 +290,7 @@ export const adminVerhalenAPI = {
     try {
       const formData = new FormData();
       
-      // Add all fields to FormData
+      // Add standard fields to FormData
       formData.append('titel', data.titel);
       formData.append('tekst', data.tekst);
       formData.append('beschrijving', data.beschrijving);
@@ -297,10 +300,20 @@ export const adminVerhalenAPI = {
       formData.append('is_uitgelicht', data.is_uitgelicht ? 'true' : 'false');
       formData.append('is_spotlighted', data.is_spotlighted ? 'true' : 'false');
       formData.append('is_downloadable', data.is_downloadable ? 'true' : 'false');
+      formData.append('url', data.url || ''); // Add URL field
 
-      // Add cover image if provided
-      if (data.cover_image instanceof File) {
+      // Handle cover image
+      if (data.remove_image) {
+        formData.append('cover_image', '');
+      } else if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
+      }
+      
+      // Handle Word document
+      if (data.word_file === null) {
+        formData.append('word_file', '');
+      } else if (data.word_file instanceof File) {
+        formData.append('word_file', data.word_file);
       }
 
       const response = await fetch(getApiUrl(`/api/verhalen/admin/${id}`), {
@@ -315,11 +328,17 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Kon verhaal niet bijwerken');
+        
+        const errorText = await response.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || errorData.message || 'Kon verhaal niet bijwerken');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
       }
 
       const responseData = await response.json();
@@ -336,7 +355,7 @@ export const adminVerhalenAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon verhaal niet verwijderen');
@@ -358,7 +377,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorieën niet ophalen');
@@ -396,7 +415,10 @@ export const adminCategoriesAPI = {
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
       
-      if (categoryData.cover_image instanceof File) {
+      // Handle cover image
+      if (categoryData.remove_image) {
+        formData.append('cover_image', '');
+      } else if (categoryData.cover_image instanceof File) {
         formData.append('cover_image', categoryData.cover_image);
       }
 
@@ -412,12 +434,11 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorie niet aanmaken');
       }
-      console.log('Categorie succesvol aangemaakt');
       return response.json();
     } catch (error) {
       console.error('Error creating category:', error);
@@ -431,7 +452,10 @@ export const adminCategoriesAPI = {
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
       
-      if (categoryData.cover_image instanceof File) {
+      // Handle cover image
+      if (categoryData.remove_image) {
+        formData.append('cover_image', '');
+      } else if (categoryData.cover_image instanceof File) {
         formData.append('cover_image', categoryData.cover_image);
       }
 
@@ -447,12 +471,19 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
-        throw new Error('Kon categorie niet bijwerken');
+        
+        const errorText = await response.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || errorData.message || 'Kon categorie niet bijwerken');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
       }
-      console.log('Categorie succesvol bijgewerkt');
+      
       return response.json();
     } catch (error) {
       console.error('Error updating category:', error);
@@ -466,7 +497,7 @@ export const adminCategoriesAPI = {
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/admin/login';
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
           throw new Error('Niet geautoriseerd');
         }
         throw new Error('Kon categorie niet verwijderen');

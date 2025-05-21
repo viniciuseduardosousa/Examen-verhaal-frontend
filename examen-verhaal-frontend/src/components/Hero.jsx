@@ -5,7 +5,7 @@ const Hero = () => {
     <div className="flex items-center justify-center min-h-screen w-full bg-[#FFFFF5] pt-24">
       <div className="text-center px-4">
         <h1 className="text-[3rem] md:text-[5.5rem] leading-none font-medium mb-8 md:mb-16 text-gray-800 tracking-tighter">
-        Ingscribblings
+        IngsScribblings
         </h1>
         
         <div className="relative inline-block group">

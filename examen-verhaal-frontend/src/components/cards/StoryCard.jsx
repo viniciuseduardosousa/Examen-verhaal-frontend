@@ -18,6 +18,11 @@ const StoryCard = ({ id, title, description, imageUrl, category, onCategoryClick
     if (!isCategorySelected) {
       e.stopPropagation();
       navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+      // Scroll to top of page after navigation
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -38,7 +43,7 @@ const StoryCard = ({ id, title, description, imageUrl, category, onCategoryClick
       <div className="p-3 sm:p-4 flex flex-col h-full">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-mono text-base sm:text-lg">{title}</h3>
+            <h3 className="font-mono text-base sm:text-lg break-words">{title}</h3>
             {category && (
               <span 
                 onClick={onCategoryClick ? (e) => onCategoryClick(e, category) : handleCategoryClick}
@@ -49,7 +54,9 @@ const StoryCard = ({ id, title, description, imageUrl, category, onCategoryClick
               </span>
             )}
           </div>
-          <p className="text-gray-700 text-xs sm:text-sm line-clamp-3">{description}</p>
+          <div className="overflow-hidden">
+            <p className="text-gray-700 text-xs sm:text-sm overflow-hidden overflow-ellipsis break-words whitespace-normal line-clamp-3">{description}</p>
+          </div>
         </div>
         
         {/* Lees meer button */}

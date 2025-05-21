@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import StoryCard from '../cards/StoryCard';
+import NoCoverStoryCard from '../cards/NoCoverStoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
 import { verhalenAPI } from '../../services/api';
+import Loader from '../Loader';
 
-const HighlightedStories = () => {
+const HighlightedStories = ({ onStoriesLoaded }) => {
   const [verhalen, setVerhalen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,26 +14,42 @@ const HighlightedStories = () => {
     const fetchVerhalen = async () => {
       try {
         const data = await verhalenAPI.getAll();
-        // Take the first 3 verhalen as highlighted
-        setVerhalen(data.slice(0, 3));
+        // Filter for highlighted stories
+        const highlightedStories = data.filter(story => story.is_uitgelicht);
+        setVerhalen(highlightedStories);
+        onStoriesLoaded(highlightedStories.length > 0);
         setError(null);
       } catch (err) {
         setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
         console.error('Error fetching verhalen:', err);
+        onStoriesLoaded(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchVerhalen();
-  }, []);
+  }, [onStoriesLoaded]);
 
   if (loading) {
-    return <div className="py-16">Laden...</div>;
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-8">
+          <div className="flex items-center gap-4 mb-12">
+            <h2 className="text-2xl font-medium">Uitgelichte verhalen</h2>
+          </div>
+          <Loader size="large" className="py-8" />
+        </div>
+      </section>
+    );
   }
 
   if (error) {
     return <div className="py-16 text-red-500">{error}</div>;
+  }
+
+  if (verhalen.length === 0) {
+    return null;
   }
 
   return (
@@ -40,21 +58,32 @@ const HighlightedStories = () => {
         {/* Header met pijl */}
         <div className="flex items-center gap-4 mb-12">
           <h2 className="text-2xl font-medium">Uitgelichte verhalen</h2>
-          <ArrowIcon className="w-6 h-6" />
         </div>
 
         {/* Grid met kaarten */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {verhalen.map((verhaal) => (
-            <StoryCard
-              key={verhaal.id}
-              id={verhaal.id}
-              title={verhaal.titel}
-              description={verhaal.beschrijving}
-              imageUrl={verhaal.cover_image}
-              category={verhaal.categorie.naam}
-            />
-          ))}
+          {verhalen.map((verhaal) => {
+            const hasCoverImage = Boolean(verhaal.cover_image);
+            
+            return hasCoverImage ? (
+              <StoryCard
+                key={verhaal.id}
+                id={verhaal.id}
+                title={verhaal.titel}
+                description={verhaal.beschrijving}
+                imageUrl={verhaal.cover_image}
+                category={verhaal.categorie.naam}
+              />
+            ) : (
+              <NoCoverStoryCard
+                key={verhaal.id}
+                id={verhaal.id}
+                title={verhaal.titel}
+                text={verhaal.tekst}
+                category={verhaal.categorie.naam}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

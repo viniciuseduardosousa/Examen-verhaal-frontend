@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import CategoryCard from '../cards/CategoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
 import { categoriesAPI } from '../../services/api';
+import Loader from '../Loader';
 
-const Categories = () => {
+const Categories = ({ onCategoriesLoaded }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,24 +14,39 @@ const Categories = () => {
       try {
         const data = await categoriesAPI.getFeatured();
         setCategories(data);
+        onCategoriesLoaded(data.length > 0);
         setError(null);
       } catch (err) {
         setError('Er is een fout opgetreden bij het ophalen van de categorieën.');
         console.error('Error fetching categories:', err);
+        onCategoriesLoaded(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCategories();
-  }, []);
+  }, [onCategoriesLoaded]);
 
   if (loading) {
-    return <div className="py-16">Laden...</div>;
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-8">
+          <div className="flex items-center gap-4 mb-12">
+            <h2 className="text-2xl font-medium">Categorieën</h2>
+          </div>
+          <Loader size="large" className="py-8" />
+        </div>
+      </section>
+    );
   }
 
   if (error) {
     return <div className="py-16 text-red-500">{error}</div>;
+  }
+
+  if (categories.length === 0) {
+    return null;
   }
 
   return (
@@ -38,7 +54,6 @@ const Categories = () => {
       <div className="container mx-auto px-8">
         <div className="flex items-center gap-4 mb-12">
           <h2 className="text-2xl font-medium">Categorieën</h2>
-          <ArrowIcon className="w-6 h-6" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {categories.map((category) => (
