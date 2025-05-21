@@ -1,11 +1,14 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const AdminHeader = ({ onLogout }) => {
   return (
     <>
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-mono font-bold">IngsScribblings</h1>
+        <Link to="/">
+          <h1 className="text-xl font-mono font-bold">IngsScribblings</h1>
+        </Link>
         <button 
           onClick={onLogout}
           className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
