@@ -152,22 +152,45 @@ const VerhaalDetail = () => {
                   <button 
                     onClick={async () => {
                       try {
-                        // Open PDF in new tab
-                        window.open(verhaal.pdf_file, '_blank');
-                        
-                        // Download PDF
-                        const response = await fetch(verhaal.pdf_file);
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${verhaal.titel}.pdf`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
+                        if (verhaal.pdf_file) {
+                          // Handle DOCX-generated PDFs
+                          window.open(verhaal.pdf_file, '_blank');
+                          
+                          const response = await fetch(verhaal.pdf_file);
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${verhaal.titel}.pdf`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } else {
+                          // Handle regular stories
+                          const { jsPDF } = await import('jspdf');
+                          const doc = new jsPDF();
+                          
+                          // Add title
+                          doc.setFontSize(20);
+                          doc.text(verhaal.titel, 20, 20);
+                          
+                          // Add description
+                          doc.setFontSize(12);
+                          const splitDesc = doc.splitTextToSize(verhaal.beschrijving, 170);
+                          doc.text(splitDesc, 20, 40);
+                          
+                          // Add content
+                          doc.setFontSize(12);
+                          const content = verhaal.tekst.replace(/<[^>]*>/g, ''); // Remove HTML tags
+                          const splitContent = doc.splitTextToSize(content, 170);
+                          doc.text(splitContent, 20, 60);
+                          
+                          // Save the PDF
+                          doc.save(`${verhaal.titel}.pdf`);
+                        }
                       } catch (error) {
-                        console.error('Error downloading PDF:', error);
+                        console.error('Error generating PDF:', error);
                       }
                     }}
                     className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2"
