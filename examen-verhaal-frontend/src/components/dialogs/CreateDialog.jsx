@@ -235,14 +235,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       setError('');
       setCoverPreview(null);
       setRemoveImage(false);
-      
-      // Check for temp filename in localStorage
-      const tempFilename = localStorage.getItem('temp_word_filename');
-      if (tempFilename) {
-        setWordFilename(tempFilename);
-      } else {
-        setWordFilename('');
-      }
+      setWordFilename('');
+      // Clear any temporary word filename from localStorage
+      localStorage.removeItem('temp_word_filename');
     }
   }, [isOpen, type]);
 

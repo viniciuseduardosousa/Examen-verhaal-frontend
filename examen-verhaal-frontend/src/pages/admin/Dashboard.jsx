@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import CreateDialog from "../../components/dialogs/CreateDialog";
 import EditDialog from "../../components/dialogs/EditDialog";
 import DeleteDialog from "../../components/dialogs/DeleteDialog";
+import LogoutDialog from "../../components/dialogs/LogoutDialog";
 import AdminHeader from "../../components/admin/AdminHeader";
 import AdminTabs from "../../components/admin/AdminTabs";
 import AdminSearchBar from "../../components/admin/AdminSearchBar";
@@ -50,6 +51,7 @@ const Dashboard = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   // Voor dynamische items per pagina, het is beter en wat globaler
   const verhalenPerPage = useItemsPerPage();
@@ -104,10 +106,14 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = async () => {
     try {
       await authAPI.logout();
       localStorage.removeItem('token');
-      window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+      navigate('/');
     } catch (err) {
       console.error("Error logging out:", err);
     }
@@ -331,6 +337,7 @@ const Dashboard = () => {
                 handlePublishToggle={handlePublishToggle}
                 handleEditClick={handleEditClick}
                 handleDeleteClick={handleDeleteClick}
+                verhalen={verhalen}
               />
 
               {/* Pagination */}
@@ -374,6 +381,12 @@ const Dashboard = () => {
         }}
         onConfirm={handleDeleteConfirm}
         itemName={verhaalToDelete?.title || verhaalToDelete?.naam}
+      />
+
+      <LogoutDialog
+        isOpen={logoutDialogOpen}
+        onClose={() => setLogoutDialogOpen(false)}
+        onConfirm={handleLogoutConfirm}
       />
     </div>
   );

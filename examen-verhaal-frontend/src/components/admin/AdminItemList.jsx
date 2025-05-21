@@ -6,8 +6,18 @@ const AdminItemList = ({
   searchTerm, 
   handlePublishToggle, 
   handleEditClick, 
-  handleDeleteClick 
+  handleDeleteClick,
+  verhalen
 }) => {
+  // Helper function to count stories per category
+  const getStoryCount = (categoryId) => {
+    return verhalen.filter(verhaal => 
+      verhaal.categorie === categoryId || 
+      verhaal.categorie_id === categoryId || 
+      verhaal.categorie?.id === categoryId
+    ).length;
+  };
+
   return (
     <div className={showCategories ? "space-y-4" : "space-y-4"}>
       {showCategories ? (
@@ -17,7 +27,14 @@ const AdminItemList = ({
               key={category.id}
               className="flex items-center justify-between py-3 border-b border-black"
             >
-              <span className="font-mono font-bold">{category.naam}</span>
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col">
+                  <span className="font-mono font-bold">{category.naam}</span>
+                  <span className="text-sm text-gray-500">
+                    {getStoryCount(category.id) === 0 ? 'geen verhalen' : `${getStoryCount(category.id)} verhalen`}
+                  </span>
+                </div>
+              </div>
               <div className="flex gap-6">
                 <button
                   onClick={() => handleEditClick(category)}
