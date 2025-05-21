@@ -48,7 +48,9 @@ const OverMij = () => {
         <div className="text-center mb-10">
           <h3 className="text-xl font-semibold mb-10 text-gray-700">Developers</h3>
         </div>
-        
+        <p className="text-center text-gray-500 italic text-sm mb-10">
+          Met veel dank aan deze ontwikkelaars voor het maken van deze site!
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <a href="https://www.linkedin.com/in/calvin-heeres/" target="_blank" rel="noopener noreferrer" className="bg-white border border-gray-200 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-200">
             <h3 className="font-semibold text-lg mb-2 text-gray-800">Calvin Heeres</h3>
@@ -80,10 +82,6 @@ const OverMij = () => {
             </div>
           </a>
         </div>
-        
-        <p className="text-center text-gray-500 italic text-sm mb-10">
-          Met veel dank aan deze ontwikkelaars voor het maken van deze site!
-        </p>
       </div>
     </div>
   );
