@@ -19,7 +19,7 @@ const OverMij = () => {
                        group-hover:translate-x-1 group-hover:translate-y-1 
                        transition-transform duration-200"></div>
             <img 
-              src="/src/assets/images/person.webp" 
+              src="./src/assets/images/ingrid.jpg" 
               alt="Profielfoto" 
               className="relative w-full h-full object-cover border-2 border-gray-800"
             />
