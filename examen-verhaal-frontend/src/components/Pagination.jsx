@@ -37,13 +37,21 @@ export const StoriesPagination = ({ currentPage, totalPages, setCurrentPage }) =
 export const AdminPagination = ({ currentPage, totalPages, setCurrentPage }) => {
   if (totalPages <= 1) return null;
   
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  
   return (
     <div className="flex justify-center gap-2 mt-2 pt-4 border-t">
       {Array.from({ length: totalPages }, (_, i) => i + 1).map(
         (page) => (
           <button
             key={page}
-            onClick={() => setCurrentPage(page)}
+            onClick={() => handlePageChange(page)}
             className={`px-3 py-1 rounded font-mono transition-all font-bold ${
               currentPage === page
                 ? "bg-gray-800 text-white"

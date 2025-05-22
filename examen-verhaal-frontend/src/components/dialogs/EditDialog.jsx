@@ -3,7 +3,6 @@ import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
-  console.log('EditDialog received data:', JSON.stringify(data, null, 2));
   const [formData, setFormData] = useState({
     titel: '',
     tekst: '',
@@ -53,6 +52,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     } else if (isOpen && data) {
       // Initialize with data when opened with data
       if (isCategory) {
+        console.log('Setting category form data with:', data);
         setFormData({
           titel: '',
           tekst: '',
@@ -61,7 +61,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           categorie: '',
           date: '',
           cover_image: data.cover_image || null,
-          is_uitgelicht: data.is_uitgelicht || false,
+          is_uitgelicht: Boolean(data.is_uitgelicht),
           is_spotlighted: false,
           is_downloadable: false,
           url: data.url || '',
@@ -72,7 +72,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           setCoverPreview(data.cover_image);
         }
       } else {
-        console.log('Setting form data with:', data); // Debug log
+        console.log('Setting story form data with:', data);
         setFormData({
           titel: data.titel || '',
           tekst: data.tekst || '',
@@ -81,9 +81,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           categorie: data.categorie?.toString() || '',
           date: data.datum || '',
           cover_image: data.cover_image || null,
-          is_uitgelicht: data.is_uitgelicht === true || data.is_uitgelicht === 'true',
-          is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
-          is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
+          is_uitgelicht: Boolean(data.is_uitgelicht),
+          is_spotlighted: Boolean(data.is_spotlighted),
+          is_downloadable: Boolean(data.is_downloadable),
           url: data.url || '',
           naam: '',
           word_file: data.word_file
@@ -99,13 +99,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             setWordFilename(storedFilename);
           }
         }
-        
-        // Log the data to verify URL and is_downloadable are present
-        console.log('Loading data in EditDialog:', data);
-        console.log('Form data after setting:', {
-          is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
-          url: data.url || ''
-        });
       }
       setRemoveImage(false);
     }

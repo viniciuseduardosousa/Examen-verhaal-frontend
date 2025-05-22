@@ -51,7 +51,7 @@ const FeaturedStory = ({ onStoryLoaded }) => {
       <section className="py-10">
         <div className="container mx-auto px-6">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-2xl font-medium">Uitgelicht verhaal</h2>
+            <h2 className="text-2xl font-medium">Spotlighted verhaal</h2>
           </div>
           <Loader size="large" className="py-6" />
         </div>
@@ -68,7 +68,7 @@ const FeaturedStory = ({ onStoryLoaded }) => {
       <div className="container mx-auto px-6">
         {/* Header met titel en pijl */}
         <div className="flex items-center gap-4 mb-8">
-          <h2 className="text-2xl font-medium">Uitgelicht verhaal</h2>
+          <h2 className="text-2xl font-medium">Spotlighted verhaal</h2>
         </div>
 
         {/* Content container */}

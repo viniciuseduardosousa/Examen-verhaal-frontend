@@ -15,14 +15,14 @@ import toast from 'react-hot-toast';
 
 // Custom hook voor dynamische items per pagina
 const useItemsPerPage = () => {
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   useEffect(() => {
     const calculateItemsPerPage = () => {
       const itemHeight = 60;
       const containerHeight = window.innerHeight - 300;
       const calculatedItems = Math.floor(containerHeight / itemHeight);
-      const clampedItems = Math.min(Math.max(calculatedItems, 4), 8);
+      const clampedItems = Math.min(Math.max(calculatedItems, 15), 20);
       setItemsPerPage(clampedItems);
     };
 
@@ -197,8 +197,10 @@ const Dashboard = () => {
       const transformedItem = {
         id: item.id,
         naam: item.naam,
-        cover_image: item.cover_image
+        cover_image: item.cover_image,
+        is_uitgelicht: item.is_uitgelicht || false
       };
+      console.log('Transformed category for edit:', transformedItem);
       setItemToEdit(transformedItem);
       setEditDialogOpen(true);
     } else {

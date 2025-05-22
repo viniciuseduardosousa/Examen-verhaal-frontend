@@ -64,69 +64,52 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     setIsLoading(true);
 
     try {
-      let updateData;
-      
       if (type === 'story') {
-        // Validate category ID
-        if (!formData.category) {
-          throw new Error('Selecteer een categorie');
+        // Validate required fields
+        if (!formData.title || !formData.text || !formData.category) {
+          setError('Alle velden zijn verplicht');
+          setIsLoading(false);
+          return;
         }
 
-        const categoryId = Number(formData.category);
-        if (isNaN(categoryId)) {
-          throw new Error('Ongeldige categorie ID');
-        }
-
-        const date = new Date(formData.date);
-        const formattedDate = date.toISOString().split('T')[0];
-
-        updateData = {
-          titel: formData.title || '',
-          tekst: formData.text || '',
-          beschrijving: formData.description || '',
+        // Transform the data to match API field names
+        const transformedData = {
+          titel: formData.title.trim(),
+          tekst: formData.text.trim(),
+          beschrijving: formData.description?.trim() || '',
           is_onzichtbaar: !formData.published,
-          categorie: categoryId,
-          datum: formattedDate,
-          is_spotlighted: formData.is_spotlighted || false,
+          categorie: parseInt(formData.category, 10),
+          datum: formData.date,
           is_uitgelicht: formData.is_uitgelicht || false,
+          is_spotlighted: formData.is_spotlighted || false,
           is_downloadable: formData.is_downloadable || false,
-          url: formData.url || null,
-          word_file: wordFilename === '' ? null : formData.word_file
+          url: formData.url?.trim() || '',
+          cover_image: formData.cover_image,
+          word_file: formData.word_file
         };
 
-        // Only include cover_image if there's a file or we want to remove it
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.cover_image = '';
+        // Validate category ID
+        if (isNaN(transformedData.categorie)) {
+          setError('Ongeldige categorie ID');
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await onSave(transformedData);
+        if (result) {
+          setIsLoading(false);
+          onClose();
         }
       } else {
-        updateData = {
-          naam: formData.naam || '',
-          is_uitgelicht: formData.is_uitgelicht || false
-        };
-
-        // Only include cover_image if there's a file or we want to remove it
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.cover_image = '';
+        const result = await onSave(formData);
+        if (result) {
+          setIsLoading(false);
+          onClose();
         }
       }
-
-      const result = await onSave(updateData);
-      
-      // If we have a story with a word file, store the filename in localStorage with the new ID
-      if (result && result.id && wordFilename !== '') {
-        localStorage.setItem(`word_filename_${result.id}`, wordFilename);
-        localStorage.removeItem('temp_word_filename');
-      }
-      
-      onClose();
     } catch (err) {
       console.error('Error saving:', err);
       setError(err.message || 'Er is iets misgegaan bij het opslaan');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -214,6 +197,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   useEffect(() => {
     if (isOpen) {
       setIsSubmitted(false);
+      setIsLoading(false);
       // Always keep all fields in formData to avoid undefined to defined transitions
       setFormData({
         // Story fields

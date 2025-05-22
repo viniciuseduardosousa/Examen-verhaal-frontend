@@ -212,7 +212,7 @@ export const adminVerhalenAPI = {
   create: async (verhaalData) => {
     try {
       // Validate required fields
-      if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.beschrijving || !verhaalData.categorie) {
+      if (!verhaalData.titel || !verhaalData.tekst || !verhaalData.categorie) {
         throw new Error('Alle velden zijn verplicht');
       }
 
@@ -227,12 +227,14 @@ export const adminVerhalenAPI = {
       // Add required fields
       formData.append('titel', verhaalData.titel);
       formData.append('tekst', verhaalData.tekst);
-      formData.append('beschrijving', verhaalData.beschrijving);
-      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
       formData.append('categorie', categoryId.toString());
       formData.append('datum', verhaalData.datum);
+      formData.append('is_onzichtbaar', verhaalData.is_onzichtbaar ? 'true' : 'false');
       
       // Add optional fields
+      if (verhaalData.beschrijving) {
+        formData.append('beschrijving', verhaalData.beschrijving);
+      }
       if (verhaalData.is_uitgelicht !== undefined) {
         formData.append('is_uitgelicht', verhaalData.is_uitgelicht ? 'true' : 'false');
       }
@@ -242,21 +244,17 @@ export const adminVerhalenAPI = {
       if (verhaalData.is_downloadable !== undefined) {
         formData.append('is_downloadable', verhaalData.is_downloadable ? 'true' : 'false');
       }
-      if (verhaalData.url !== undefined) {
-        formData.append('url', verhaalData.url || '');
+      if (verhaalData.url) {
+        formData.append('url', verhaalData.url);
       }
 
       // Handle cover image
-      if (verhaalData.remove_image) {
-        formData.append('cover_image', '');
-      } else if (verhaalData.cover_image instanceof File) {
+      if (verhaalData.cover_image instanceof File) {
         formData.append('cover_image', verhaalData.cover_image);
       }
       
       // Handle Word document
-      if (verhaalData.word_file === null) {
-        formData.append('word_file', '');
-      } else if (verhaalData.word_file instanceof File) {
+      if (verhaalData.word_file instanceof File) {
         formData.append('word_file', verhaalData.word_file);
       }
 
