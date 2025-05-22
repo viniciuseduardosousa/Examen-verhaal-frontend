@@ -18,6 +18,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     naam: '',
     word_file: null
   });
+  const [displayText, setDisplayText] = useState('');
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +50,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       setRemoveImage(false);
       setError('');
       setWordFilename('');
+      setDisplayText('');
     } else if (isOpen && data) {
       // Initialize with data when opened with data
       if (isCategory) {
@@ -91,6 +93,19 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         if (data.cover_image) {
           setCoverPreview(data.cover_image);
         }
+        
+        // Always set displayText for the textarea, whether it's a Word import or not
+        const cleanHtml = data.tekst
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim();
+        setDisplayText(cleanHtml);
         
         // Load word filename from localStorage
         if (data.id) {
@@ -210,6 +225,22 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setCoverPreview(URL.createObjectURL(files[0]));
         setRemoveImage(false);
       }
+    } else if (name === 'tekst') {
+      // When editing text, update displayText and preserve the original HTML if it exists
+      setDisplayText(value);
+      if (formData.word_file) {
+        // If there's a Word file, keep the original HTML in formData.tekst
+        setFormData(prev => ({
+          ...prev,
+          tekst: prev.tekst
+        }));
+      } else {
+        // If no Word file, update both
+        setFormData(prev => ({
+          ...prev,
+          tekst: value
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
@@ -263,6 +294,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         displayText: displayText,
         word_file: file
       }));
+      setDisplayText(displayText);
       setWordFilename(file.name);
       
       // Store the filename in localStorage when a file is uploaded
@@ -632,9 +664,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               setFormData(prev => ({
                                 ...prev,
                                 tekst: '',
-                                displayText: '',
                                 word_file: null
                               }));
+                              setDisplayText('');
                               
                               // Remove filename from localStorage when document is removed
                               if (data && data.id) {
@@ -682,7 +714,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     </label>
                     <textarea
                       name="tekst"
-                      value={formData.displayText || formData.tekst}
+                      value={displayText || formData.tekst}
                       onChange={handleChange}
                       required
                       rows="6"
