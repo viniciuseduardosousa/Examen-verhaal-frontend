@@ -28,6 +28,14 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [removeImage, setRemoveImage] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+
+  const scrollToTop = () => {
+    const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
+    if (dialogContent) {
+      dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -57,17 +65,46 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     };
   }, [isOpen]);
 
+  const validateForm = () => {
+    const errors = [];
+    
+    if (type === 'story') {
+      if (!formData.title?.trim()) {
+        errors.push('Titel is verplicht');
+      }
+      if (!formData.text?.trim()) {
+        errors.push('Verhaal is verplicht');
+      }
+      if (!formData.category) {
+        errors.push('Categorie is verplicht');
+      }
+    } else {
+      if (!formData.naam?.trim()) {
+        errors.push('Naam is verplicht');
+      }
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitted(true);
     setError('');
     setIsLoading(true);
+    scrollToTop();
 
     try {
       if (type === 'story') {
-        // Validate required fields
-        if (!formData.title || !formData.text || !formData.category) {
-          setError('Alle velden zijn verplicht');
+        // Validate form first
+        if (!validateForm()) {
           setIsLoading(false);
           return;
         }
@@ -88,19 +125,18 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           word_file: formData.word_file
         };
 
-        // Validate category ID
-        if (isNaN(transformedData.categorie)) {
-          setError('Ongeldige categorie ID');
-          setIsLoading(false);
-          return;
-        }
-
         const result = await onSave(transformedData);
         if (result) {
           setIsLoading(false);
           onClose();
         }
       } else {
+        // Validate form first
+        if (!validateForm()) {
+          setIsLoading(false);
+          return;
+        }
+
         const result = await onSave(formData);
         if (result) {
           setIsLoading(false);
@@ -110,6 +146,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     } catch (err) {
       console.error('Error saving:', err);
       setError(err.message || 'Er is iets misgegaan bij het opslaan');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
       setIsLoading(false);
     }
   };
@@ -191,6 +230,9 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     } catch (error) {
       console.error('Error importing Word document:', error);
       setError('Er is een fout opgetreden bij het importeren van het Word document');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
     }
   };
 
@@ -237,7 +279,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       }}
     >
       <div 
-        className="bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl"
+        className={`bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl ${isShaking ? 'animate-shake' : ''}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6">
@@ -246,7 +288,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           </h2>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 whitespace-pre-line">
               {error}
             </div>
           )}
@@ -416,7 +458,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                             </svg>
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="#111">
-                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414-1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
                               <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                             </svg>
                           )}

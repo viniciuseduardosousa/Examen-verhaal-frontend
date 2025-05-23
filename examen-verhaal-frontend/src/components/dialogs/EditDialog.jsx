@@ -26,6 +26,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [removeImage, setRemoveImage] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
 
   // Reset form when dialog is opened or closed
   useEffect(() => {
@@ -147,11 +148,43 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     };
   }, [isOpen]);
 
+  const scrollToTop = () => {
+    // Use the overflow-y-auto container which is the actual scrollable element
+    const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
+    if (dialogContent) {
+      dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.titel?.trim()) {
+      errors.push('Titel is verplicht');
+    }
+    if (!formData.tekst?.trim()) {
+      errors.push('Verhaal is verplicht');
+    }
+    if (!formData.categorie) {
+      errors.push('Categorie is verplicht');
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitted(true);
     setError('');
     setIsLoading(true);
+    scrollToTop();
 
     try {
       if (isCategory) {
@@ -169,20 +202,26 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
         await adminCategoriesAPI.update(data.id, updateData);
       } else {
+        // Validate form first
+        if (!validateForm()) {
+          setIsLoading(false);
+          return;
+        }
+
         const date = new Date(formData.date);
         const formattedDate = date.toISOString().split('T')[0];
         
         const updateData = {
-          titel: formData.titel,
-          tekst: formData.tekst,
-          beschrijving: formData.beschrijving,
+          titel: formData.titel.trim(),
+          tekst: formData.tekst.trim(),
+          beschrijving: formData.beschrijving?.trim() || '',
           is_onzichtbaar: formData.is_onzichtbaar,
-          categorie: formData.categorie,
+          categorie: parseInt(formData.categorie, 10),
           datum: formattedDate,
           is_uitgelicht: formData.is_uitgelicht,
           is_spotlighted: formData.is_spotlighted,
           is_downloadable: formData.is_downloadable,
-          url: formData.url || null,
+          url: formData.url?.trim() || null,
           word_file: wordFilename === '' ? null : formData.word_file
         };
 
@@ -199,9 +238,6 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           localStorage.setItem(`word_filename_${data.id}`, wordFilename);
         }
         
-        // Log the update data to verify URL is included
-        console.log('Sending update data:', updateData);
-        
         await adminVerhalenAPI.update(data.id, updateData);
       }
       onSuccess();
@@ -209,7 +245,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     } catch (err) {
       console.error('Error saving:', err);
       setError(err.message || 'Er is iets misgegaan bij het opslaan');
-    } finally {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
       setIsLoading(false);
     }
   };
@@ -304,6 +342,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     } catch (error) {
       console.error('Error importing Word document:', error);
       setError('Er is een fout opgetreden bij het importeren van het Word document');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
     }
   };
 
@@ -319,7 +360,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       }}
     >
       <div 
-        className="bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl"
+        className={`bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl ${isShaking ? 'animate-shake' : ''}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6">
@@ -327,7 +368,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             {isCategory ? 'Categorie bewerken' : 'Verhaal bijwerken'}
           </h2>
           {error && (
-            <div className="text-red-500 text-sm mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 whitespace-pre-line">
               {error}
             </div>
           )}
