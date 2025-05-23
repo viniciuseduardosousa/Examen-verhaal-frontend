@@ -52,6 +52,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       setError('');
       setWordFilename('');
       setDisplayText('');
+      setIsLoading(false);
     } else if (isOpen && data) {
       // Initialize with data when opened with data
       if (isCategory) {
@@ -117,6 +118,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         }
       }
       setRemoveImage(false);
+      setIsLoading(false);
     }
   }, [isOpen, data, isCategory]);
 
@@ -267,11 +269,25 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       // When editing text, update displayText and preserve the original HTML if it exists
       setDisplayText(value);
       if (formData.word_file) {
-        // If there's a Word file, keep the original HTML in formData.tekst
-        setFormData(prev => ({
-          ...prev,
-          tekst: prev.tekst
-        }));
+        // If there's a Word file and the text is empty, clear both the display text and HTML
+        if (!value.trim()) {
+          setFormData(prev => ({
+            ...prev,
+            tekst: '',
+            word_file: null
+          }));
+          setWordFilename('');
+          // Remove filename from localStorage when text is cleared
+          if (data && data.id) {
+            localStorage.removeItem(`word_filename_${data.id}`);
+          }
+        } else {
+          // If there's still text, keep the original HTML in formData.tekst
+          setFormData(prev => ({
+            ...prev,
+            tekst: prev.tekst
+          }));
+        }
       } else {
         // If no Word file, update both
         setFormData(prev => ({
