@@ -508,4 +508,117 @@ export const adminCategoriesAPI = {
       throw error;
     }
   },
+};
+
+// Profile and Footer API calls
+export const profileAPI = {
+  getOvermij: async () => {
+    try {
+      const response = await fetch(getApiUrl('/overmijpagina/overmij/admin/'), getFetchOptions());
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon over mij data niet ophalen');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching over mij data:', error);
+      throw error;
+    }
+  },
+
+  updateOvermij: async (data) => {
+    try {
+      const formData = new FormData();
+      
+      // Add text content
+      formData.append('tekst', data.aboutMeText);
+      formData.append('subtitel', 'De persoonlijke schrijfplek van Ingrid'); // Add default subtitel
+      
+      // Handle profile photo
+      if (data.removePhoto) {
+        formData.append('afbeelding', ''); // Send empty string to remove photo
+      } else if (data.afbeelding instanceof File) {
+        formData.append('afbeelding', data.afbeelding);
+      }
+
+      const response = await fetch(getApiUrl('/overmijpagina/overmij/admin/'), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        
+        const errorText = await response.text();
+        console.error('Server response:', errorText); // Debug log
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || errorData.message || 'Kon over mij data niet bijwerken');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error updating over mij data:', error);
+      throw error;
+    }
+  },
+
+  getFooter: async () => {
+    try {
+      const response = await fetch(getApiUrl('/overmijpagina/footer/admin/'), getFetchOptions());
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon footer data niet ophalen');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching footer data:', error);
+      throw error;
+    }
+  },
+
+  updateFooter: async (data) => {
+    try {
+      const response = await fetch(getApiUrl('/overmijpagina/footer/admin/'), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tekst: data.footerText }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        throw new Error('Kon footer data niet bijwerken');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error updating footer data:', error);
+      throw error;
+    }
+  },
 }; 

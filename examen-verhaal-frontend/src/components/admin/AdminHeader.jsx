@@ -1,7 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ProfileSettingsDialog from './ProfileSettingsDialog';
+import { profileAPI } from '../../services/adminApi';
 
 const AdminHeader = ({ onLogout }) => {
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+
+  useEffect(() => {
+    const fetchProfilePhoto = async () => {
+      try {
+        const data = await profileAPI.getOvermij();
+        setProfilePhoto(data.afbeelding || "/src/assets/images/ingrid.jpg");
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+        setProfilePhoto("/src/assets/images/ingrid.jpg");
+      }
+    };
+
+    fetchProfilePhoto();
+
+    const handleProfileUpdate = () => {
+      fetchProfilePhoto();
+    };
+
+    window.addEventListener('profileDataUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('profileDataUpdated', handleProfileUpdate);
+    };
+  }, []);
+
   return (
     <>
       {/* Header */}
@@ -9,6 +38,38 @@ const AdminHeader = ({ onLogout }) => {
         <Link to="/">
           <h1 className="text-xl font-mono font-bold">IngsScribblings</h1>
         </Link>
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gray-400/40 transform translate-x-1 translate-y-1 
+                       group-hover:translate-x-0.5 group-hover:translate-y-0.5 
+                       transition-transform duration-200 rounded-full opacity-0 group-hover:opacity-100"></div>
+            <button
+              onClick={() => setIsProfileDialogOpen(true)}
+              className="relative w-12 h-12 rounded-full overflow-hidden hover:opacity-90 transition-opacity border-2 border-gray-800"
+            >
+              <img 
+                src={profilePhoto} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                  <path d="m15 5 4 4"/>
+                </svg>
+              </div>
+            </button>
+          </div>
         <button 
           onClick={onLogout}
           className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
@@ -28,11 +89,16 @@ const AdminHeader = ({ onLogout }) => {
           </svg>
         </button>
       </div>
-
-      {/* Welcome and Create Button */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-mono font-bold">welkom, Ingrid</h2>
       </div>
+
+      {/* Welcome message */}
+      <h2 className="text-xl font-mono font-bold mb-6">welkom, Ingrid</h2>
+
+      {/* Profile Settings Dialog */}
+      <ProfileSettingsDialog
+        isOpen={isProfileDialogOpen}
+        onClose={() => setIsProfileDialogOpen(false)}
+      />
     </>
   );
 };
