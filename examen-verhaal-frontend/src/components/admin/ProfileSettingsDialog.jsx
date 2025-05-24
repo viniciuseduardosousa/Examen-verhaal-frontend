@@ -20,9 +20,8 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
   const dialogRef = useRef(null);
 
   const scrollToTop = () => {
-    const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
-    if (dialogContent) {
-      dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+    if (dialogRef.current) {
+      dialogRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -184,41 +183,43 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
           </div>
         )}
         
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="space-y-4">
-            <ProfilePhotoUpload
-              photoPreview={photoPreview}
-              onPhotoChange={handlePhotoChange}
-              onPhotoRemove={handleRemovePhoto}
-            />
+        <div className="md:max-h-none max-h-[60vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="space-y-4">
+              <ProfilePhotoUpload
+                photoPreview={photoPreview}
+                onPhotoChange={handlePhotoChange}
+                onPhotoRemove={handleRemovePhoto}
+              />
 
-            <TextInput
-              label="Over Mij Tekst"
-              name="aboutMeText"
-              value={formData.aboutMeText}
-              onChange={handleChange}
-              rows={5}
-              required
-              isSubmitted={isSubmitted}
-            />
+              <TextInput
+                label="Over Mij Tekst"
+                name="aboutMeText"
+                value={formData.aboutMeText}
+                onChange={handleChange}
+                rows={5}
+                required
+                isSubmitted={isSubmitted}
+              />
 
-            <TextInput
-              label="Footer Tekst"
-              name="footerText"
-              value={formData.footerText}
-              onChange={handleChange}
-              rows={3}
-              required
-              isSubmitted={isSubmitted}
-            />
-          </div>
+              <TextInput
+                label="Footer Tekst"
+                name="footerText"
+                value={formData.footerText}
+                onChange={handleChange}
+                rows={3}
+                required
+                isSubmitted={isSubmitted}
+              />
+            </div>
 
-          <DialogActions 
-            onClose={onClose} 
-            onSubmit={handleSubmit} 
-            isLoading={isLoading}
-          />
-        </form>
+            <DialogActions 
+              onClose={onClose} 
+              onSubmit={handleSubmit} 
+              isLoading={isLoading}
+            />
+          </form>
+        </div>
       </div>
     </div>
   );

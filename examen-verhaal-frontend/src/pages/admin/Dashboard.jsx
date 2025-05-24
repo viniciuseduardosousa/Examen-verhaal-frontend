@@ -312,12 +312,14 @@ const Dashboard = () => {
         {/* Main Content Card */}
         <div className="bg-white rounded-2xl shadow p-6">
           {/* Tabs and Search */}
-          <div className="flex items-center gap-4 mb-6">
-            <AdminTabs 
-              showCategories={showCategories} 
-              setShowCategories={setShowCategories} 
-            />
-            <div className="flex-1 flex justify-end">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+            <div className="w-full sm:w-[400px]">
+              <AdminTabs 
+                showCategories={showCategories} 
+                setShowCategories={setShowCategories} 
+              />
+            </div>
+            <div className="w-full sm:flex-1 flex justify-end">
               <AdminSearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
