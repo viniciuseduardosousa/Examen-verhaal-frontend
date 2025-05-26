@@ -78,26 +78,49 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         }
       } else {
         console.log('Setting story form data with:', data);
-        // Create a temporary div to extract text content from HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = data.tekst || '';
-        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        // For Word-imported content, preserve the HTML
+        if (data.word_file) {
+          // Create a temporary div to get the plain text version
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.tekst || '';
+          const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
-        setFormData({
-          titel: data.titel || '',
-          tekst: plainText, // Use the plain text version
-          beschrijving: data.beschrijving || '',
-          is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
-          categorie: data.categorie?.toString() || '',
-          date: data.datum || '',
-          cover_image: data.cover_image || null,
-          is_uitgelicht: Boolean(data.is_uitgelicht),
-          is_spotlighted: Boolean(data.is_spotlighted),
-          is_downloadable: Boolean(data.is_downloadable),
-          url: data.url || '',
-          naam: '',
-          word_file: data.word_file
-        });
+          setFormData({
+            titel: data.titel || '',
+            tekst: data.tekst || '', // Keep the HTML content
+            beschrijving: data.beschrijving || '',
+            is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
+            categorie: data.categorie?.toString() || '',
+            date: data.datum || '',
+            cover_image: data.cover_image || null,
+            is_uitgelicht: Boolean(data.is_uitgelicht),
+            is_spotlighted: Boolean(data.is_spotlighted),
+            is_downloadable: Boolean(data.is_downloadable),
+            url: data.url || '',
+            naam: '',
+            word_file: data.word_file,
+            displayText: plainText // Set the plain text version for display
+          });
+        } else {
+          // For regular content, use plain text
+          setFormData({
+            titel: data.titel || '',
+            tekst: data.tekst || '',
+            beschrijving: data.beschrijving || '',
+            is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
+            categorie: data.categorie?.toString() || '',
+            date: data.datum || '',
+            cover_image: data.cover_image || null,
+            is_uitgelicht: Boolean(data.is_uitgelicht),
+            is_spotlighted: Boolean(data.is_spotlighted),
+            is_downloadable: Boolean(data.is_downloadable),
+            url: data.url || '',
+            naam: '',
+            word_file: data.word_file,
+            displayText: data.tekst || '' // Set the plain text version
+          });
+        }
+        
         if (data.cover_image) {
           setCoverPreview(data.cover_image);
         }
@@ -107,12 +130,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           const storedFilename = localStorage.getItem(`word_filename_${data.id}`);
           if (storedFilename) {
             setWordFilename(storedFilename);
-            setDisplayText(plainText);
-          } else {
-            setDisplayText(plainText);
           }
-        } else {
-          setDisplayText(plainText);
         }
       }
       setRemoveImage(false);
@@ -192,12 +210,13 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         };
         await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
-        // Ensure we have a valid tekst value
+        // For Word-imported content, keep the original HTML content
+        // For regular content, convert URLs to links
         const tekstValue = formData.word_file 
-          ? formData.tekst 
+          ? formData.tekst // Keep original HTML for Word documents
           : (formData.displayText ? convertUrlsToLinks(formData.displayText) : formData.tekst);
 
-        // Format the date to YYYY-MM-DD and convert URLs to links
+        // Format the date to YYYY-MM-DD
         const formattedData = {
           ...formData,
           datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date,
@@ -239,12 +258,20 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setRemoveImage(false);
       }
     } else if (name === 'tekst') {
-      // Update both displayText and tekst
-      setFormData(prev => ({
-        ...prev,
-        displayText: value,
-        tekst: value // Store the same value in tekst for non-Word documents
-      }));
+      // For Word-imported content, only update displayText
+      if (formData.word_file) {
+        setFormData(prev => ({
+          ...prev,
+          displayText: value
+        }));
+      } else {
+        // For regular content, update both displayText and tekst
+        setFormData(prev => ({
+          ...prev,
+          displayText: value,
+          tekst: value
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
@@ -716,7 +743,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     </label>
                     <textarea
                       name="tekst"
-                      value={formData.displayText || formData.tekst}
+                      value={formData.displayText || ''}
                       onChange={handleChange}
                       style={{ 
                         whiteSpace: 'pre-wrap', 
