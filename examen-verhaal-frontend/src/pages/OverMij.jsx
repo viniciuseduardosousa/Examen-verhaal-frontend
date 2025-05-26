@@ -5,6 +5,7 @@ import DeveloperSection from '../components/sections/DeveloperSection';
 const OverMij = () => {
   const [profileData, setProfileData] = useState({
     tekst: '',
+    subtitel: '',
     afbeelding: null
   });
 
@@ -15,6 +16,7 @@ const OverMij = () => {
         const data = await response.json();
         setProfileData({
           tekst: data.tekst || '',
+          subtitel: data.subtitel || 'De persoonlijke schrijfplek van Ingrid',
           afbeelding: data.afbeelding || null
         });
       }
@@ -39,7 +41,10 @@ const OverMij = () => {
 
   return (
     <div className="container mx-auto px-4 pt-40 pb-20">
-      <HeaderSection profilePhoto={profileData.afbeelding} />
+      <HeaderSection 
+        profilePhoto={profileData.afbeelding} 
+        subtitle={profileData.subtitel}
+      />
 
       <div className="max-w-3xl mx-auto animate-slideDown">
         <article className="prose prose-lg max-w-none">

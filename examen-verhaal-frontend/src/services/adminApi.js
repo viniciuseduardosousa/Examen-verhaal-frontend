@@ -611,7 +611,7 @@ export const profileAPI = {
       
       // Add text content
       formData.append('tekst', data.aboutMeText);
-      formData.append('subtitel', 'De persoonlijke schrijfplek van Ingrid'); // Add default subtitel
+      formData.append('subtitel', data.subtitle); // Use the subtitle from form data
       
       // Handle profile photo
       if (data.removePhoto) {

@@ -9,6 +9,7 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     aboutMeText: '',
     footerText: '',
+    subtitle: '',
     afbeelding: null,
     removePhoto: false
   });
@@ -68,6 +69,7 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
       setFormData({
         aboutMeText: overmijData.tekst || '',
         footerText: footerData.tekst || '',
+        subtitle: overmijData.subtitel || 'De persoonlijke schrijfplek van Ingrid (ook wel Inge genoemd)',
         afbeelding: null,
         removePhoto: false
       });
@@ -89,6 +91,9 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
     }
     if (!formData.footerText?.trim()) {
       errors.push('Footer tekst is verplicht');
+    }
+    if (!formData.subtitle?.trim()) {
+      errors.push('Subtitel is verplicht');
     }
 
     if (errors.length > 0) {
@@ -146,6 +151,7 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
       const [profileResponse, footerResponse] = await Promise.all([
         profileAPI.updateOvermij({
           aboutMeText: formData.aboutMeText.trim(),
+          subtitle: formData.subtitle.trim(),
           afbeelding: formData.afbeelding instanceof File ? formData.afbeelding : undefined,
           removePhoto: formData.removePhoto
         }),
@@ -190,6 +196,16 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
                 photoPreview={photoPreview}
                 onPhotoChange={handlePhotoChange}
                 onPhotoRemove={handleRemovePhoto}
+              />
+
+              <TextInput
+                label="Subtitel"
+                name="subtitle"
+                value={formData.subtitle}
+                onChange={handleChange}
+                rows={1}
+                required
+                isSubmitted={isSubmitted}
               />
 
               <TextInput
