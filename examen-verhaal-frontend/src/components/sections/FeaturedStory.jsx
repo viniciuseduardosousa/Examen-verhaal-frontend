@@ -86,7 +86,7 @@ const FeaturedStory = ({ onStoryLoaded }) => {
           )}
           
           {/* Rechter kolom met content */}
-          <div className={`w-full ${story.cover_image ? 'md:w-1/2' : ''} flex flex-col h-[350px]`}>
+          <div className="w-full md:w-1/2 flex flex-col h-[350px]">
             <div className="flex-grow flex flex-col">
               <h2 className="text-3xl font-medium mb-4 break-words">{story.titel}</h2>
               <div className="overflow-hidden flex-grow pr-4">
@@ -97,15 +97,13 @@ const FeaturedStory = ({ onStoryLoaded }) => {
             </div>
             
             {/* Lees het hele verhaal button */}
-            <div className="md:w-1/2">
-              <button 
-                onClick={handleReadMore}
-                className="flex items-center justify-center gap-2 w-full border-2 border-gray-800 py-2 px-4 hover:bg-gray-50 transition-colors mt-4"
-              >
-                <span>Lees het hele verhaal</span>
-                <ArrowIcon className="w-4 h-4" />
-              </button>
-            </div>
+            <button 
+              onClick={handleReadMore}
+              className="flex items-center justify-center gap-2 border-2 border-gray-800 py-2 px-4 hover:bg-gray-50 transition-colors mt-4"
+            >
+              <span>Lees het hele verhaal</span>
+              <ArrowIcon className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
