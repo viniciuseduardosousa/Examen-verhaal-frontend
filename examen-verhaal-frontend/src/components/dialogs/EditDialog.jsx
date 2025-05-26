@@ -78,9 +78,14 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         }
       } else {
         console.log('Setting story form data with:', data);
+        // Create a temporary div to extract text content from HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.tekst || '';
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+
         setFormData({
           titel: data.titel || '',
-          tekst: data.tekst || '',
+          tekst: plainText, // Use the plain text version
           beschrijving: data.beschrijving || '',
           is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
           categorie: data.categorie?.toString() || '',
@@ -102,25 +107,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           const storedFilename = localStorage.getItem(`word_filename_${data.id}`);
           if (storedFilename) {
             setWordFilename(storedFilename);
-            // For Word-imported content, clean the HTML for display
-            const cleanHtml = data.tekst
-              .replace(/<[^>]*>/g, '')
-              .replace(/&nbsp;/g, ' ')
-              .replace(/&amp;/g, '&')
-              .replace(/&lt;/g, '<')
-              .replace(/&gt;/g, '>')
-              .replace(/&quot;/g, '"')
-              .replace(/&#39;/g, "'")
-              .replace(/\s+/g, ' ')
-              .trim();
-            setDisplayText(cleanHtml);
+            setDisplayText(plainText);
           } else {
-            // For regular text, preserve all whitespace
-            setDisplayText(data.tekst || '');
+            setDisplayText(plainText);
           }
         } else {
-          // For new entries, preserve all whitespace
-          setDisplayText(data.tekst || '');
+          setDisplayText(plainText);
         }
       }
       setRemoveImage(false);
@@ -200,10 +192,16 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         };
         await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
-        // Format the date to YYYY-MM-DD
+        // Ensure we have a valid tekst value
+        const tekstValue = formData.word_file 
+          ? formData.tekst 
+          : (formData.displayText ? convertUrlsToLinks(formData.displayText) : formData.tekst);
+
+        // Format the date to YYYY-MM-DD and convert URLs to links
         const formattedData = {
           ...formData,
-          datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date
+          datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date,
+          tekst: tekstValue || '' // Ensure we never send null or undefined
         };
         await adminVerhalenAPI.update(data.id, formattedData);
       }
@@ -223,7 +221,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     if (!text) return '';
     // Regular expression to match URLs
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`);
+    return text.replace(urlRegex, url => {
+      const cleanUrl = url.replace(/[.,;:!?]+$/, '');
+      return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${cleanUrl}</a>`;
+    });
   };
 
   const handleChange = (e) => {
@@ -238,36 +239,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setRemoveImage(false);
       }
     } else if (name === 'tekst') {
-      // Convert URLs to clickable links
-      const textWithLinks = convertUrlsToLinks(value);
-      setDisplayText(textWithLinks);
-      
-      // Store the original text without HTML for the form data
-      const plainText = value.replace(/<[^>]*>/g, '');
-      
-      if (formData.word_file) {
-        if (!plainText.trim()) {
-          setFormData(prev => ({
-            ...prev,
-            tekst: '',
-            word_file: null
-          }));
-          setWordFilename('');
-          if (data && data.id) {
-            localStorage.removeItem(`word_filename_${data.id}`);
-          }
-        } else {
-          setFormData(prev => ({
-            ...prev,
-            tekst: textWithLinks // Store the HTML version with links
-          }));
-        }
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          tekst: textWithLinks // Store the HTML version with links
-        }));
-      }
+      // Update both displayText and tekst
+      setFormData(prev => ({
+        ...prev,
+        displayText: value,
+        tekst: value // Store the same value in tekst for non-Word documents
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -285,6 +262,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       const html = result.value;
 
+      // Clean and format the HTML
       const cleanHtml = html
         .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '<br /><h2>$1</h2>')
         .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '<br /><h2>$1</h2>')
@@ -297,31 +275,25 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
         .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
         .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-        .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1">$2</a>')
         .replace(/<br\s*\/?>/gi, '<br />')
         .replace(/\n\s*\n/g, '\n')
         .replace(/\n/g, '<br />')
         .replace(/<br \/><br \/><h/g, '<br /><h')
         .trim();
 
-      const displayText = cleanHtml
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/\s+/g, ' ')
-        .trim();
+      // Create a temporary div to get the plain text version
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = cleanHtml;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
+      // Store both versions
       setFormData(prev => ({
         ...prev,
-        tekst: cleanHtml,
-        displayText: displayText,
+        tekst: cleanHtml, // Store the HTML version for display
+        displayText: plainText, // Store the plain text version for editing
         word_file: file
       }));
-      setDisplayText(displayText);
+      setDisplayText(plainText);
       setWordFilename(file.name);
       
       // Store the filename in localStorage when a file is uploaded
@@ -651,7 +623,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                             </svg>
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="#111">
-                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414-1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
                               <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                             </svg>
                           )}
@@ -742,11 +714,14 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     <label className="block text-base font-mono font-bold mb-1">
                       Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
                     </label>
-                    <div
-                      contentEditable
-                      onInput={(e) => handleChange({ target: { name: 'tekst', value: e.currentTarget.textContent } })}
-                      dangerouslySetInnerHTML={{ __html: displayText || formData.tekst }}
-                      style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
+                    <textarea
+                      name="tekst"
+                      value={formData.displayText || formData.tekst}
+                      onChange={handleChange}
+                      style={{ 
+                        whiteSpace: 'pre-wrap', 
+                        minHeight: '200px'
+                      }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}

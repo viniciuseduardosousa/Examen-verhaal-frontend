@@ -14,13 +14,67 @@ export const generatePDFWithWatermark = (title, description, content) => {
   
   // Add content
   doc.setFontSize(12);
-  const cleanContent = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
-  const splitContent = doc.splitTextToSize(cleanContent, 170);
-  doc.text(splitContent, 20, 60);
+  
+  // Create a temporary div to properly handle HTML content
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = content;
+  
+  // Process the content while preserving formatting
+  let y = 60; // Starting y position
+  const lineHeight = 7; // Line height in PDF units
+  const maxWidth = 170; // Maximum width for text
+  
+  // Function to process text nodes and apply formatting
+  const processNode = (node, isBold = false, isItalic = false) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      if (text.trim()) {
+        // Set font style based on parent elements
+        if (isBold && isItalic) {
+          doc.setFont('helvetica', 'bolditalic');
+        } else if (isBold) {
+          doc.setFont('helvetica', 'bold');
+        } else if (isItalic) {
+          doc.setFont('helvetica', 'italic');
+        } else {
+          doc.setFont('helvetica', 'normal');
+        }
+        
+        // Split text into lines that fit the width
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        // Add each line to the PDF
+        lines.forEach(line => {
+          if (y > doc.internal.pageSize.getHeight() - 30) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(line, 20, y);
+          y += lineHeight;
+        });
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      // Check for formatting elements
+      const isNodeBold = isBold || node.tagName === 'STRONG' || node.tagName === 'B';
+      const isNodeItalic = isItalic || node.tagName === 'EM' || node.tagName === 'I';
+      
+      // Process child nodes with updated formatting
+      Array.from(node.childNodes).forEach(child => processNode(child, isNodeBold, isNodeItalic));
+      
+      // Add extra line break after block elements
+      if (['P', 'DIV', 'BR', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+        y += lineHeight;
+      }
+    }
+  };
+  
+  // Process all nodes in the content
+  Array.from(tempDiv.childNodes).forEach(node => processNode(node));
   
   // Add copyright text at bottom left
   doc.setTextColor(0, 0, 0); // Black color
   doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal'); // Reset font to normal
   doc.text('© Ingrid van de Bovenkamp - http://www.ingsscribblings.nl/', 20, doc.internal.pageSize.getHeight() - 20);
   
   return doc;
