@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
+import toast from 'react-hot-toast';
 
 const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   // Initialize with empty values for both story and category types
@@ -112,7 +113,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
         // Transform the data to match API field names
         const transformedData = {
           titel: formData.title.trim(),
-          tekst: formData.text.trim(),
+          tekst: formData.text,
           beschrijving: formData.description?.trim() || '',
           is_onzichtbaar: !formData.published,
           categorie: parseInt(formData.category, 10),
@@ -125,7 +126,16 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           word_file: formData.word_file
         };
 
+        // Show loading toast if PDF generation is enabled
+        const toastId = formData.is_downloadable ? toast.loading('Word document wordt verwerkt naar PDF...') : null;
+        
         const result = await onSave(transformedData);
+        
+        // Update toast based on PDF generation
+        if (formData.is_downloadable) {
+          toast.success('PDF succesvol gegenereerd!', { id: toastId });
+        }
+        
         if (result) {
           setIsLoading(false);
           onClose();
@@ -150,6 +160,10 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       setTimeout(() => setIsShaking(false), 500);
       scrollToTop();
       setIsLoading(false);
+      // Dismiss loading toast if there was an error
+      if (formData.is_downloadable) {
+        toast.error('Er is een fout opgetreden bij het genereren van de PDF', { id: toastId });
+      }
     }
   };
 
@@ -169,6 +183,12 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       setFormData(prev => ({
         ...prev,
         [name]: checked
+      }));
+    } else if (name === 'text') {
+      // Preserve all whitespace and line breaks exactly as entered
+      setFormData(prev => ({
+        ...prev,
+        text: value
       }));
     } else {
       setFormData(prev => ({
@@ -489,6 +509,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                       onChange={handleChange}
                       required
                       rows="6"
+                      style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}

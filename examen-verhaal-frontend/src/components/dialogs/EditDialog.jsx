@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
+import toast from 'react-hot-toast';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [formData, setFormData] = useState({
@@ -96,25 +97,30 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           setCoverPreview(data.cover_image);
         }
         
-        // Always set displayText for the textarea, whether it's a Word import or not
-        const cleanHtml = data.tekst
-          .replace(/<[^>]*>/g, '')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'")
-          .replace(/\s+/g, ' ')
-          .trim();
-        setDisplayText(cleanHtml);
-        
-        // Load word filename from localStorage
+        // Check if this is a Word-imported document
         if (data.id) {
           const storedFilename = localStorage.getItem(`word_filename_${data.id}`);
           if (storedFilename) {
             setWordFilename(storedFilename);
+            // For Word-imported content, clean the HTML for display
+            const cleanHtml = data.tekst
+              .replace(/<[^>]*>/g, '')
+              .replace(/&nbsp;/g, ' ')
+              .replace(/&amp;/g, '&')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&quot;/g, '"')
+              .replace(/&#39;/g, "'")
+              .replace(/\s+/g, ' ')
+              .trim();
+            setDisplayText(cleanHtml);
+          } else {
+            // For regular text, preserve all whitespace
+            setDisplayText(data.tekst || '');
           }
+        } else {
+          // For new entries, preserve all whitespace
+          setDisplayText(data.tekst || '');
         }
       }
       setRemoveImage(false);
@@ -215,7 +221,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         
         const updateData = {
           titel: formData.titel.trim(),
-          tekst: formData.tekst.trim(),
+          tekst: formData.tekst,
           beschrijving: formData.beschrijving?.trim() || '',
           is_onzichtbaar: formData.is_onzichtbaar,
           categorie: parseInt(formData.categorie, 10),
@@ -239,8 +245,16 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         } else if (data && data.id) {
           localStorage.setItem(`word_filename_${data.id}`, wordFilename);
         }
+
+        // Show loading toast if PDF generation is enabled
+        const toastId = formData.is_downloadable ? toast.loading('Word document wordt verwerkt naar PDF...') : null;
         
         await adminVerhalenAPI.update(data.id, updateData);
+        
+        // Update toast based on PDF generation
+        if (formData.is_downloadable) {
+          toast.success('PDF succesvol gegenereerd!', { id: toastId });
+        }
       }
       onSuccess();
       onClose();
@@ -251,6 +265,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       setTimeout(() => setIsShaking(false), 500);
       scrollToTop();
       setIsLoading(false);
+      // Dismiss loading toast if there was an error
+      if (formData.is_downloadable) {
+        toast.error('Er is een fout opgetreden bij het genereren van de PDF', { id: toastId });
+      }
     }
   };
 
@@ -289,7 +307,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           }));
         }
       } else {
-        // If no Word file, update both
+        // If no Word file, preserve all whitespace and line breaks exactly as entered
         setFormData(prev => ({
           ...prev,
           tekst: value
@@ -775,6 +793,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       onChange={handleChange}
                       required
                       rows="6"
+                      style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}

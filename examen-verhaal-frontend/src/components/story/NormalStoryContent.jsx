@@ -6,7 +6,7 @@ const NormalStoryContent = ({ tekst }) => {
           prose-headings:font-bold prose-headings:text-gray-800
           prose-h2:text-4xl prose-h2:mt-16 prose-h2:mb-8
           prose-h3:text-3xl prose-h3:mt-12 prose-h3:mb-6
-          prose-p:text-xl prose-p:my-8 prose-p:whitespace-pre-line
+          prose-p:text-xl prose-p:my-8 prose-p:whitespace-pre-wrap
           prose-ul:list-disc prose-ul:pl-6 prose-ul:my-8
           prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-8
           prose-li:my-4 prose-li:text-xl
@@ -40,7 +40,7 @@ const NormalStoryContent = ({ tekst }) => {
           [&>p+img]:mt-8
           px-4 sm:px-6 md:px-8"
       >
-        {tekst}
+        <div style={{ whiteSpace: 'pre-wrap' }}>{tekst}</div>
       </div>
     </section>
   );

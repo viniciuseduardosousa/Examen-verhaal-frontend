@@ -1,3 +1,5 @@
+import { generatePDFWithWatermark } from '../../utils/pdfWatermark';
+
 const StoryActions = ({ verhaal }) => {
   const handleDownload = async () => {
     try {
@@ -17,23 +19,11 @@ const StoryActions = ({ verhaal }) => {
         document.body.removeChild(a);
       } else {
         // Handle regular stories
-        const { jsPDF } = await import('jspdf');
-        const doc = new jsPDF();
-        
-        // Add title
-        doc.setFontSize(20);
-        doc.text(verhaal.titel, 20, 20);
-        
-        // Add description
-        doc.setFontSize(12);
-        const splitDesc = doc.splitTextToSize(verhaal.beschrijving, 170);
-        doc.text(splitDesc, 20, 40);
-        
-        // Add content
-        doc.setFontSize(12);
-        const content = verhaal.tekst.replace(/<[^>]*>/g, ''); // Remove HTML tags
-        const splitContent = doc.splitTextToSize(content, 170);
-        doc.text(splitContent, 20, 60);
+        const doc = generatePDFWithWatermark(
+          verhaal.titel,
+          verhaal.beschrijving,
+          verhaal.tekst
+        );
         
         // Save the PDF
         doc.save(`${verhaal.titel}.pdf`);
