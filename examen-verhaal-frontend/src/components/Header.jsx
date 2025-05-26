@@ -38,6 +38,7 @@ const Header = () => {
                 <span>Verhalen</span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-800 transition-all duration-300 group-hover:w-full"></span>
               </Link>
+              <CategoryDropdown />
               <Link 
                 to="/over-mij" 
                 className="text-xl text-gray-800 relative group"
@@ -45,7 +46,6 @@ const Header = () => {
                 <span>Over mij</span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-800 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <CategoryDropdown />
             </div>
           </div>
           
