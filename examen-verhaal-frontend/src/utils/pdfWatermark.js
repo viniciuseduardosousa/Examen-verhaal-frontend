@@ -7,10 +7,14 @@ export const generatePDFWithWatermark = (title, description, content) => {
   doc.setFontSize(20);
   doc.text(title, 20, 20);
   
-  // Add description
-  doc.setFontSize(12);
-  const splitDesc = doc.splitTextToSize(description, 170);
-  doc.text(splitDesc, 20, 40);
+  // Add description only if it exists and is not empty
+  let y = 40; // Default y position after title
+  if (description && description.trim()) {
+    doc.setFontSize(12);
+    const splitDesc = doc.splitTextToSize(description, 170);
+    doc.text(splitDesc, 20, y);
+    y = 60; // Move y position down if description was added
+  }
   
   // Add content
   doc.setFontSize(12);
@@ -20,7 +24,6 @@ export const generatePDFWithWatermark = (title, description, content) => {
   tempDiv.innerHTML = content;
   
   // Process the content while preserving formatting
-  let y = 60; // Starting y position
   const lineHeight = 7; // Line height in PDF units
   const maxWidth = 170; // Maximum width for text
   
