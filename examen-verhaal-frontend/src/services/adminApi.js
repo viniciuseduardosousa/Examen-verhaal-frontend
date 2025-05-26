@@ -508,6 +508,81 @@ export const adminCategoriesAPI = {
       throw error;
     }
   },
+
+  patch: async (id, categoryData) => {
+    try {
+      // If we're removing the image, send as JSON
+      if (categoryData.cover_image === null) {
+        const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cover_image: null
+          }),
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+            throw new Error('Niet geautoriseerd');
+          }
+          throw new Error('Kon categorie niet bijwerken');
+        }
+        return response.json();
+      }
+
+      // For other updates, use FormData
+      const formData = new FormData();
+      
+      // Add only the fields that are provided
+      if (categoryData.naam !== undefined) {
+        formData.append('naam', categoryData.naam);
+      }
+      if (categoryData.is_uitgelicht !== undefined) {
+        formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      }
+      
+      // Handle cover image upload
+      if (categoryData.cover_image instanceof File) {
+        formData.append('cover_image', categoryData.cover_image);
+      }
+
+      const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/Examen-verhaal-frontend/#/admin/login';
+          throw new Error('Niet geautoriseerd');
+        }
+        
+        const errorText = await response.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || errorData.message || 'Kon categorie niet bijwerken');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error patching category:', error);
+      throw error;
+    }
+  },
 };
 
 // Profile and Footer API calls

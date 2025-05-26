@@ -189,86 +189,33 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setError('');
     setIsLoading(true);
-    scrollToTop();
+    setError('');
 
     try {
       if (isCategory) {
-        const updateData = {
-          naam: formData.naam,
-          is_uitgelicht: formData.is_uitgelicht,
-          url: formData.url || '',
+        const categoryUpdateData = {
+          ...formData,
+          cover_image: removeImage ? null : formData.cover_image
         };
-
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.remove_image = true;
-        }
-
-        await adminCategoriesAPI.update(data.id, updateData);
+        await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
-        // Validate form first
-        if (!validateForm()) {
-          setIsLoading(false);
-          return;
-        }
-
-        const date = new Date(formData.date);
-        const formattedDate = date.toISOString().split('T')[0];
-        
-        const updateData = {
-          titel: formData.titel.trim(),
-          tekst: formData.tekst,
-          beschrijving: formData.beschrijving?.trim() || '',
-          is_onzichtbaar: formData.is_onzichtbaar,
-          categorie: parseInt(formData.categorie, 10),
-          datum: formattedDate,
-          is_uitgelicht: formData.is_uitgelicht,
-          is_spotlighted: formData.is_spotlighted,
-          is_downloadable: formData.is_downloadable,
-          url: formData.url?.trim() || null,
-          word_file: wordFilename === '' ? null : formData.word_file
+        // Format the date to YYYY-MM-DD
+        const formattedData = {
+          ...formData,
+          datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date
         };
-
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.remove_image = true;
-        }
-        
-        // Store or remove the filename in localStorage 
-        if (wordFilename === '') {
-          localStorage.removeItem(`word_filename_${data.id}`);
-        } else if (data && data.id) {
-          localStorage.setItem(`word_filename_${data.id}`, wordFilename);
-        }
-
-        // Show loading toast if PDF generation is enabled
-        const toastId = formData.is_downloadable ? toast.loading('Word document wordt verwerkt naar PDF...') : null;
-        
-        await adminVerhalenAPI.update(data.id, updateData);
-        
-        // Update toast based on PDF generation
-        if (formData.is_downloadable) {
-          toast.success('PDF succesvol gegenereerd!', { id: toastId });
-        }
+        await adminVerhalenAPI.update(data.id, formattedData);
       }
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('Error saving:', err);
-      setError(err.message || 'Er is iets misgegaan bij het opslaan');
+      console.error('Error updating item:', err);
+      setError(err.message || 'Er is een fout opgetreden bij het bijwerken');
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
-      scrollToTop();
+    } finally {
       setIsLoading(false);
-      // Dismiss loading toast if there was an error
-      if (formData.is_downloadable) {
-        toast.error('Er is een fout opgetreden bij het genereren van de PDF', { id: toastId });
-      }
     }
   };
 
