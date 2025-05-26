@@ -1,6 +1,16 @@
 import StoryActions from './StoryActions';
 
 const StoryHeader = ({ verhaal, categoryMap, onCategoryClick }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return "Geen datum beschikbaar";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('nl-NL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   return (
     <section className="py-8 animate-fadeIn">
       <div className={`grid ${verhaal.cover_image ? 'grid-cols-1 md:grid-cols-2 gap-20' : 'grid-cols-1'}`}>
@@ -25,7 +35,7 @@ const StoryHeader = ({ verhaal, categoryMap, onCategoryClick }) => {
                 {categoryMap[verhaal.categorie] || "Onbekende categorie"}
               </button>
               <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                {verhaal.datum || "Geen datum beschikbaar"}
+                {formatDate(verhaal.datum)}
               </span>
             </div>
           </div>
@@ -46,7 +56,7 @@ const StoryHeader = ({ verhaal, categoryMap, onCategoryClick }) => {
                   {categoryMap[verhaal.categorie] || "Onbekende categorie"}
                 </button>
                 <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                  {verhaal.datum || "Geen datum beschikbaar"}
+                  {formatDate(verhaal.datum)}
                 </span>
               </div>
             )}

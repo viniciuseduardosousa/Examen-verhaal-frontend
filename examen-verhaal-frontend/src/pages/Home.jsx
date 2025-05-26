@@ -12,12 +12,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      <Hero />
-      <Divider show={hasHighlightedStories} />
+      {/* <Hero /> */}
+      <div className="pt-20">
+        <Categories onCategoriesLoaded={(hasCategories) => setHasCategories(hasCategories)} />
+      </div>
       <HighlightedStories onStoriesLoaded={(hasStories) => setHasHighlightedStories(hasStories)} />
-      <Divider show={hasCategories} />
-      <Categories onCategoriesLoaded={(hasCategories) => setHasCategories(hasCategories)} />
-      {hasFeaturedStory && <Divider />}
       <FeaturedStory onStoryLoaded={(hasStory) => setHasFeaturedStory(hasStory)} />
       <div className="container mx-auto px-4 py-8">
       </div>

@@ -1,6 +1,36 @@
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const [footerText, setFooterText] = useState('');
+
+  const fetchFooterText = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://vinininja123.pythonanywhere.com'}/overmijpagina/footer/`);
+      if (response.ok) {
+        const data = await response.json();
+        setFooterText(data.tekst);
+      }
+    } catch (error) {
+      console.error('Error fetching footer text:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFooterText();
+
+    // Listen for custom event when footer text is updated
+    const handleFooterUpdate = () => {
+      fetchFooterText();
+    };
+
+    window.addEventListener('footerTextUpdated', handleFooterUpdate);
+
+    return () => {
+      window.removeEventListener('footerTextUpdated', handleFooterUpdate);
+    };
+  }, []);
+
   const currentYear = new Date().getFullYear();
 
   return (
@@ -12,9 +42,7 @@ const Footer = () => {
           <div className="relative min-h-[120px] flex flex-col">
             <h3 className="text-2xl font-medium mb-6 h-[32px]">IngsScribblings</h3>
             <p className="text-gray-700 flex-grow text-lg leading-relaxed">
-              Ontdek verhalen die je raken, 
-              inspireren en vermaken. Een plek 
-              waar woorden tot leven komen.
+              {footerText || 'Ontdek verhalen die je raken, inspireren en vermaken. Een plek waar woorden tot leven komen.'}
             </p>
             {/* Verticale divider rechts */}
             <div className="hidden md:block absolute right-[-2rem] top-0 bottom-0 w-[1px] bg-gray-800/20"></div>

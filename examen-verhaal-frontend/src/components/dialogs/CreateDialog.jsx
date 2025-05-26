@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
+import toast from 'react-hot-toast';
 
 const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   // Initialize with empty values for both story and category types
@@ -28,6 +29,14 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [removeImage, setRemoveImage] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+
+  const scrollToTop = () => {
+    const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
+    if (dialogContent) {
+      dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -57,77 +66,104 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     };
   }, [isOpen]);
 
+  const validateForm = () => {
+    const errors = [];
+    
+    if (type === 'story') {
+      if (!formData.title?.trim()) {
+        errors.push('Titel is verplicht');
+      }
+      if (!formData.text?.trim()) {
+        errors.push('Verhaal is verplicht');
+      }
+      if (!formData.category) {
+        errors.push('Categorie is verplicht');
+      }
+    } else {
+      if (!formData.naam?.trim()) {
+        errors.push('Naam is verplicht');
+      }
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitted(true);
     setError('');
     setIsLoading(true);
+    scrollToTop();
 
     try {
-      let updateData;
-      
       if (type === 'story') {
-        // Validate category ID
-        if (!formData.category) {
-          throw new Error('Selecteer een categorie');
+        // Validate form first
+        if (!validateForm()) {
+          setIsLoading(false);
+          return;
         }
 
-        const categoryId = Number(formData.category);
-        if (isNaN(categoryId)) {
-          throw new Error('Ongeldige categorie ID');
-        }
-
-        const date = new Date(formData.date);
-        const formattedDate = date.toISOString().split('T')[0];
-
-        updateData = {
-          titel: formData.title || '',
-          tekst: formData.text || '',
-          beschrijving: formData.description || '',
+        // Transform the data to match API field names
+        const transformedData = {
+          titel: formData.title.trim(),
+          tekst: formData.text,
+          beschrijving: formData.description?.trim() || '',
           is_onzichtbaar: !formData.published,
-          categorie: categoryId,
-          datum: formattedDate,
-          is_spotlighted: formData.is_spotlighted || false,
+          categorie: parseInt(formData.category, 10),
+          datum: formData.date,
           is_uitgelicht: formData.is_uitgelicht || false,
+          is_spotlighted: formData.is_spotlighted || false,
           is_downloadable: formData.is_downloadable || false,
-          url: formData.url || null,
-          word_file: wordFilename === '' ? null : formData.word_file
+          url: formData.url?.trim() || '',
+          cover_image: formData.cover_image,
+          word_file: formData.word_file
         };
 
-        // Only include cover_image if there's a file or we want to remove it
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.cover_image = '';
+        // Show loading toast if PDF generation is enabled
+        const toastId = formData.is_downloadable ? toast.loading('Word document wordt verwerkt naar PDF...') : null;
+        
+        const result = await onSave(transformedData);
+        
+        // Update toast based on PDF generation
+        if (formData.is_downloadable) {
+          toast.success('PDF succesvol gegenereerd!', { id: toastId });
+        }
+        
+        if (result) {
+          setIsLoading(false);
+          onClose();
         }
       } else {
-        updateData = {
-          naam: formData.naam || '',
-          is_uitgelicht: formData.is_uitgelicht || false
-        };
+        // Validate form first
+        if (!validateForm()) {
+          setIsLoading(false);
+          return;
+        }
 
-        // Only include cover_image if there's a file or we want to remove it
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.cover_image = '';
+        const result = await onSave(formData);
+        if (result) {
+          setIsLoading(false);
+          onClose();
         }
       }
-
-      const result = await onSave(updateData);
-      
-      // If we have a story with a word file, store the filename in localStorage with the new ID
-      if (result && result.id && wordFilename !== '') {
-        localStorage.setItem(`word_filename_${result.id}`, wordFilename);
-        localStorage.removeItem('temp_word_filename');
-      }
-      
-      onClose();
     } catch (err) {
       console.error('Error saving:', err);
       setError(err.message || 'Er is iets misgegaan bij het opslaan');
-    } finally {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
       setIsLoading(false);
+      // Dismiss loading toast if there was an error
+      if (formData.is_downloadable) {
+        toast.error('Er is een fout opgetreden bij het genereren van de PDF', { id: toastId });
+      }
     }
   };
 
@@ -147,6 +183,12 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       setFormData(prev => ({
         ...prev,
         [name]: checked
+      }));
+    } else if (name === 'text') {
+      // Preserve all whitespace and line breaks exactly as entered
+      setFormData(prev => ({
+        ...prev,
+        text: value
       }));
     } else {
       setFormData(prev => ({
@@ -208,12 +250,16 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
     } catch (error) {
       console.error('Error importing Word document:', error);
       setError('Er is een fout opgetreden bij het importeren van het Word document');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
     }
   };
 
   useEffect(() => {
     if (isOpen) {
       setIsSubmitted(false);
+      setIsLoading(false);
       // Always keep all fields in formData to avoid undefined to defined transitions
       setFormData({
         // Story fields
@@ -253,7 +299,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       }}
     >
       <div 
-        className="bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl"
+        className={`bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl ${isShaking ? 'animate-shake' : ''}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6">
@@ -262,7 +308,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
           </h2>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 whitespace-pre-line">
               {error}
             </div>
           )}
@@ -432,7 +478,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                             </svg>
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="#111">
-                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414-1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
                               <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                             </svg>
                           )}
@@ -463,6 +509,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                       onChange={handleChange}
                       required
                       rows="6"
+                      style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}

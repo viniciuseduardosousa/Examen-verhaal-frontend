@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
+import toast from 'react-hot-toast';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
-  console.log('EditDialog received data:', JSON.stringify(data, null, 2));
   const [formData, setFormData] = useState({
     titel: '',
     tekst: '',
@@ -19,6 +19,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     naam: '',
     word_file: null
   });
+  const [displayText, setDisplayText] = useState('');
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [removeImage, setRemoveImage] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
 
   // Reset form when dialog is opened or closed
   useEffect(() => {
@@ -50,9 +52,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       setRemoveImage(false);
       setError('');
       setWordFilename('');
+      setDisplayText('');
+      setIsLoading(false);
     } else if (isOpen && data) {
       // Initialize with data when opened with data
       if (isCategory) {
+        console.log('Setting category form data with:', data);
         setFormData({
           titel: '',
           tekst: '',
@@ -61,7 +66,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           categorie: '',
           date: '',
           cover_image: data.cover_image || null,
-          is_uitgelicht: data.is_uitgelicht || false,
+          is_uitgelicht: Boolean(data.is_uitgelicht),
           is_spotlighted: false,
           is_downloadable: false,
           url: data.url || '',
@@ -72,42 +77,64 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           setCoverPreview(data.cover_image);
         }
       } else {
-        console.log('Setting form data with:', data); // Debug log
-        setFormData({
-          titel: data.titel || '',
-          tekst: data.tekst || '',
-          beschrijving: data.beschrijving || '',
-          is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
-          categorie: data.categorie?.toString() || '',
-          date: data.datum || '',
-          cover_image: data.cover_image || null,
-          is_uitgelicht: data.is_uitgelicht === true || data.is_uitgelicht === 'true',
-          is_spotlighted: data.is_spotlighted === true || data.is_spotlighted === 'true',
-          is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
-          url: data.url || '',
-          naam: '',
-          word_file: data.word_file
-        });
+        console.log('Setting story form data with:', data);
+        // For Word-imported content, preserve the HTML
+        if (data.word_file) {
+          // Create a temporary div to get the plain text version
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.tekst || '';
+          const plainText = tempDiv.textContent || tempDiv.innerText || '';
+
+          setFormData({
+            titel: data.titel || '',
+            tekst: data.tekst || '', // Keep the HTML content
+            beschrijving: data.beschrijving || '',
+            is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
+            categorie: data.categorie?.toString() || '',
+            date: data.datum || '',
+            cover_image: data.cover_image || null,
+            is_uitgelicht: Boolean(data.is_uitgelicht),
+            is_spotlighted: Boolean(data.is_spotlighted),
+            is_downloadable: Boolean(data.is_downloadable),
+            url: data.url || '',
+            naam: '',
+            word_file: data.word_file,
+            displayText: plainText // Set the plain text version for display
+          });
+        } else {
+          // For regular content, use plain text
+          setFormData({
+            titel: data.titel || '',
+            tekst: data.tekst || '',
+            beschrijving: data.beschrijving || '',
+            is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
+            categorie: data.categorie?.toString() || '',
+            date: data.datum || '',
+            cover_image: data.cover_image || null,
+            is_uitgelicht: Boolean(data.is_uitgelicht),
+            is_spotlighted: Boolean(data.is_spotlighted),
+            is_downloadable: Boolean(data.is_downloadable),
+            url: data.url || '',
+            naam: '',
+            word_file: data.word_file,
+            displayText: data.tekst || '' // Set the plain text version
+          });
+        }
+        
         if (data.cover_image) {
           setCoverPreview(data.cover_image);
         }
         
-        // Load word filename from localStorage
+        // Check if this is a Word-imported document
         if (data.id) {
           const storedFilename = localStorage.getItem(`word_filename_${data.id}`);
           if (storedFilename) {
             setWordFilename(storedFilename);
           }
         }
-        
-        // Log the data to verify URL and is_downloadable are present
-        console.log('Loading data in EditDialog:', data);
-        console.log('Form data after setting:', {
-          is_downloadable: data.is_downloadable === true || data.is_downloadable === 'true',
-          url: data.url || ''
-        });
       }
       setRemoveImage(false);
+      setIsLoading(false);
     }
   }, [isOpen, data, isCategory]);
 
@@ -139,71 +166,84 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     };
   }, [isOpen]);
 
+  const scrollToTop = () => {
+    // Use the overflow-y-auto container which is the actual scrollable element
+    const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
+    if (dialogContent) {
+      dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.titel?.trim()) {
+      errors.push('Titel is verplicht');
+    }
+    if (!formData.tekst?.trim()) {
+      errors.push('Verhaal is verplicht');
+    }
+    if (!formData.categorie) {
+      errors.push('Categorie is verplicht');
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setError('');
     setIsLoading(true);
+    setError('');
 
     try {
       if (isCategory) {
-        const updateData = {
-          naam: formData.naam,
-          is_uitgelicht: formData.is_uitgelicht,
-          url: formData.url || '',
+        const categoryUpdateData = {
+          ...formData,
+          cover_image: removeImage ? null : formData.cover_image
         };
-
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.remove_image = true;
-        }
-
-        await adminCategoriesAPI.update(data.id, updateData);
+        await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
-        const date = new Date(formData.date);
-        const formattedDate = date.toISOString().split('T')[0];
-        
-        const updateData = {
-          titel: formData.titel,
-          tekst: formData.tekst,
-          beschrijving: formData.beschrijving,
-          is_onzichtbaar: formData.is_onzichtbaar,
-          categorie: formData.categorie,
-          datum: formattedDate,
-          is_uitgelicht: formData.is_uitgelicht,
-          is_spotlighted: formData.is_spotlighted,
-          is_downloadable: formData.is_downloadable,
-          url: formData.url || null,
-          word_file: wordFilename === '' ? null : formData.word_file
-        };
+        // For Word-imported content, keep the original HTML content
+        // For regular content, convert URLs to links
+        const tekstValue = formData.word_file 
+          ? formData.tekst // Keep original HTML for Word documents
+          : (formData.displayText ? convertUrlsToLinks(formData.displayText) : formData.tekst);
 
-        if (formData.cover_image instanceof File) {
-          updateData.cover_image = formData.cover_image;
-        } else if (removeImage) {
-          updateData.remove_image = true;
-        }
-        
-        // Store or remove the filename in localStorage 
-        if (wordFilename === '') {
-          localStorage.removeItem(`word_filename_${data.id}`);
-        } else if (data && data.id) {
-          localStorage.setItem(`word_filename_${data.id}`, wordFilename);
-        }
-        
-        // Log the update data to verify URL is included
-        console.log('Sending update data:', updateData);
-        
-        await adminVerhalenAPI.update(data.id, updateData);
+        // Format the date to YYYY-MM-DD
+        const formattedData = {
+          ...formData,
+          datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date,
+          tekst: tekstValue || '' // Ensure we never send null or undefined
+        };
+        await adminVerhalenAPI.update(data.id, formattedData);
       }
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('Error saving:', err);
-      setError(err.message || 'Er is iets misgegaan bij het opslaan');
+      console.error('Error updating item:', err);
+      setError(err.message || 'Er is een fout opgetreden bij het bijwerken');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const convertUrlsToLinks = (text) => {
+    if (!text) return '';
+    // Regular expression to match URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => {
+      const cleanUrl = url.replace(/[.,;:!?]+$/, '');
+      return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${cleanUrl}</a>`;
+    });
   };
 
   const handleChange = (e) => {
@@ -216,6 +256,21 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       if (files && files[0]) {
         setCoverPreview(URL.createObjectURL(files[0]));
         setRemoveImage(false);
+      }
+    } else if (name === 'tekst') {
+      // For Word-imported content, only update displayText
+      if (formData.word_file) {
+        setFormData(prev => ({
+          ...prev,
+          displayText: value
+        }));
+      } else {
+        // For regular content, update both displayText and tekst
+        setFormData(prev => ({
+          ...prev,
+          displayText: value,
+          tekst: value
+        }));
       }
     } else {
       setFormData(prev => ({
@@ -234,6 +289,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       const html = result.value;
 
+      // Clean and format the HTML
       const cleanHtml = html
         .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '<br /><h2>$1</h2>')
         .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '<br /><h2>$1</h2>')
@@ -246,30 +302,25 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
         .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
         .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-        .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1">$2</a>')
         .replace(/<br\s*\/?>/gi, '<br />')
         .replace(/\n\s*\n/g, '\n')
         .replace(/\n/g, '<br />')
         .replace(/<br \/><br \/><h/g, '<br /><h')
         .trim();
 
-      const displayText = cleanHtml
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/\s+/g, ' ')
-        .trim();
+      // Create a temporary div to get the plain text version
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = cleanHtml;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
+      // Store both versions
       setFormData(prev => ({
         ...prev,
-        tekst: cleanHtml,
-        displayText: displayText,
+        tekst: cleanHtml, // Store the HTML version for display
+        displayText: plainText, // Store the plain text version for editing
         word_file: file
       }));
+      setDisplayText(plainText);
       setWordFilename(file.name);
       
       // Store the filename in localStorage when a file is uploaded
@@ -279,6 +330,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     } catch (error) {
       console.error('Error importing Word document:', error);
       setError('Er is een fout opgetreden bij het importeren van het Word document');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
     }
   };
 
@@ -294,7 +348,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       }}
     >
       <div 
-        className="bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl"
+        className={`bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl ${isShaking ? 'animate-shake' : ''}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6">
@@ -302,7 +356,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             {isCategory ? 'Categorie bewerken' : 'Verhaal bijwerken'}
           </h2>
           {error && (
-            <div className="text-red-500 text-sm mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 whitespace-pre-line">
               {error}
             </div>
           )}
@@ -596,7 +650,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                             </svg>
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="#111">
-                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                              <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414-1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
                               <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                             </svg>
                           )}
@@ -639,9 +693,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               setFormData(prev => ({
                                 ...prev,
                                 tekst: '',
-                                displayText: '',
                                 word_file: null
                               }));
+                              setDisplayText('');
                               
                               // Remove filename from localStorage when document is removed
                               if (data && data.id) {
@@ -689,10 +743,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     </label>
                     <textarea
                       name="tekst"
-                      value={formData.displayText || formData.tekst}
+                      value={formData.displayText || ''}
                       onChange={handleChange}
-                      required
-                      rows="6"
+                      style={{ 
+                        whiteSpace: 'pre-wrap', 
+                        minHeight: '200px'
+                      }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}

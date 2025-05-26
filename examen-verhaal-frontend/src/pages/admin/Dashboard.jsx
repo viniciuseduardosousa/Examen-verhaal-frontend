@@ -12,17 +12,18 @@ import AdminSearchBar from "../../components/admin/AdminSearchBar";
 import AdminItemList from "../../components/admin/AdminItemList";
 import { AdminPagination } from "../../components/Pagination";
 import toast from 'react-hot-toast';
+import { regenerateExistingPDFs } from '../../utils/pdfWatermark';
 
 // Custom hook voor dynamische items per pagina
 const useItemsPerPage = () => {
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   useEffect(() => {
     const calculateItemsPerPage = () => {
       const itemHeight = 60;
       const containerHeight = window.innerHeight - 300;
       const calculatedItems = Math.floor(containerHeight / itemHeight);
-      const clampedItems = Math.min(Math.max(calculatedItems, 4), 8);
+      const clampedItems = Math.min(Math.max(calculatedItems, 15), 20);
       setItemsPerPage(clampedItems);
     };
 
@@ -197,8 +198,10 @@ const Dashboard = () => {
       const transformedItem = {
         id: item.id,
         naam: item.naam,
-        cover_image: item.cover_image
+        cover_image: item.cover_image,
+        is_uitgelicht: item.is_uitgelicht || false
       };
+      console.log('Transformed category for edit:', transformedItem);
       setItemToEdit(transformedItem);
       setEditDialogOpen(true);
     } else {
@@ -290,6 +293,29 @@ const Dashboard = () => {
     (showCategories ? filteredCategories.length : filteredVerhalen.length) / verhalenPerPage
   );
 
+  const handleRegeneratePDFs = async () => {
+    try {
+      const regeneratedPDFs = await regenerateExistingPDFs(verhalen);
+      
+      // Show loading toast
+      const toastId = toast.loading('PDFs worden bijgewerkt...');
+      
+      // Update each story with its new PDF
+      for (const { id, formData } of regeneratedPDFs) {
+        await adminVerhalenAPI.update(id, formData);
+      }
+      
+      // Refresh the stories list
+      await fetchVerhalen();
+      
+      // Show success message
+      toast.success('Alle PDFs zijn succesvol bijgewerkt!', { id: toastId });
+    } catch (err) {
+      console.error('Error regenerating PDFs:', err);
+      toast.error('Er is een fout opgetreden bij het bijwerken van de PDFs');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FFFFF5] p-8">
       <div className="max-w-5xl mx-auto">
@@ -310,12 +336,14 @@ const Dashboard = () => {
         {/* Main Content Card */}
         <div className="bg-white rounded-2xl shadow p-6">
           {/* Tabs and Search */}
-          <div className="flex items-center gap-4 mb-6">
-            <AdminTabs 
-              showCategories={showCategories} 
-              setShowCategories={setShowCategories} 
-            />
-            <div className="flex-1 flex justify-end">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+            <div className="w-full sm:w-[400px]">
+              <AdminTabs 
+                showCategories={showCategories} 
+                setShowCategories={setShowCategories} 
+              />
+            </div>
+            <div className="w-full sm:flex-1 flex justify-end">
               <AdminSearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}

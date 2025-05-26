@@ -12,7 +12,8 @@ const WordStoryContent = ({ tekst }) => {
     .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
     .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
     .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1">$2</a>')
+    // Preserve links with proper styling
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">$2</a>')
     .replace(/<br\s*\/?>/gi, '<br />')
     .replace(/\n\s*\n/g, '\n')
     .replace(/\n/g, '<br />')
@@ -33,7 +34,6 @@ const WordStoryContent = ({ tekst }) => {
           prose-table:w-full prose-table:my-8
           prose-tr:border-b prose-tr:border-gray-200
           prose-td:p-3 prose-td:align-top prose-td:text-lg
-          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
           prose-strong:font-bold prose-strong:text-gray-800
           prose-img:rounded-lg prose-img:my-8
           prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-8 prose-blockquote:text-lg

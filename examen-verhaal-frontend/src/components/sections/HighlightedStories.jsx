@@ -1,21 +1,48 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import StoryCard from '../cards/StoryCard';
 import NoCoverStoryCard from '../cards/NoCoverStoryCard';
 import ArrowIcon from '../icons/ArrowIcon';
-import { verhalenAPI } from '../../services/api';
+import { verhalenAPI, categoriesAPI } from '../../services/api';
 import Loader from '../Loader';
 
 const HighlightedStories = ({ onStoriesLoaded }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [verhalen, setVerhalen] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleCategoryClick = (e, category) => {
+    e.stopPropagation();
+    navigate(`/verhalen?category=${encodeURIComponent(category)}`);
+    // Scroll to top of page after navigation
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   useEffect(() => {
-    const fetchVerhalen = async () => {
+    const fetchData = async () => {
       try {
-        const data = await verhalenAPI.getAll();
+        // Fetch both stories and categories
+        const [storiesData, categoriesData] = await Promise.all([
+          verhalenAPI.getAll(),
+          categoriesAPI.getAll()
+        ]);
+
+        // Create a map of category IDs to names
+        const categoryIdToName = {};
+        categoriesData.forEach(category => {
+          categoryIdToName[category.id] = category.naam;
+        });
+        setCategoryMap(categoryIdToName);
+
         // Filter for highlighted stories
-        const highlightedStories = data.filter(story => story.is_uitgelicht);
+        const highlightedStories = storiesData.filter(story => story.is_uitgelicht);
         setVerhalen(highlightedStories);
         onStoriesLoaded(highlightedStories.length > 0);
         setError(null);
@@ -28,7 +55,7 @@ const HighlightedStories = ({ onStoriesLoaded }) => {
       }
     };
 
-    fetchVerhalen();
+    fetchData();
   }, [onStoriesLoaded]);
 
   if (loading) {
@@ -72,7 +99,8 @@ const HighlightedStories = ({ onStoriesLoaded }) => {
                 title={verhaal.titel}
                 description={verhaal.beschrijving}
                 imageUrl={verhaal.cover_image}
-                category={verhaal.categorie.naam}
+                category={categoryMap[verhaal.categorie]}
+                onCategoryClick={handleCategoryClick}
               />
             ) : (
               <NoCoverStoryCard
@@ -80,7 +108,8 @@ const HighlightedStories = ({ onStoriesLoaded }) => {
                 id={verhaal.id}
                 title={verhaal.titel}
                 text={verhaal.tekst}
-                category={verhaal.categorie.naam}
+                category={categoryMap[verhaal.categorie]}
+                onCategoryClick={handleCategoryClick}
               />
             );
           })}
