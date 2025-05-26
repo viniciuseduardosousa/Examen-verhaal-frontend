@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
-import trainImage from '../../assets/images/train.webp';
 import { verhalenAPI } from '../../services/api';
 import Loader from '../Loader';
 
@@ -74,18 +73,20 @@ const FeaturedStory = ({ onStoryLoaded }) => {
         {/* Content container */}
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {/* Linker kolom met grote afbeelding */}
-          <div className="w-full md:w-1/2">
-            <div className="w-full h-[350px] border-2 border-gray-800">
-              <img 
-                src={story.cover_image || trainImage} 
-                alt={story.titel}
-                className="w-full h-full object-cover"
-              />
+          {story.cover_image && (
+            <div className="w-full md:w-1/2">
+              <div className="w-full h-[350px] border-2 border-gray-800">
+                <img 
+                  src={story.cover_image} 
+                  alt={story.titel}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-          </div>
+          )}
           
           {/* Rechter kolom met content */}
-          <div className="w-full md:w-1/2 flex flex-col h-[350px]">
+          <div className={`w-full ${story.cover_image ? 'md:w-1/2' : ''} flex flex-col h-[350px]`}>
             <div className="flex-grow flex flex-col">
               <h2 className="text-3xl font-medium mb-4 break-words">{story.titel}</h2>
               <div className="overflow-hidden flex-grow pr-4">
@@ -96,13 +97,15 @@ const FeaturedStory = ({ onStoryLoaded }) => {
             </div>
             
             {/* Lees het hele verhaal button */}
-            <button 
-              onClick={handleReadMore}
-              className="flex items-center justify-center gap-2 w-full border-2 border-gray-800 py-2 px-4 hover:bg-gray-50 transition-colors mt-4"
-            >
-              <span>Lees het hele verhaal</span>
-              <ArrowIcon className="w-4 h-4" />
-            </button>
+            <div className="md:w-1/2">
+              <button 
+                onClick={handleReadMore}
+                className="flex items-center justify-center gap-2 w-full border-2 border-gray-800 py-2 px-4 hover:bg-gray-50 transition-colors mt-4"
+              >
+                <span>Lees het hele verhaal</span>
+                <ArrowIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
