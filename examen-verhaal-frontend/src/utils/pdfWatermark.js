@@ -21,7 +21,35 @@ export const generatePDFWithWatermark = (title, description, content) => {
   // Add copyright text at bottom left
   doc.setTextColor(0, 0, 0); // Black color
   doc.setFontSize(10);
-  doc.text('@ingsscriblings', 20, doc.internal.pageSize.getHeight() - 20);
+  doc.text('© Ingrid van de Bovenkamp - http://www.ingsscribblings.nl/', 20, doc.internal.pageSize.getHeight() - 20);
   
   return doc;
+};
+
+export const regenerateExistingPDFs = async (stories) => {
+  const regeneratedPDFs = [];
+  
+  for (const story of stories) {
+    if (story.is_downloadable) {
+      const doc = generatePDFWithWatermark(
+        story.titel,
+        story.beschrijving,
+        story.tekst
+      );
+      
+      // Convert PDF to blob
+      const pdfBlob = doc.output('blob');
+      
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('pdf_file', pdfBlob, `${story.titel}.pdf`);
+      
+      regeneratedPDFs.push({
+        id: story.id,
+        formData
+      });
+    }
+  }
+  
+  return regeneratedPDFs;
 }; 

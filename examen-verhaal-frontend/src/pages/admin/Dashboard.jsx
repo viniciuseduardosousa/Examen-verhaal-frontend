@@ -12,6 +12,7 @@ import AdminSearchBar from "../../components/admin/AdminSearchBar";
 import AdminItemList from "../../components/admin/AdminItemList";
 import { AdminPagination } from "../../components/Pagination";
 import toast from 'react-hot-toast';
+import { regenerateExistingPDFs } from '../../utils/pdfWatermark';
 
 // Custom hook voor dynamische items per pagina
 const useItemsPerPage = () => {
@@ -291,6 +292,29 @@ const Dashboard = () => {
   const totalPages = Math.ceil(
     (showCategories ? filteredCategories.length : filteredVerhalen.length) / verhalenPerPage
   );
+
+  const handleRegeneratePDFs = async () => {
+    try {
+      const regeneratedPDFs = await regenerateExistingPDFs(verhalen);
+      
+      // Show loading toast
+      const toastId = toast.loading('PDFs worden bijgewerkt...');
+      
+      // Update each story with its new PDF
+      for (const { id, formData } of regeneratedPDFs) {
+        await adminVerhalenAPI.update(id, formData);
+      }
+      
+      // Refresh the stories list
+      await fetchVerhalen();
+      
+      // Show success message
+      toast.success('Alle PDFs zijn succesvol bijgewerkt!', { id: toastId });
+    } catch (err) {
+      console.error('Error regenerating PDFs:', err);
+      toast.error('Er is een fout opgetreden bij het bijwerken van de PDFs');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FFFFF5] p-8">
