@@ -219,6 +219,13 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
     }
   };
 
+  const convertUrlsToLinks = (text) => {
+    if (!text) return '';
+    // Regular expression to match URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`);
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === 'file') {
@@ -231,33 +238,34 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setRemoveImage(false);
       }
     } else if (name === 'tekst') {
-      // When editing text, update displayText and preserve the original HTML if it exists
-      setDisplayText(value);
+      // Convert URLs to clickable links
+      const textWithLinks = convertUrlsToLinks(value);
+      setDisplayText(textWithLinks);
+      
+      // Store the original text without HTML for the form data
+      const plainText = value.replace(/<[^>]*>/g, '');
+      
       if (formData.word_file) {
-        // If there's a Word file and the text is empty, clear both the display text and HTML
-        if (!value.trim()) {
+        if (!plainText.trim()) {
           setFormData(prev => ({
             ...prev,
             tekst: '',
             word_file: null
           }));
           setWordFilename('');
-          // Remove filename from localStorage when text is cleared
           if (data && data.id) {
             localStorage.removeItem(`word_filename_${data.id}`);
           }
         } else {
-          // If there's still text, keep the original HTML in formData.tekst
           setFormData(prev => ({
             ...prev,
-            tekst: prev.tekst
+            tekst: textWithLinks // Store the HTML version with links
           }));
         }
       } else {
-        // If no Word file, preserve all whitespace and line breaks exactly as entered
         setFormData(prev => ({
           ...prev,
-          tekst: value
+          tekst: textWithLinks // Store the HTML version with links
         }));
       }
     } else {
@@ -734,12 +742,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     <label className="block text-base font-mono font-bold mb-1">
                       Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
                     </label>
-                    <textarea
-                      name="tekst"
-                      value={displayText || formData.tekst}
-                      onChange={handleChange}
-                      required
-                      rows="6"
+                    <div
+                      contentEditable
+                      onInput={(e) => handleChange({ target: { name: 'tekst', value: e.currentTarget.textContent } })}
+                      dangerouslySetInnerHTML={{ __html: displayText || formData.tekst }}
                       style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
