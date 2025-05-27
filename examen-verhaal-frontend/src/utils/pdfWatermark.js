@@ -106,7 +106,8 @@ export const generatePDFWithWatermark = (title, description, content) => {
   doc.setTextColor(0, 0, 0); // Black color
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('© Ingrid van de Bovenkamp - http://www.ingsscribblings.nl/', 20, doc.internal.pageSize.getHeight() - 20);
+  const currentYear = new Date().getFullYear();
+  doc.text(`© ${currentYear} Ingrid van de Bovenkamp - https://www.ingsscribblings.nl/`, 20, doc.internal.pageSize.getHeight() - 20);
   
   return doc;
 };
