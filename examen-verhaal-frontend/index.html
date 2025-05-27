@@ -23,6 +23,11 @@
           );
         }
       }(window.location))
+
+      // Add # if not present
+      if (!window.location.hash) {
+        window.location.hash = '#';
+      }
     </script>
   </head>
   <body>

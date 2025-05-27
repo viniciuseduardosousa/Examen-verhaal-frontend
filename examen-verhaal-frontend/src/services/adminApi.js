@@ -619,7 +619,7 @@ export const adminCategoriesAPI = {
 export const profileAPI = {
   getOvermij: async () => {
     try {
-      const response = await fetch(getApiUrl('/overmijpagina/overmij/admin/'), getFetchOptions());
+      const response = await fetch(getApiUrl('/overmijpagina/overmij/'), getFetchOptions());
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
@@ -689,7 +689,7 @@ export const profileAPI = {
 
   getFooter: async () => {
     try {
-      const response = await fetch(getApiUrl('/overmijpagina/footer/admin/'), getFetchOptions());
+      const response = await fetch(getApiUrl('/overmijpagina/footer/'), getFetchOptions());
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
