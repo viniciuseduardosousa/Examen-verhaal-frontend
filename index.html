@@ -23,8 +23,15 @@
           );
         }
       }(window.location))
+
+      // Ensure URL always starts with #
+      (function() {
+        if (!window.location.hash) {
+          window.location.hash = '/';
+        }
+      })();
     </script>
-    <script type="module" crossorigin src="/Examen-verhaal-frontend/assets/index-BMEWzero.js"></script>
+    <script type="module" crossorigin src="/Examen-verhaal-frontend/assets/index-BEA6rS-c.js"></script>
     <link rel="stylesheet" crossorigin href="/Examen-verhaal-frontend/assets/index-Bm6cneOl.css">
   </head>
   <body>
