@@ -758,12 +758,12 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       <button
                         type="button"
                         onClick={() => setShowPreview(!showPreview)}
-                        className="text-gray-600 hover:text-gray-800 focus:outline-none"
-                        title="Preview verhaal"
+                        disabled={!formData.displayText?.trim()}
+                        className={`text-gray-600 hover:text-gray-800 focus:outline-none ${!formData.displayText?.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={!formData.displayText?.trim() ? 'Geen preview beschikbaar' : 'Preview verhaal'}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                         </svg>
                       </button>
                     </div>
@@ -782,9 +782,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                     />
                     {showPreview && (
                       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-[#FFFFF5] rounded-lg w-full max-w-3xl max-h-[80vh] overflow-y-auto p-6">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold">Preview</h3>
+                        <div className="bg-[#FFFFF5] rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold font-mono">Preview</h3>
                             <button
                               onClick={() => setShowPreview(false)}
                               className="text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -794,8 +794,10 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               </svg>
                             </button>
                           </div>
-                          <div className="prose prose-lg max-w-none">
-                            <RichTextDisplay content={formData.displayText || ''} />
+                          <div className="prose prose-lg max-w-none mx-auto px-4 sm:px-6 md:px-8">
+                            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+                              <RichTextDisplay content={formData.displayText || ''} />
+                            </div>
                           </div>
                         </div>
                       </div>

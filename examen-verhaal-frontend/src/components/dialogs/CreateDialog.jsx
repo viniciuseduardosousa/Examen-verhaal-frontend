@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
 import toast from 'react-hot-toast';
+import RichTextDisplay from '../admin/RichTextDisplay';
 
 const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   // Initialize with empty values for both story and category types
@@ -30,6 +31,7 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
   const [isShaking, setIsShaking] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const scrollToTop = () => {
     const dialogContent = document.querySelector('.max-h-\\[90vh\\].overflow-y-auto');
@@ -495,9 +497,22 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">
-                      Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-base font-mono font-bold">
+                        Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPreview(!showPreview)}
+                        disabled={!formData.text?.trim()}
+                        className={`text-gray-600 hover:text-gray-800 focus:outline-none ${!formData.text?.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={!formData.text?.trim() ? 'Geen preview beschikbaar' : 'Preview verhaal'}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                     <textarea
                       name="text"
                       value={formData.displayText || formData.text}
@@ -509,6 +524,28 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
                     />
+                    {showPreview && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-[#FFFFF5] rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold font-mono">Preview</h3>
+                            <button
+                              onClick={() => setShowPreview(false)}
+                              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="prose prose-lg max-w-none mx-auto px-4 sm:px-6 md:px-8">
+                            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+                              <RichTextDisplay content={formData.text || ''} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-mono font-bold mb-1">
