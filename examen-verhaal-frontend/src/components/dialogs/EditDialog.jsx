@@ -63,7 +63,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setFormData({
           titel: '',
           tekst: '',
-          beschrijving: '',
+          beschrijving: data.beschrijving || '',
           is_onzichtbaar: false,
           categorie: '',
           date: '',
