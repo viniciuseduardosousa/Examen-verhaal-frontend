@@ -130,7 +130,7 @@ export const getAuthHeaders = () => {
 // Error handler
 export const handleApiError = (error) => {
   console.error('API Error:', error);
-  if (error.response?.status === 401) {
+  if (error.response?.status === 401 && window.location.pathname.includes('/admin')) {
     localStorage.removeItem('token');
     window.location.href = '/admin/login';
   }
