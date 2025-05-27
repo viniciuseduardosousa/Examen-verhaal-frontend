@@ -300,6 +300,28 @@ export const adminVerhalenAPI = {
       formData.append('is_downloadable', data.is_downloadable ? 'true' : 'false');
       formData.append('url', data.url || ''); // Add URL field
 
+      if (data.is_spotlighted) {
+        try {
+          const allStories = await adminVerhalenAPI.getAll();
+          for (const story of allStories) {
+            if (story.id !== id && story.is_spotlighted) {
+              const unspotlightFormData = new FormData();
+              unspotlightFormData.append('is_spotlighted', 'false');
+              await fetch(getApiUrl(`/api/verhalen/admin/${story.id}`), {
+                method: 'PATCH',
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: unspotlightFormData,
+                credentials: 'include'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error unspotlighting other stories:', error);
+        }
+      }
+      
       // Handle cover image
       if (data.remove_image) {
         formData.append('cover_image', '');
