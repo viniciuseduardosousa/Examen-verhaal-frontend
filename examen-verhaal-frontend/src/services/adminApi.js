@@ -611,13 +611,18 @@ export const profileAPI = {
       
       // Add text content
       formData.append('tekst', data.aboutMeText);
-      formData.append('subtitel', data.subtitle); // Use the subtitle from form data
+      formData.append('subtitel', data.subtitle);
       
       // Handle profile photo
       if (data.removePhoto) {
         formData.append('afbeelding', ''); // Send empty string to remove photo
       } else if (data.afbeelding instanceof File) {
         formData.append('afbeelding', data.afbeelding);
+      }
+
+      // Handle Word document
+      if (data.word_file instanceof File) {
+        formData.append('word_file', data.word_file);
       }
 
       const response = await fetch(getApiUrl('/overmijpagina/overmij/admin/'), {
