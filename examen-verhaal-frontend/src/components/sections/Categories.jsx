@@ -48,6 +48,7 @@ const Categories = ({ onCategoriesLoaded }) => {
         <CategoryCard
           key={category.id}
           title={category.naam}
+          description={category.beschrijving}
           imageUrl={category.cover_image}
           category={category.naam}
         />
@@ -55,6 +56,7 @@ const Categories = ({ onCategoriesLoaded }) => {
         <NoCoverCategoryCard
           key={category.id}
           title={category.naam}
+          description={category.beschrijving}
           category={category.naam}
         />
       );

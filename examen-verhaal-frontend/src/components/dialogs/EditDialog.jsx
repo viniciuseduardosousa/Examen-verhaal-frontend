@@ -67,7 +67,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_onzichtbaar: false,
           categorie: '',
           date: '',
-          cover_image: data.cover_image || null,
+          cover_image: null,
           is_uitgelicht: Boolean(data.is_uitgelicht),
           is_spotlighted: false,
           is_downloadable: false,
@@ -75,7 +75,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           naam: data.naam || '',
           word_file: data.word_file
         });
-        if (data.cover_image) {
+        if (data.cover_image && !removeImage) {
           setCoverPreview(data.cover_image);
         }
       } else {
@@ -94,7 +94,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
             categorie: data.categorie?.toString() || '',
             date: data.datum || '',
-            cover_image: data.cover_image || null,
+            cover_image: null,
             is_uitgelicht: Boolean(data.is_uitgelicht),
             is_spotlighted: Boolean(data.is_spotlighted),
             is_downloadable: Boolean(data.is_downloadable),
@@ -112,7 +112,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
             categorie: data.categorie?.toString() || '',
             date: data.datum || '',
-            cover_image: data.cover_image || null,
+            cover_image: null,
             is_uitgelicht: Boolean(data.is_uitgelicht),
             is_spotlighted: Boolean(data.is_spotlighted),
             is_downloadable: Boolean(data.is_downloadable),
@@ -123,7 +123,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           });
         }
         
-        if (data.cover_image) {
+        if (data.cover_image && !removeImage) {
           setCoverPreview(data.cover_image);
         }
         
@@ -208,7 +208,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       if (isCategory) {
         const categoryUpdateData = {
           ...formData,
-          cover_image: removeImage ? null : formData.cover_image
+          cover_image: removeImage ? null : formData.cover_image,
+          remove_image: removeImage
         };
         await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
@@ -216,7 +217,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         const formattedData = {
           ...formData,
           datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date,
-          tekst: formData.displayText || '' // Use displayText directly without converting URLs
+          tekst: formData.displayText || '', // Use displayText directly without converting URLs
+          cover_image: removeImage ? null : formData.cover_image,
+          remove_image: removeImage
         };
         await adminVerhalenAPI.update(data.id, formattedData);
       }
@@ -245,11 +248,11 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === 'file') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: files[0]
-      }));
       if (files && files[0]) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: files[0]
+        }));
         setCoverPreview(URL.createObjectURL(files[0]));
         setRemoveImage(false);
       }
@@ -374,6 +377,19 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-mono font-bold mb-1">
+                      Beschrijving
+                    </label>
+                    <textarea
+                      name="beschrijving"
+                      value={formData.beschrijving || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows="3"
                     />
                   </div>
 

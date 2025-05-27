@@ -303,6 +303,7 @@ export const adminVerhalenAPI = {
       // Handle cover image
       if (data.remove_image) {
         formData.append('cover_image', '');
+        formData.append('remove_image', 'true');
       } else if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
       }
@@ -412,6 +413,7 @@ export const adminCategoriesAPI = {
       const formData = new FormData();
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      formData.append('beschrijving', categoryData.beschrijving || '');
       
       // Handle cover image
       if (categoryData.remove_image) {
@@ -449,6 +451,7 @@ export const adminCategoriesAPI = {
       const formData = new FormData();
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      formData.append('beschrijving', categoryData.beschrijving || '');
       
       // Handle cover image
       if (categoryData.remove_image) {
@@ -512,7 +515,7 @@ export const adminCategoriesAPI = {
   patch: async (id, categoryData) => {
     try {
       // If we're removing the image, send as JSON
-      if (categoryData.cover_image === null) {
+      if (categoryData.remove_image) {
         const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
           method: 'PATCH',
           headers: {
@@ -520,7 +523,9 @@ export const adminCategoriesAPI = {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            cover_image: null
+            cover_image: null,
+            beschrijving: categoryData.beschrijving || null,
+            remove_image: true
           }),
           credentials: 'include'
         });
@@ -545,6 +550,9 @@ export const adminCategoriesAPI = {
       }
       if (categoryData.is_uitgelicht !== undefined) {
         formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      }
+      if (categoryData.beschrijving !== undefined) {
+        formData.append('beschrijving', categoryData.beschrijving || '');
       }
       
       // Handle cover image upload

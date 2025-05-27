@@ -198,6 +198,7 @@ const Dashboard = () => {
       const transformedItem = {
         id: item.id,
         naam: item.naam,
+        beschrijving: item.beschrijving,
         cover_image: item.cover_image,
         is_uitgelicht: item.is_uitgelicht || false
       };
@@ -217,7 +218,8 @@ const Dashboard = () => {
         is_spotlighted: item.is_spotlighted,
         is_downloadable: item.is_downloadable,
         url: item.url,
-        cover_image: item.cover_image
+        cover_image: item.cover_image || null,
+        remove_image: false
       };
       console.log('Transformed item for edit:', transformedItem);
       setItemToEdit(transformedItem);

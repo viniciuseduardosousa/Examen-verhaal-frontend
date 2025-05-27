@@ -632,6 +632,19 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-mono font-bold mb-1">
+                      Beschrijving
+                    </label>
+                    <textarea
+                      name="beschrijving"
+                      value={formData.beschrijving || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows="3"
+                    />
+                  </div>
+
                   <div className="flex justify-start">
                     <label className="flex items-center gap-2 text-base font-mono">
                       <input
