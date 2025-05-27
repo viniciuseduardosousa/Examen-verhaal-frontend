@@ -11,6 +11,7 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     aboutMeText: '',
     footerText: '',
+    email: '',
     subtitle: '',
     afbeelding: null,
     removePhoto: false,
@@ -73,7 +74,8 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
       setFormData({
         aboutMeText: overmijData.tekst || '',
         footerText: footerData.tekst || '',
-        subtitle: overmijData.subtitel || 'De persoonlijke schrijfplek van Ingrid (ook wel Inge genoemd)',
+        email: footerData.email || '',
+        subtitle: overmijData.subtitel || 'De persoonlijke schrijfplek van Ingrid',
         afbeelding: null,
         removePhoto: false,
         word_file: null
@@ -99,6 +101,9 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
     }
     if (!formData.subtitle?.trim()) {
       errors.push('Subtitel is verplicht');
+    }
+    if (!formData.email?.trim()) {
+      errors.push('E-mailadres is verplicht');
     }
 
     if (errors.length > 0) {
@@ -210,7 +215,8 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
           removePhoto: formData.removePhoto
         }),
         profileAPI.updateFooter({
-          footerText: formData.footerText.trim()
+          footerText: formData.footerText.trim(),
+          email: formData.email.trim()
         })
       ]);
 
@@ -339,6 +345,17 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
                 rows={3}
                 required
                 isSubmitted={isSubmitted}
+              />
+
+              <TextInput
+                label="E-mailadres"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                rows={1}
+                required
+                isSubmitted={isSubmitted}
+                type="email"
               />
             </div>
 

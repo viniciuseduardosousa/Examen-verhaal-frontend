@@ -678,12 +678,15 @@ export const profileAPI = {
   updateFooter: async (data) => {
     try {
       const response = await fetch(getApiUrl('/overmijpagina/footer/admin/'), {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tekst: data.footerText }),
+        body: JSON.stringify({
+          tekst: data.footerText,
+          email: data.email
+        }),
         credentials: 'include'
       });
 
