@@ -1,5 +1,30 @@
 import { jsPDF } from 'jspdf';
 
+// Function to convert markdown-style formatting to HTML
+const convertMarkdownToHtml = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert bold and italic (must be done first)
+    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Convert bold
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert italic
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Convert underline
+    .replace(/__(.*?)__/g, '<u>$1</u>')
+    // Convert strikethrough
+    .replace(/~~(.*?)~~/g, '<s>$1</s>')
+    // Convert code
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    // Convert paragraphs
+    .replace(/\n\n/g, '</p><p>')
+    // Convert line breaks
+    .replace(/\n/g, '<br>')
+    // Wrap in paragraph tags if not already wrapped
+    .replace(/^(.+)$/g, '<p>$1</p>');
+};
+
 export const generatePDFWithWatermark = (title, description, content) => {
   const doc = new jsPDF();
   
@@ -19,13 +44,16 @@ export const generatePDFWithWatermark = (title, description, content) => {
   // Add content
   doc.setFontSize(12);
   
+  // Convert markdown to HTML first
+  const htmlContent = convertMarkdownToHtml(content);
+  
   // Create a temporary div to properly handle HTML content
   const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = content;
+  tempDiv.innerHTML = htmlContent;
   
   // Process the content while preserving formatting
   const lineHeight = 7; // Line height in PDF units
-  const maxWidth = 170; // Maximum width for text
+  const maxWidth = 170;
   
   // Function to process text nodes and apply formatting
   const processNode = (node, isBold = false, isItalic = false) => {
@@ -77,7 +105,7 @@ export const generatePDFWithWatermark = (title, description, content) => {
   // Add copyright text at bottom left
   doc.setTextColor(0, 0, 0); // Black color
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal'); // Reset font to normal
+  doc.setFont('helvetica', 'normal');
   doc.text('© Ingrid van de Bovenkamp - http://www.ingsscribblings.nl/', 20, doc.internal.pageSize.getHeight() - 20);
   
   return doc;
