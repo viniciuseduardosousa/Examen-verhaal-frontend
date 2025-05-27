@@ -1,5 +1,6 @@
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
+import RichTextDisplay from '../admin/RichTextDisplay';
 
 const NoCoverStoryCard = ({ id, title, text, category, date, onCategoryClick }) => {
   const navigate = useNavigate();
@@ -30,10 +31,8 @@ const NoCoverStoryCard = ({ id, title, text, category, date, onCategoryClick }) 
       <div className="p-5 sm:p-6 flex flex-col h-full">
         <div className="flex-grow">
           <h3 className="font-mono text-xl sm:text-2xl mb-4 break-words">{title}</h3>
-          <div className="mb-4 overflow-hidden">
-            <p className="text-gray-700 text-sm sm:text-base overflow-hidden overflow-ellipsis break-words whitespace-normal line-clamp-4">
-              {text}
-            </p>
+          <div className="text-gray-700 text-sm sm:text-base overflow-hidden overflow-ellipsis break-words whitespace-normal line-clamp-4">
+            <RichTextDisplay content={text} />
           </div>
         </div>
         <div className="mt-4">
