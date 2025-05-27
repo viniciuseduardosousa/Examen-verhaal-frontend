@@ -130,7 +130,7 @@ const handleApiResponse = async (response) => {
     console.error('Response status:', response.status);
     console.error('Response status text:', response.statusText);
     
-    if (response.status === 401) {
+    if (response.status === 401 && window.location.pathname.includes('/admin')) {
       localStorage.removeItem('token');
       window.location.href = '/Examen-verhaal-frontend/#/admin/login';
       throw new Error('Niet geautoriseerd');
