@@ -24,10 +24,10 @@
         }
       }(window.location))
 
-      // Ensure URL always starts with #
+      // Redirect to #/ if no hash is present
       (function() {
         if (!window.location.hash) {
-          window.location.hash = '/';
+          window.location.replace(window.location.href + '#/');
         }
       })();
     </script>
