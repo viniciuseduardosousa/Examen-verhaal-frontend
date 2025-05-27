@@ -1,3 +1,5 @@
+import RichTextDisplay from '../admin/RichTextDisplay';
+
 const WordStoryContent = ({ tekst }) => {
   // Clean up the HTML content
   const cleanHtml = tekst
@@ -59,8 +61,9 @@ const WordStoryContent = ({ tekst }) => {
           [&>img+p]:mt-8
           [&>p+img]:mt-8
           px-4 sm:px-6 md:px-8"
-        dangerouslySetInnerHTML={{ __html: cleanHtml }}
-      />
+      >
+        <RichTextDisplay content={tekst} />
+      </div>
     </section>
   );
 };

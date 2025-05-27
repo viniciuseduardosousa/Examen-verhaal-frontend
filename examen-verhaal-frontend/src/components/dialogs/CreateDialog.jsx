@@ -207,40 +207,35 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       const html = result.value;
 
-      const cleanHtml = html
-        .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '<br /><h2>$1</h2>')
-        .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '<br /><h2>$1</h2>')
-        .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '<br /><h3>$1</h3>')
-        .replace(/<p[^>]*>(.*?)<\/p>/gi, '<p>$1</p>')
-        .replace(/<ul[^>]*>(.*?)<\/ul>/gi, '<ul>$1</ul>')
-        .replace(/<ol[^>]*>(.*?)<\/ol>/gi, '<ol>$1</ol>')
-        .replace(/<li[^>]*>(.*?)<\/li>/gi, '<li>$1</li>')
-        .replace(/<table[^>]*>(.*?)<\/table>/gi, '<table>$1</table>')
-        .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
-        .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
-        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-        .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1">$2</a>')
-        .replace(/<br\s*\/?>/gi, '<br />')
-        .replace(/\n\s*\n/g, '\n')
-        .replace(/\n/g, '<br />')
-        .replace(/<br \/><br \/><h/g, '<br /><h')
-        .trim();
-
-      const displayText = cleanHtml
+      // Convert HTML formatting to markdown-style formatting
+      const formattedText = html
+        // Convert bold and italic (must be done first)
+        .replace(/<strong[^>]*><em[^>]*>(.*?)<\/em><\/strong>/gi, '***$1***')
+        // Convert bold
+        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+        // Convert italic
+        .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+        // Convert underline
+        .replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__')
+        // Convert strikethrough
+        .replace(/<s[^>]*>(.*?)<\/s>/gi, '~~$1~~')
+        // Convert code
+        .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+        // Convert paragraphs to double newlines
+        .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+        // Convert line breaks to single newlines
+        .replace(/<br\s*\/?>/gi, '\n')
+        // Remove other HTML tags
         .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/\s+/g, ' ')
+        // Clean up extra spaces and newlines while preserving structure
+        .replace(/\n\s*\n\s*\n/g, '\n\n')
+        .replace(/\s+$/gm, '') // Remove trailing spaces on each line
         .trim();
 
       setFormData(prev => ({
         ...prev,
-        text: cleanHtml,
-        displayText: displayText,
+        text: formattedText,
+        displayText: formattedText,
         word_file: file
       }));
       setWordFilename(file.name);
