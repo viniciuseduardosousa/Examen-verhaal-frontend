@@ -24,14 +24,12 @@
         }
       }(window.location))
 
-      // Redirect to #/ if no hash is present
-      (function() {
-        if (!window.location.hash) {
-          window.location.replace(window.location.href + '#/');
-        }
-      })();
+      // Add # if not present
+      if (!window.location.hash) {
+        window.location.hash = '#';
+      }
     </script>
-    <script type="module" crossorigin src="/Examen-verhaal-frontend/assets/index-BEA6rS-c.js"></script>
+    <script type="module" crossorigin src="/Examen-verhaal-frontend/assets/index-FITb0O23.js"></script>
     <link rel="stylesheet" crossorigin href="/Examen-verhaal-frontend/assets/index-Bm6cneOl.css">
   </head>
   <body>
