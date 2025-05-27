@@ -75,13 +75,16 @@ const FeaturedStory = ({ onStoryLoaded }) => {
           {/* Linker kolom met grote afbeelding */}
           {story.cover_image && (
             <div className="w-full md:w-1/2">
-              <div className="w-full h-[350px] border-2 border-gray-800">
+              <button 
+                onClick={handleReadMore}
+                className="w-full h-[350px] border-2 border-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+              >
                 <img 
                   src={story.cover_image} 
                   alt={story.titel}
                   className="w-full h-full object-cover"
                 />
-              </div>
+              </button>
             </div>
           )}
           

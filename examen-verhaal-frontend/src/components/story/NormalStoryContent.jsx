@@ -1,17 +1,6 @@
+import RichTextDisplay from '../admin/RichTextDisplay';
+
 const NormalStoryContent = ({ tekst }) => {
-  const convertUrlsToLinks = (text) => {
-    if (!text) return '';
-    // Regular expression to match URLs
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, url => {
-      // Remove any trailing punctuation from the URL
-      const cleanUrl = url.replace(/[.,;:!?]+$/, '');
-      return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${cleanUrl}</a>`;
-    });
-  };
-
-  const textWithLinks = convertUrlsToLinks(tekst);
-
   return (
     <section className="py-8 animate-slideDown">
       <div
@@ -53,10 +42,7 @@ const NormalStoryContent = ({ tekst }) => {
           [&>p+img]:mt-8
           px-4 sm:px-6 md:px-8"
       >
-        <div 
-          style={{ whiteSpace: 'pre-wrap' }} 
-          dangerouslySetInnerHTML={{ __html: textWithLinks }}
-        />
+        <RichTextDisplay content={tekst} />
       </div>
     </section>
   );

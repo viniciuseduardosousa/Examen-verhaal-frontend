@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import HeaderSection from '../components/sections/HeaderSection';
 import DeveloperSection from '../components/sections/DeveloperSection';
+import RichTextDisplay from '../components/admin/RichTextDisplay';
 
 const OverMij = () => {
   const [profileData, setProfileData] = useState({
     tekst: '',
+    subtitel: '',
     afbeelding: null
   });
 
@@ -15,6 +17,7 @@ const OverMij = () => {
         const data = await response.json();
         setProfileData({
           tekst: data.tekst || '',
+          subtitel: data.subtitel || 'De persoonlijke schrijfplek van Ingrid',
           afbeelding: data.afbeelding || null
         });
       }
@@ -39,15 +42,18 @@ const OverMij = () => {
 
   return (
     <div className="container mx-auto px-4 pt-40 pb-20">
-      <HeaderSection profilePhoto={profileData.afbeelding} />
+      <HeaderSection 
+        profilePhoto={profileData.afbeelding} 
+        subtitle={profileData.subtitel}
+      />
 
       <div className="max-w-3xl mx-auto animate-slideDown">
         <article className="prose prose-lg max-w-none">
           <h2 className="text-2xl font-bold mb-8 text-gray-800">Over Mij</h2>
           
-          <p className="text-gray-600 leading-relaxed mb-16">
-            {profileData.tekst || "Op deze site staan korte verhalen, columns, 50-woordenverhalen en andere literaire schetsen en schrijfsels. De naam 'Ings' verwijst naar de schrijver, en 'Scribblings' naar het plezier van schrijven zonder vaste kaders."}
-          </p>
+          <div className="text-gray-600 leading-relaxed mb-16">
+            <RichTextDisplay content={profileData.tekst || "Op deze site staan korte verhalen, columns, 50-woordenverhalen en andere literaire schetsen en schrijfsels. De naam 'Ings' verwijst naar de schrijver, en 'Scribblings' naar het plezier van schrijven zonder vaste kaders."} />
+          </div>
         </article>
         
         <div className="flex items-center my-16">

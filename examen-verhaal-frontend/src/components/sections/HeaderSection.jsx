@@ -1,15 +1,12 @@
 import React from 'react';
 
-const HeaderSection = ({ profilePhoto }) => {
+const HeaderSection = ({ profilePhoto, subtitle }) => {
   return (
     <div className="max-w-4xl mx-auto mb-24">
       <div className="flex flex-col items-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800 text-center">IngsScribblings</h1>
         <p className="text-xl text-gray-600 mb-4 text-center max-w-2xl">
-          De persoonlijke schrijfplek van Ingrid
-        </p>
-        <p className="text-gray-500 italic text-center">
-          Ook wel Inge genoemd
+          {subtitle || "De persoonlijke schrijfplek van Ingrid"}
         </p>
       </div>
 

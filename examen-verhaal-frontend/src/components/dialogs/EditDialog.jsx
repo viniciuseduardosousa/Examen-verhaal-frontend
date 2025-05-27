@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { adminVerhalenAPI, adminCategoriesAPI } from '../../services/adminApi';
 import mammoth from 'mammoth';
 import toast from 'react-hot-toast';
+import RichTextDisplay from '../admin/RichTextDisplay';
 
 const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +29,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [wordFilename, setWordFilename] = useState('');
   const [isShaking, setIsShaking] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Reset form when dialog is opened or closed
   useEffect(() => {
@@ -65,7 +67,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           is_onzichtbaar: false,
           categorie: '',
           date: '',
-          cover_image: data.cover_image || null,
+          cover_image: null,
           is_uitgelicht: Boolean(data.is_uitgelicht),
           is_spotlighted: false,
           is_downloadable: false,
@@ -73,7 +75,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           naam: data.naam || '',
           word_file: data.word_file
         });
-        if (data.cover_image) {
+        if (data.cover_image && !removeImage) {
           setCoverPreview(data.cover_image);
         }
       } else {
@@ -92,7 +94,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
             categorie: data.categorie?.toString() || '',
             date: data.datum || '',
-            cover_image: data.cover_image || null,
+            cover_image: null,
             is_uitgelicht: Boolean(data.is_uitgelicht),
             is_spotlighted: Boolean(data.is_spotlighted),
             is_downloadable: Boolean(data.is_downloadable),
@@ -110,7 +112,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
             is_onzichtbaar: data.is_onzichtbaar === true || data.is_onzichtbaar === 'true',
             categorie: data.categorie?.toString() || '',
             date: data.datum || '',
-            cover_image: data.cover_image || null,
+            cover_image: null,
             is_uitgelicht: Boolean(data.is_uitgelicht),
             is_spotlighted: Boolean(data.is_spotlighted),
             is_downloadable: Boolean(data.is_downloadable),
@@ -121,7 +123,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
           });
         }
         
-        if (data.cover_image) {
+        if (data.cover_image && !removeImage) {
           setCoverPreview(data.cover_image);
         }
         
@@ -206,21 +208,18 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       if (isCategory) {
         const categoryUpdateData = {
           ...formData,
-          cover_image: removeImage ? null : formData.cover_image
+          cover_image: removeImage ? null : formData.cover_image,
+          remove_image: removeImage
         };
         await adminCategoriesAPI.patch(data.id, categoryUpdateData);
       } else {
-        // For Word-imported content, keep the original HTML content
-        // For regular content, convert URLs to links
-        const tekstValue = formData.word_file 
-          ? formData.tekst // Keep original HTML for Word documents
-          : (formData.displayText ? convertUrlsToLinks(formData.displayText) : formData.tekst);
-
         // Format the date to YYYY-MM-DD
         const formattedData = {
           ...formData,
           datum: formData.date ? new Date(formData.date).toISOString().split('T')[0] : formData.date,
-          tekst: tekstValue || '' // Ensure we never send null or undefined
+          tekst: formData.displayText || '', // Use displayText directly without converting URLs
+          cover_image: removeImage ? null : formData.cover_image,
+          remove_image: removeImage
         };
         await adminVerhalenAPI.update(data.id, formattedData);
       }
@@ -249,11 +248,11 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === 'file') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: files[0]
-      }));
       if (files && files[0]) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: files[0]
+        }));
         setCoverPreview(URL.createObjectURL(files[0]));
         setRemoveImage(false);
       }
@@ -262,7 +261,8 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       if (formData.word_file) {
         setFormData(prev => ({
           ...prev,
-          displayText: value
+          displayText: value,
+          tekst: value
         }));
       } else {
         // For regular content, update both displayText and tekst
@@ -289,38 +289,38 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       const html = result.value;
 
-      // Clean and format the HTML
-      const cleanHtml = html
-        .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '<br /><h2>$1</h2>')
-        .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '<br /><h2>$1</h2>')
-        .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '<br /><h3>$1</h3>')
-        .replace(/<p[^>]*>(.*?)<\/p>/gi, '<p>$1</p>')
-        .replace(/<ul[^>]*>(.*?)<\/ul>/gi, '<ul>$1</ul>')
-        .replace(/<ol[^>]*>(.*?)<\/ol>/gi, '<ol>$1</ol>')
-        .replace(/<li[^>]*>(.*?)<\/li>/gi, '<li>$1</li>')
-        .replace(/<table[^>]*>(.*?)<\/table>/gi, '<table>$1</table>')
-        .replace(/<tr[^>]*>(.*?)<\/tr>/gi, '<tr>$1</tr>')
-        .replace(/<td[^>]*>(.*?)<\/td>/gi, '<td>$1</td>')
-        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-        .replace(/<br\s*\/?>/gi, '<br />')
-        .replace(/\n\s*\n/g, '\n')
-        .replace(/\n/g, '<br />')
-        .replace(/<br \/><br \/><h/g, '<br /><h')
+      // Convert HTML formatting to markdown-style formatting while preserving whitespace
+      const formattedText = html
+        // Convert bold and italic (must be done first)
+        .replace(/<strong[^>]*><em[^>]*>(.*?)<\/em><\/strong>/gi, '***$1***')
+        // Convert bold
+        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+        // Convert italic
+        .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+        // Convert underline
+        .replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__')
+        // Convert strikethrough
+        .replace(/<s[^>]*>(.*?)<\/s>/gi, '~~$1~~')
+        // Convert code
+        .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+        // Convert paragraphs to double newlines while preserving whitespace
+        .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+        // Convert line breaks to single newlines
+        .replace(/<br\s*\/?>/gi, '\n')
+        // Remove other HTML tags while preserving whitespace
+        .replace(/<[^>]*>/g, '')
+        // Clean up extra spaces and newlines while preserving structure
+        .replace(/\n\s*\n\s*\n/g, '\n\n')
+        .replace(/\s+$/gm, '') // Remove trailing spaces on each line
         .trim();
 
-      // Create a temporary div to get the plain text version
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = cleanHtml;
-      const plainText = tempDiv.textContent || tempDiv.innerText || '';
-
-      // Store both versions
+      // Store both versions with preserved whitespace
       setFormData(prev => ({
         ...prev,
-        tekst: cleanHtml, // Store the HTML version for display
-        displayText: plainText, // Store the plain text version for editing
+        tekst: formattedText,
+        displayText: formattedText,
         word_file: file
       }));
-      setDisplayText(plainText);
       setWordFilename(file.name);
       
       // Store the filename in localStorage when a file is uploaded
@@ -377,6 +377,19 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                       className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-mono font-bold mb-1">
+                      Beschrijving
+                    </label>
+                    <textarea
+                      name="beschrijving"
+                      value={formData.beschrijving || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows="3"
                     />
                   </div>
 
@@ -693,9 +706,9 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                               setFormData(prev => ({
                                 ...prev,
                                 tekst: '',
+                                displayText: '',
                                 word_file: null
                               }));
-                              setDisplayText('');
                               
                               // Remove filename from localStorage when document is removed
                               if (data && data.id) {
@@ -738,21 +751,57 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
                   </div>
                   
                   <div>
-                    <label className="block text-base font-mono font-bold mb-1">
-                      Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-base font-mono font-bold">
+                        Verhaal <span className={`${isSubmitted ? 'text-red-500' : 'text-gray-400'}`}>*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPreview(!showPreview)}
+                        disabled={!formData.displayText?.trim()}
+                        className={`text-gray-600 hover:text-gray-800 focus:outline-none ${!formData.displayText?.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={!formData.displayText?.trim() ? 'Geen preview beschikbaar' : 'Preview verhaal'}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                     <textarea
                       name="tekst"
                       value={formData.displayText || ''}
                       onChange={handleChange}
                       style={{ 
-                        whiteSpace: 'pre-wrap', 
-                        minHeight: '200px'
+                        whiteSpace: 'pre-wrap',
+                        minHeight: '200px',
+                        overflowWrap: 'break-word'
                       }}
                       className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
                     />
+                    {showPreview && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-[#FFFFF5] rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold font-mono">Preview</h3>
+                            <button
+                              onClick={() => setShowPreview(false)}
+                              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="prose prose-lg max-w-none mx-auto px-4 sm:px-6 md:px-8">
+                            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+                              <RichTextDisplay content={formData.displayText || ''} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t">

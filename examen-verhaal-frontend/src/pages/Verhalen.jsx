@@ -244,7 +244,7 @@ const Verhalen = () => {
                   <StoryCard
                     id={story.id}
                     title={story.titel}
-                    description={story.beschrijving}
+                    description={story.tekst}
                     imageUrl={story.cover_image}
                     category={categoryMap[story.categorie]}
                   />
@@ -300,7 +300,7 @@ const Verhalen = () => {
                   <StoryCard
                     id={story.id}
                     title={story.titel}
-                    description={story.beschrijving}
+                    description={story.tekst}
                     imageUrl={story.cover_image}
                     category={categoryMap[story.categorie]}
                   />

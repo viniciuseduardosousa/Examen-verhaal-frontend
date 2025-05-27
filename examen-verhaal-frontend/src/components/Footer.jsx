@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { profileAPI } from '../services/adminApi';
 
 const Footer = () => {
-  const [footerText, setFooterText] = useState('');
+  const [footerData, setFooterData] = useState({
+    tekst: '',
+    email: ''
+  });
 
-  const fetchFooterText = async () => {
+  const fetchFooterData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://vinininja123.pythonanywhere.com'}/overmijpagina/footer/`);
-      if (response.ok) {
-        const data = await response.json();
-        setFooterText(data.tekst);
-      }
+      const data = await profileAPI.getFooter();
+      setFooterData({
+        tekst: data.tekst || '',
+        email: data.email || ''
+      });
     } catch (error) {
-      console.error('Error fetching footer text:', error);
+      console.error('Error fetching footer data:', error);
     }
   };
 
   useEffect(() => {
-    fetchFooterText();
+    fetchFooterData();
 
-    // Listen for custom event when footer text is updated
     const handleFooterUpdate = () => {
-      fetchFooterText();
+      fetchFooterData();
     };
 
     window.addEventListener('footerTextUpdated', handleFooterUpdate);
@@ -42,7 +45,7 @@ const Footer = () => {
           <div className="relative min-h-[120px] flex flex-col">
             <h3 className="text-2xl font-medium mb-6 h-[32px]">IngsScribblings</h3>
             <p className="text-gray-700 flex-grow text-lg leading-relaxed">
-              {footerText || 'Ontdek verhalen die je raken, inspireren en vermaken. Een plek waar woorden tot leven komen.'}
+              {footerData.tekst || 'Ontdek verhalen die je raken, inspireren en vermaken. Een plek waar woorden tot leven komen.'}
             </p>
             {/* Verticale divider rechts */}
             <div className="hidden md:block absolute right-[-2rem] top-0 bottom-0 w-[1px] bg-gray-800/20"></div>
@@ -70,18 +73,20 @@ const Footer = () => {
           <div className="min-h-[120px] flex flex-col">
             <h3 className="text-2xl font-medium mb-6 h-[32px]">Contact</h3>
             <ul className="space-y-4 flex-grow">
-              <li>
-                <a 
-                  href="mailto:inge@soundstories.nl" 
-                  className="text-gray-700 hover:text-gray-900 text-lg transition-colors duration-200 flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                  inge@soundstories.nl
-                </a>
-              </li>
+              {footerData.email && (
+                <li>
+                  <a 
+                    href={`mailto:${footerData.email}`}
+                    className="text-gray-700 hover:text-gray-900 text-lg transition-colors duration-200 flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    {footerData.email}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

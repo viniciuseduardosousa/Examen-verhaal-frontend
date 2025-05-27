@@ -180,14 +180,6 @@ const MobileMenu = ({ isOpen, onClose }) => {
           >
             Verhalen
           </Link>
-          <Link 
-            to="/over-mij" 
-            className="text-2xl py-4 border-b-2 border-gray-800 hover:pl-4 
-                     transition-all duration-300 hover:text-gray-600"
-            onClick={onClose}
-          >
-            Over-mij
-          </Link>
           
           {/* Categories Dropdown */}
           <div className="border-b-2 border-gray-800">
@@ -244,6 +236,15 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
+
+          <Link 
+            to="/over-mij" 
+            className="text-2xl py-4 border-b-2 border-gray-800 hover:pl-4 
+                     transition-all duration-300 hover:text-gray-600"
+            onClick={onClose}
+          >
+            Over-mij
+          </Link>
         </nav>
 
         {/* Search Results Overlay */}

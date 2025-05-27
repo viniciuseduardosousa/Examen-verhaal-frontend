@@ -21,7 +21,7 @@ const CategoryCard = ({ title, description, imageUrl, category }) => {
           {/* Text overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <h3 className="text-xl font-medium mb-2">{title}</h3>
-            <p className="line-clamp-3">{description}</p>
+            {description && <p className="line-clamp-3">{description}</p>}
           </div>
         </div>
         

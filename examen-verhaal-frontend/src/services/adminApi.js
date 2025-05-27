@@ -300,9 +300,32 @@ export const adminVerhalenAPI = {
       formData.append('is_downloadable', data.is_downloadable ? 'true' : 'false');
       formData.append('url', data.url || ''); // Add URL field
 
+      if (data.is_spotlighted) {
+        try {
+          const allStories = await adminVerhalenAPI.getAll();
+          for (const story of allStories) {
+            if (story.id !== id && story.is_spotlighted) {
+              const unspotlightFormData = new FormData();
+              unspotlightFormData.append('is_spotlighted', 'false');
+              await fetch(getApiUrl(`/api/verhalen/admin/${story.id}`), {
+                method: 'PATCH',
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: unspotlightFormData,
+                credentials: 'include'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error unspotlighting other stories:', error);
+        }
+      }
+      
       // Handle cover image
       if (data.remove_image) {
         formData.append('cover_image', '');
+        formData.append('remove_image', 'true');
       } else if (data.cover_image instanceof File) {
         formData.append('cover_image', data.cover_image);
       }
@@ -412,6 +435,7 @@ export const adminCategoriesAPI = {
       const formData = new FormData();
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      formData.append('beschrijving', categoryData.beschrijving || '');
       
       // Handle cover image
       if (categoryData.remove_image) {
@@ -449,6 +473,7 @@ export const adminCategoriesAPI = {
       const formData = new FormData();
       formData.append('naam', categoryData.naam);
       formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      formData.append('beschrijving', categoryData.beschrijving || '');
       
       // Handle cover image
       if (categoryData.remove_image) {
@@ -512,7 +537,7 @@ export const adminCategoriesAPI = {
   patch: async (id, categoryData) => {
     try {
       // If we're removing the image, send as JSON
-      if (categoryData.cover_image === null) {
+      if (categoryData.remove_image) {
         const response = await fetch(getApiUrl(`/api/categorieen/admin/${id}`), {
           method: 'PATCH',
           headers: {
@@ -520,7 +545,9 @@ export const adminCategoriesAPI = {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            cover_image: null
+            cover_image: null,
+            beschrijving: categoryData.beschrijving || null,
+            remove_image: true
           }),
           credentials: 'include'
         });
@@ -545,6 +572,9 @@ export const adminCategoriesAPI = {
       }
       if (categoryData.is_uitgelicht !== undefined) {
         formData.append('is_uitgelicht', categoryData.is_uitgelicht ? 'true' : 'false');
+      }
+      if (categoryData.beschrijving !== undefined) {
+        formData.append('beschrijving', categoryData.beschrijving || '');
       }
       
       // Handle cover image upload
@@ -611,13 +641,18 @@ export const profileAPI = {
       
       // Add text content
       formData.append('tekst', data.aboutMeText);
-      formData.append('subtitel', 'De persoonlijke schrijfplek van Ingrid'); // Add default subtitel
+      formData.append('subtitel', data.subtitle);
       
       // Handle profile photo
       if (data.removePhoto) {
         formData.append('afbeelding', ''); // Send empty string to remove photo
       } else if (data.afbeelding instanceof File) {
         formData.append('afbeelding', data.afbeelding);
+      }
+
+      // Handle Word document
+      if (data.word_file instanceof File) {
+        formData.append('word_file', data.word_file);
       }
 
       const response = await fetch(getApiUrl('/overmijpagina/overmij/admin/'), {
@@ -673,12 +708,15 @@ export const profileAPI = {
   updateFooter: async (data) => {
     try {
       const response = await fetch(getApiUrl('/overmijpagina/footer/admin/'), {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tekst: data.footerText }),
+        body: JSON.stringify({
+          tekst: data.footerText,
+          email: data.email
+        }),
         credentials: 'include'
       });
 
