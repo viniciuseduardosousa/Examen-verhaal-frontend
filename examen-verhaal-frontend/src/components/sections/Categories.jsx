@@ -40,7 +40,8 @@ const Categories = ({ onCategoriesLoaded }) => {
         hasCoverImage: Boolean(category.cover_image),
       });
       const hasCoverImage =
-        category.cover_image &&
+        category.cover_image !== null &&
+        category.cover_image !== undefined &&
         typeof category.cover_image === "string" &&
         category.cover_image.trim() !== "";
       return hasCoverImage ? (
