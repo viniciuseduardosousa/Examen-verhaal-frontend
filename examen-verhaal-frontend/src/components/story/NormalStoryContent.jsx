@@ -4,7 +4,7 @@ const NormalStoryContent = ({ tekst }) => {
   return (
     <section className="py-8 animate-slideDown">
       <div
-        className="prose prose-2xl max-w-4xl mx-auto font-serif leading-relaxed text-gray-700 text-xl
+        className="prose prose-2xl max-w-7xl mx-auto font-serif leading-relaxed text-gray-700 text-xl
           prose-headings:font-bold prose-headings:text-gray-800
           prose-h2:text-4xl prose-h2:mt-16 prose-h2:mb-8
           prose-h3:text-3xl prose-h3:mt-12 prose-h3:mb-6
