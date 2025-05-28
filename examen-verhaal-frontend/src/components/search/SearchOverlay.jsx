@@ -10,6 +10,7 @@ const SearchOverlay = ({ show, onClose }) => {
   const [categoryMap, setCategoryMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [predictions, setPredictions] = useState([]);
   const inputRef = useRef(null);
   const overlayRef = useRef(null);
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const SearchOverlay = ({ show, onClose }) => {
           });
           setCategoryMap(categoryIdToName);
           setError(null);
+          setResults(storiesData);
         })
         .catch(err => {
           setError('Er is een fout opgetreden bij het ophalen van de verhalen.');
@@ -44,6 +46,7 @@ const SearchOverlay = ({ show, onClose }) => {
       document.body.style.overflow = '';
       setSearchTerm('');
       setResults([]);
+      setPredictions([]);
     }
     return () => { document.body.style.overflow = ''; };
   }, [show]);
@@ -51,16 +54,30 @@ const SearchOverlay = ({ show, onClose }) => {
   // Filter stories on search
   useEffect(() => {
     if (!searchTerm.trim()) {
-      setResults([]);
+      setResults(allStories);
+      setPredictions([]);
       return;
     }
+
     const term = searchTerm.toLowerCase();
-    setResults(
-      allStories.filter(story =>
-        (story.titel && story.titel.toLowerCase().includes(term)) ||
-        (story.beschrijving && story.beschrijving.toLowerCase().includes(term))
-      )
+    
+    // Filter results
+    const filteredResults = allStories.filter(story =>
+      (story.titel && story.titel.toLowerCase().includes(term)) ||
+      (story.tekst && story.tekst.toLowerCase().includes(term))
     );
+    setResults(filteredResults);
+
+    // Generate predictions based on titles
+    const titlePredictions = allStories
+      .filter(story => 
+        story.titel && 
+        story.titel.toLowerCase().includes(term) && 
+        story.titel.toLowerCase() !== term
+      )
+      .map(story => story.titel)
+      .slice(0, 5); // Limit to 5 predictions
+    setPredictions(titlePredictions);
   }, [searchTerm, allStories]);
 
   // Close on outside click or Escape
@@ -96,13 +113,29 @@ const SearchOverlay = ({ show, onClose }) => {
     navigate(`/verhalen?category=${encodeURIComponent(category)}`);
   };
 
+  // Handle prediction click
+  const handlePredictionClick = (prediction) => {
+    setSearchTerm(prediction);
+  };
+
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-32 bg-black/40 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/40 backdrop-blur-sm animate-fadeIn">
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/10 transition-colors"
+        aria-label="Sluit zoekvenster"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
       <div ref={overlayRef} className="w-full flex flex-col items-center px-4">
-        {/* Search bar */}
-        <div className="relative w-full max-w-md mb-4">
+        {/* Search bar with predictions */}
+        <div className="relative w-full max-w-md mb-4 z-10">
           <input
             ref={inputRef}
             type="text"
@@ -131,10 +164,27 @@ const SearchOverlay = ({ show, onClose }) => {
               </svg>
             </span>
           )}
+          {/* Predictions dropdown */}
+          {predictions.length > 0 && (
+            <div className="absolute w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-20">
+              {predictions.map((prediction, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePredictionClick(prediction)}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                >
+                  {prediction}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
         {/* Results */}
         <div className="w-full max-w-4xl">
-          <h2 className="text-left text-xl font-semibold mb-4 text-white drop-shadow">Resultaten:</h2>
+          <h2 className="text-left text-xl font-semibold mb-4 text-white drop-shadow">
+            {searchTerm ? 'Zoekresultaten:' : 'Alle verhalen:'}
+          </h2>
           {loading ? (
             <div className="text-center py-8 text-white">Laden...</div>
           ) : error ? (
@@ -147,7 +197,7 @@ const SearchOverlay = ({ show, onClose }) => {
                     <StoryCard
                       id={story.id}
                       title={story.titel}
-                      description={story.beschrijving}
+                      description={story.tekst}
                       imageUrl={story.cover_image}
                       category={categoryMap[story.categorie]}
                       onCategoryClick={handleCategoryClick}
