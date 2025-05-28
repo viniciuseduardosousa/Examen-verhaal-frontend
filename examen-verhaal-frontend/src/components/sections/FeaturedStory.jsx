@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowIcon from '../icons/ArrowIcon';
 import { verhalenAPI } from '../../services/api';
 import Loader from '../Loader';
+import RichTextDisplay from '../admin/RichTextDisplay';
 
 const FeaturedStory = ({ onStoryLoaded }) => {
   const navigate = useNavigate();
@@ -43,6 +44,24 @@ const FeaturedStory = ({ onStoryLoaded }) => {
     if (story) {
       navigate(`/verhaal-detail/${story.id}`);
     }
+  };
+
+  // Helper function to truncate text
+  const truncateText = (text, maxLength = 200) => {
+    if (!text) return '';
+    
+    // Clean up the text: remove extra spaces and normalize whitespace
+    const cleanText = text
+      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+      .trim();               // Remove leading/trailing spaces
+    
+    if (cleanText.length <= maxLength) return cleanText;
+    
+    // Find the last space before maxLength to avoid cutting words in half
+    const lastSpace = cleanText.slice(0, maxLength).lastIndexOf(' ');
+    const truncateAt = lastSpace > 0 ? lastSpace : maxLength;
+    
+    return cleanText.slice(0, truncateAt) + '...';
   };
 
   if (loading) {
@@ -93,9 +112,17 @@ const FeaturedStory = ({ onStoryLoaded }) => {
             <div className="flex-grow flex flex-col">
               <h2 className="text-3xl font-medium mb-4 break-words">{story.titel}</h2>
               <div className="overflow-hidden flex-grow pr-4">
-                <p className="text-gray-700 text-base sm:text-lg break-words whitespace-normal leading-relaxed line-clamp-[10]">
-                  {story.beschrijving}
-                </p>
+                <div className="text-gray-700 text-base sm:text-lg break-words whitespace-normal leading-relaxed">
+                  {story.tekst ? (
+                    story.word_file ? (
+                      <RichTextDisplay content={story.tekst} />
+                    ) : (
+                      <p>{truncateText(story.tekst)}</p>
+                    )
+                  ) : (
+                    <p>{story.beschrijving}</p>
+                  )}
+                </div>
               </div>
             </div>
             
