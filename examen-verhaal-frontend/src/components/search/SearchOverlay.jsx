@@ -109,7 +109,7 @@ const SearchOverlay = ({ show, onClose }) => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Verhaal zoeken..."
-            className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg shadow bg-white/90"
+            className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black text-lg shadow bg-white/90"
           />
           {searchTerm ? (
             <button
