@@ -5,9 +5,6 @@ const HeaderSection = ({ profilePhoto, subtitle }) => {
     <div className="max-w-4xl mx-auto mb-24">
       <div className="flex flex-col items-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800 text-center">IngsScribblings</h1>
-        <p className="text-xl text-gray-600 mb-4 text-center max-w-2xl">
-          {subtitle || "De persoonlijke schrijfplek van Ingrid"}
-        </p>
       </div>
 
       {profilePhoto && (

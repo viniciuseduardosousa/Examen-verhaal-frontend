@@ -258,15 +258,22 @@ const ProfileSettingsDialog = ({ isOpen, onClose }) => {
                 onPhotoRemove={handleRemovePhoto}
               />
 
-              <TextInput
-                label="Subtitel"
-                name="subtitle"
-                value={formData.subtitle}
-                onChange={handleChange}
-                rows={1}
-                required
-                isSubmitted={isSubmitted}
-              />
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="block text-sm font-mono font-bold">
+                    Hero Tekst
+                  </label>
+                </div>
+                <TextInput
+                  name="subtitle"
+                  value={formData.subtitle}
+                  onChange={handleChange}
+                  rows={3}
+                  required
+                  isSubmitted={isSubmitted}
+                  className="text-lg"
+                />
+              </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
