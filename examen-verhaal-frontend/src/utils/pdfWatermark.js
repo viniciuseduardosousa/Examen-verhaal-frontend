@@ -92,9 +92,12 @@ export const generatePDFWithWatermark = (title, description, content) => {
       // Process child nodes with updated formatting
       Array.from(node.childNodes).forEach(child => processNode(child, isNodeBold, isNodeItalic));
       
-      // Add extra line break after block elements
-      if (['P', 'DIV', 'BR', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
-        y += lineHeight;
+      // Only add extra line break after block elements that aren't already followed by a line break
+      if (['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+        const nextNode = node.nextSibling;
+        if (!nextNode || (nextNode.nodeType === Node.ELEMENT_NODE && !['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(nextNode.tagName))) {
+          y += lineHeight;
+        }
       }
     }
   };
