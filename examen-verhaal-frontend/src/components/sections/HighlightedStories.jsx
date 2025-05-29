@@ -97,7 +97,7 @@ const HighlightedStories = ({ onStoriesLoaded }) => {
                 key={verhaal.id}
                 id={verhaal.id}
                 title={verhaal.titel}
-                description={verhaal.beschrijving}
+                description={verhaal.tekst}
                 imageUrl={verhaal.cover_image}
                 category={categoryMap[verhaal.categorie]}
                 onCategoryClick={handleCategoryClick}
