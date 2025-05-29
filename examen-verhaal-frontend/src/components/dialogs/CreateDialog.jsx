@@ -237,7 +237,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
       setFormData(prev => ({
         ...prev,
         text: formattedText,
-        displayText: formattedText,
         word_file: file
       }));
       setWordFilename(file.name);
@@ -515,12 +514,11 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                     </div>
                     <textarea
                       name="text"
-                      value={formData.displayText || formData.text}
+                      value={formData.text}
                       onChange={handleChange}
                       required
-                      rows="6"
-                      style={{ whiteSpace: 'pre-wrap', minHeight: '200px' }}
-                      className={`w-full px-3 py-2 border rounded-md bg-[#D9D9D9] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      rows={10}
+                      className={`w-full px-3 py-2 border rounded-md bg-[#F7F6ED] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         isSubmitted ? 'invalid:border-red-500 invalid:focus:ring-red-500' : ''
                       }`}
                     />
@@ -582,7 +580,6 @@ const CreateDialog = ({ isOpen, onClose, onSave, type }) => {
                             setFormData(prev => ({
                               ...prev,
                               text: '',
-                              displayText: '',
                               word_file: null
                             }));
                             

@@ -8,10 +8,8 @@ import Verhalen from './pages/Verhalen';
 import VerhaalDetail from './pages/VerhaalDetail';
 import OverMij from './pages/OverMij';
 import Login from './pages/admin/Login';
-import Register from './pages/admin/Register';
 import VerhalenDashboard from './pages/admin/Dashboard';
-import CreateVerhaal from './pages/admin/CreateVerhaal';
-import EditVerhaal from './pages/admin/EditVerhaal';
+
 
 function App() {
   return (
@@ -27,10 +25,8 @@ function App() {
             <Route path="/verhaal-detail/:id" element={<VerhaalDetail />} />
             <Route path="/over-mij" element={<OverMij />} />
             <Route path="/admin/login" element={<Login />} />
-            <Route path="/admin/register" element={<Register />} />
             <Route path="/admin/dashboard" element={<VerhalenDashboard />} />
-            <Route path="/admin/verhalen/create" element={<CreateVerhaal />} />
-            <Route path="/admin/verhalen/edit/:id" element={<EditVerhaal />} />
+
           </Routes>
         </main>
         <Footer />

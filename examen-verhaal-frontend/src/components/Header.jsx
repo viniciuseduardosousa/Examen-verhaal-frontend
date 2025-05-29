@@ -19,7 +19,7 @@ const Header = () => {
   const closeOverlay = () => setShowSearchOverlay(false);
 
   return (
-    <header className="fixed w-full top-0 z-50 bg-[#FFFFF5] shadow-sm">
+    <header className="fixed w-full top-0 z-50 bg-[#FFFFF5] shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
       <nav className="container mx-auto px-8 py-6">
         <div className="flex items-center justify-between">
           {/* Left side: Logo + Navigation */}

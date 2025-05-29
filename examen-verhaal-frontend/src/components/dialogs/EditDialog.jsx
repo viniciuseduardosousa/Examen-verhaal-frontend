@@ -63,7 +63,7 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
         setFormData({
           titel: '',
           tekst: '',
-          beschrijving: '',
+          beschrijving: data.beschrijving || '',
           is_onzichtbaar: false,
           categorie: '',
           date: '',
@@ -227,9 +227,14 @@ const EditDialog = ({ isOpen, onClose, onSuccess, data, isCategory }) => {
       onClose();
     } catch (err) {
       console.error('Error updating item:', err);
-      setError(err.message || 'Er is een fout opgetreden bij het bijwerken');
+      if (err.message === 'Server error: 400 Bad Request') {
+        setError('Selecteer een geldige categorie');
+      } else {
+        setError(err.message || 'Er is een fout opgetreden bij het bijwerken');
+      }
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
+      scrollToTop();
     } finally {
       setIsLoading(false);
     }
