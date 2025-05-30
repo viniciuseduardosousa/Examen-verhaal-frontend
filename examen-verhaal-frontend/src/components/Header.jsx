@@ -3,6 +3,7 @@ import { useState } from 'react';
 import CategoryDropdown from './navigation/CategoryDropdown';
 import MobileMenu from './navigation/MobileMenu';
 import SearchOverlay from './search/SearchOverlay';
+import ingeIcon from '../assets/images/inge-icon.png';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,13 +21,18 @@ const Header = () => {
 
   return (
     <header className="fixed w-full top-0 z-50 bg-[#FFFFF5] shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
-      <nav className="container mx-auto px-8 py-6">
+      <nav className="container mx-auto px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Left side: Logo + Navigation */}
           <div className="flex items-center gap-12">
             {/* Logo */}
-            <Link to="/" className="text-2xl font-bold text-gray-800">
-              IngsScribblings
+            <Link to="/" className="flex items-center gap-3 text-2xl font-bold text-gray-800 group">
+              <span>IngsScribblings</span>
+              <img 
+                src={ingeIcon} 
+                alt="INGE Icon" 
+                className="w-8 h-8 object-contain transition-transform duration-300 group-hover:rotate-12"
+              />
             </Link>
 
             {/* Desktop Navigation */}
